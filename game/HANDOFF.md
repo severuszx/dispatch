@@ -11,7 +11,9 @@
 - 车辆段：K/T/Z、货物、检测、检修、工程车的色条分色；车卡副标题补编组辆数与车种。
 - 云端包：`app.js` 的 `PACK_BASE` 指 `https://severuszx.github.io/dispatch/data/packs/`；首次点焦柳/宁西标签下载并合并，安装包不预装 55 站。
 - 背景音乐：`audio.js` WebAudio 程序化四套和弦循环，`play()` 启动、`stop()` 停止。
-- 交付：`dispatch-0.4.3-win64.zip` 162,629,906 B，sha256 `6352945d8c2ad91e279df1b3edaae89936dbcb74c287a82150e254caeca9012f`；Pad `dispatch-pad.apk` 257,329 B，sha256 `45cfbb6737b5e7974a9b860ffd1b2a0778227199797fc9031cf6d30be565f0d8`，versionCode 6、versionName 0.4.3；固定证书 `CN=Dispatch, O=TST, C=CN`，SHA-256 `8b2e1d5b0143014489c32d2e650c1190b11a87e082b493d2d0fb49b1330a8dff`。0.4.2 旧包用的是另一张临时证书，升级必须先卸载旧版一次；0.4.3 之后可覆盖升级。
+- 交付：`dispatch-0.4.3-win64.zip` 162,629,906 B，sha256 `6352945d8c2ad91e279df1b3edaae89936dbcb74c287a82150e254caeca9012f`；Pad `dispatch-0.4.3-pad.apk` 510,117 B，sha256 `dd7b428cffd40bd34cac2ddd128b4969755cff1e3a89f259b405ef330bd322a0`，versionCode 7、versionName 0.4.3，Release asset id `779127986`；固定证书 `CN=Dispatch, O=TST, C=CN`，SHA-256 `8b2e1d5b0143014489c32d2e650c1190b11a87e082b493d2d0fb49b1330a8dff`。
+- Pad 签名：0.4.2、旧 0.4.3、当前固定密钥三版证书各不相同，客户端检测到已安装应用签名不同时会报“安装包签名不正确”。装 0.4.3 前必须在 Pad 上长按旧“调度台”进入应用信息并卸载，再装新包；从当前版本起后续覆盖升级可沿用同一张证书。
+- Pad 新包实测 apksigner：v2、v3 校验通过，证书 `CN=Dispatch`，minSdk 26、targetSdk 34；v1 未启用，targetSdk 34 不要求 v1。
 - `latest.json` 已更新为 0.4.3 的 size/hash；官网首页、游戏副本、桌面/Pad 资源均已同步。
 
 ### 尚未做
