@@ -98,7 +98,7 @@ $env:JAVA_HOME="C:\android-build\jdk\jdk-17.0.21.1+2"
 pwsh -File pad\build-apk.ps1
 ```
 
-产物 `pad\build\dispatch-pad.apk`，包名 `com.tst.dispatch`，`versionCode 4`、`versionName 0.3.4`，debug keystore 签名。不再弹系统启动对话框，启动屏右侧直接注明“为 Pad 横屏设计，手机打开可能显示不全”，随后进全屏 WebView。Pad 布局由 `?pad=1`、Android 非 Mobile UA 或粗指针且宽度 ≥700 触发。
+产物 `pad\build\dispatch-pad.apk`，包名 `com.tst.dispatch`，`versionCode 5`、`versionName 0.4.2`，debug keystore 签名。不再弹系统启动对话框，启动屏右侧直接注明“为 Pad 横屏设计，手机打开可能显示不全”，随后进全屏 WebView。Pad 布局由 `?pad=1`、Android 非 Mobile UA 或粗指针且宽度 ≥700 触发。
 
 ## 扩展包
 
@@ -143,7 +143,7 @@ node tools\gen-data.mjs
 - Release：https://github.com/severuszx/dispatch/releases/tag/v0.4.2
 - 桌面 release：`dispatch-0.4.2-win64.zip`，158,416,354 bytes，sha256 `2b89431dcbe1899a7e48ffa0be7feef4bdd2a6bee4f651f9f130c34c32fb1b53`
 - 上一个 Release：https://github.com/severuszx/dispatch/releases/tag/v0.3.4
-- Pad release：`dispatch-0.3.4-pad.apk`，240,874 bytes，sha256 `f181ee3075b5e6f19c7db6edad9f788b02cab4b8e936cb88cf65dc5fef7f22e9`
+- Pad release：`dispatch-0.4.2-pad.apk`，331,345 bytes，sha256 `f8e81f6cf8e587db3db89c05051f80609673833ba0537bee28948173ed3cd6e7`
 - 更新清单：`https://severuszx.github.io/dispatch/latest.json`
 - 桌面端启动 4 秒后自动检查更新；开机页“检查更新”可手动触发。下载后校验 SHA256，退出并由 PowerShell 替换安装目录后重启。
 
@@ -154,7 +154,7 @@ node tools\gen-data.mjs
 - 特殊事件首件 90 秒、之后 5 分钟一件；5 分钟间隔没有真等一轮验证。
 - Pad 自绘退出框与启动屏已在 1200×800 实拍；APK 已验签，没有实机安装。
 - 音效已重写，未做主观试听。
-- 官网与源码已部署到 GitHub Pages；0.4.2 桌面包已发布并替换 Release 资产，Pad 包仍是 0.3.4。
+- 官网与源码已部署到 GitHub Pages；0.4.2 桌面与 Pad 包已发布，Pad APK 无实机试装。
 - 自动更新只对打包态生效；开发态点“检查更新”只会提示开发环境不检查。
 - 窄窗口下 8 股道以上车站的站名、车次框与股道号可能挤压。
 - 教程 t2、t5 与通用术语教程未逐步走完，t2 仍写“点车站与站场”。
