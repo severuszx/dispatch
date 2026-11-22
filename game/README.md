@@ -1,6 +1,6 @@
 # 调度台
 
-单机铁路行车调度模拟，原生 ES modules，无构建步骤。网页版、Windows 桌面端、Pad 横屏端共用同一套前端。当前源码版本 0.4.2；Windows 包与 Pad 包仍为 0.3.4，待按 0.4.2 重打。
+单机铁路行车调度模拟，原生 ES modules，无构建步骤。网页版、Windows 桌面端、Pad 横屏端共用同一套前端。当前源码版本 0.4.2；Windows 包已按 0.4.2 重打并发布，Pad 包仍为 0.3.4。
 
 ## 0.4.2 是什么
 
@@ -75,11 +75,12 @@ node tools\serve.mjs 8123
 
 ```
 cd desktop
-$env:ELECTRON_MIRROR="https://npmmirror.com/mirrors/electron/"
 pwsh -File build.ps1
 ```
 
-产物 `desktop\dist\调度台-win32-x64\调度台.exe`。打包时前端会复制到 `desktop\app`，再整体进 asar；`main.js` 在打包态从 `resources\app.asar\app` 读资源，开发态从 `desktop\app` 读。
+`build.ps1` 会自动找 `%LOCALAPPDATA%\electron\Cache` 里的 `electron-v*-win32-x64.zip`，用 `--electron-zip-dir` 离线打包；打包器返回非 0 会直接抛错，不再留下旧 `dist` 却打印 `pack done`。
+
+产物 `desktop\dist\调度台-win32-x64\调度台.exe`。打包时前端会复制到 `desktop\app`，再整体进 asar；`main.js` 在打包态从 `resources\app.asar\app` 读资源，开发态从 `desktop\app` 读。打包后可用 `--remote-debugging-port=9222` 查页面版本与数据加载。
 
 截图模式：
 
@@ -139,20 +140,21 @@ node tools\gen-data.mjs
 
 - 官网：https://severuszx.github.io/dispatch/
 - 仓库：https://github.com/severuszx/dispatch
-- Release：https://github.com/severuszx/dispatch/releases/tag/v0.3.4
-- 桌面 release：`dispatch-0.3.4-win64.zip`，162,608,573 bytes，sha256 `9cd7e75c86b9b141faa587bec7b1773d29884781eab65ce4c8ab2b409e061e7f`
+- Release：https://github.com/severuszx/dispatch/releases/tag/v0.4.2
+- 桌面 release：`dispatch-0.4.2-win64.zip`，158,416,354 bytes，sha256 `2b89431dcbe1899a7e48ffa0be7feef4bdd2a6bee4f651f9f130c34c32fb1b53`
+- 上一个 Release：https://github.com/severuszx/dispatch/releases/tag/v0.3.4
 - Pad release：`dispatch-0.3.4-pad.apk`，240,874 bytes，sha256 `f181ee3075b5e6f19c7db6edad9f788b02cab4b8e936cb88cf65dc5fef7f22e9`
 - 更新清单：`https://severuszx.github.io/dispatch/latest.json`
 - 桌面端启动 4 秒后自动检查更新；开机页“检查更新”可手动触发。下载后校验 SHA256，退出并由 PowerShell 替换安装目录后重启。
 
 ## 已知道的限制
 
-- 新版车次是示意编组，不是官方 2026-11 调图。
-- H1/H5 在 0.3.4 只做了静态实拍，未实际点车、放行、跑事件；H4 未跑完整班，枢纽评分继续复用线路关逻辑。
+- 焦柳、宁西两线车次取 12306 2026-11-22 当日实际停站；16 个无客运电报码车站用货运/编组车次。
+- H1 已跑站内换挂，信阳已跑 K822 换 K389；H2/H5 未实际点车、放行、跑事件，枢纽评分继续复用线路关逻辑。
 - 特殊事件首件 90 秒、之后 5 分钟一件；5 分钟间隔没有真等一轮验证。
 - Pad 自绘退出框与启动屏已在 1200×800 实拍；APK 已验签，没有实机安装。
 - 音效已重写，未做主观试听。
-- 官网与源码已部署到 GitHub Pages；0.4.2 桌面包与 Pad 包尚未重打，Release 仍是 0.3.4。
+- 官网与源码已部署到 GitHub Pages；0.4.2 桌面包已发布并替换 Release 资产，Pad 包仍是 0.3.4。
 - 自动更新只对打包态生效；开发态点“检查更新”只会提示开发环境不检查。
 - 窄窗口下 8 股道以上车站的站名、车次框与股道号可能挤压。
 - 教程 t2、t5 与通用术语教程未逐步走完，t2 仍写“点车站与站场”。

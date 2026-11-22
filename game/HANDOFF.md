@@ -7,20 +7,21 @@
 - 12306 当日数据落在 `data/rail-2026-11-22.json`：271 趟车、全程停站；`tools/stations-55.json` 是站表，`tools/fetch-rail-more.mjs` 可重抓。
 - 开班页新增线路筛选；`desktop\app`、`pad\app\src\main\assets`、`site\play`、`site-github\play`、`deploy_github\pages\play` 已同步本轮前端。
 - 作业系统：站内换挂、换向整备、列检、摘挂、待避。信阳 K822 换向为 K389，方向翻转并自动改配股道，实测通过；H1 K101 站内换挂实测通过。
-- 尚未做：0.4.2 安装包、更新器下载替换重启全链路、Pad 端 0.4.2 包。
+- 0.4.2 桌面包已重打并替换 Release：`dispatch-0.4.2-win64.zip` 158,416,354 B，sha256 `2b89431dcbe1899a7e48ffa0be7feef4bdd2a6bee4f651f9f130c34c32fb1b53`；包内界面为 0.4.2，焦柳/宁西标签实测可切。
+- 尚未做：更新器下载替换重启全链路实测、Pad 端 0.4.2 包。
 
 ## 官网、仓库与更新器（2026-11-22）
 
 - 新仓库：`https://github.com/severuszx/dispatch`，`main` 分支；官网根目录静态站由 GitHub Pages 发布。
 - 线上官网：`https://severuszx.github.io/dispatch/`；网页版 `/play/`；版本清单 `/latest.json`。
-- 首个 Release：`v0.3.4`，含 `dispatch-0.3.4-win64.zip`（162,608,573 B）与 `dispatch-0.3.4-pad.apk`（240,874 B）。
+- Release：`v0.3.4`（桌面 162,608,573 B、Pad 240,874 B）；`v0.4.2`（release id `454302162`，桌面 `dispatch-0.4.2-win64.zip` 158,416,354 B）。
 - 桌面端更新：`desktop/main.js` 启动后 4 秒自动请求 `latest.json`；开机页“检查更新”可手动触发。比较版本后弹原生确认，下载到临时目录，校验 SHA256，退出后由 PowerShell 脚本解压覆盖安装目录并重启。
 - 更新器只在 `app.isPackaged` 生效；开发态手动检查返回“开发环境不检查更新”。预加载桥 `desktop/preload.js` 已用隐藏窗口实测，`window.dispatchUpdate.check()` 返回正常。
-- 仓库 `game/` 存放 0.4.2 源码；`desktop/app`、`pad`、`site/play` 的 0.4.2 四端同步与 0.4.2 安装包仍未完成。
+- 仓库 `game/` 存放 0.4.2 源码；`desktop/app`、`pad/app/src/main/assets`、`site/play`、`site-github/play` 已同步 0.4.2 前端；0.4.2 桌面包已发布，Pad 包仍为 0.3.4。
 
 ## 当前状态（0.4.2，2026-11-22）
 
-0.4.2 继续把《调度台》收成“单站复线值班”：玩家要在站场图上接车、选股道、等发车，不能再靠一次“放行”通关。网页参数 `0.4.2p`，左栏与关于页显示 `0.4.2`。官网与源码仓库已部署，桌面更新器已接入；0.4.2 安装包与四端副本尚未同步。
+0.4.2 继续把《调度台》收成“单站复线值班”：玩家要在站场图上接车、选股道、等发车，不能再靠一次“放行”通关。网页参数 `0.4.2p`，左栏与关于页显示 `0.4.2`。官网、源码仓库、四端副本与 0.4.2 桌面包已同步；Pad 端仍是 0.3.4。
 
 - 站场图：按真实双线中间站画，两条正线相邻居中，到发线分在正线两侧；两端咽喉用斜向道岔接到发线。图头新增站名牌：站名、线路、场型、股道数、值班时钟、天气和“值班员在岗”。
 - 接车预告：T1 左上新增“接车预告”方角表格，列车次、始发→终到、计划到、状态，状态带“待接 N 分 / 压站外 N 分”；整行可点开动作卡。H1 八股道时自动隐藏，避免压住 1/2 道。
@@ -40,9 +41,9 @@
 
 ### 尚未同步
 
-- `desktop\app`、`pad\app\src\main\assets`、`site\play`、`deploy_github\pages\play` 仍是 0.3.4。
-- 桌面包、APK、`site\dl`、官网、GitHub 仓库与 Release 未更新。
-- H2—H5、T2—T5 尚未逐关实拍；H1 只验证布局，尚未跑接车。
+- Pad APK 仍是 0.3.4，未重打 0.4.2。
+- 自动更新下载→SHA256→退出替换→重启未做真机全链路实测。
+- H2—H5、T2—T5 尚未逐关实拍；H1 已跑换挂，信阳已跑换向。
 
 ## 0.4.0 历史状态（2026-11-22）
 
