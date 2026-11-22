@@ -236,14 +236,21 @@ function renderScenes() {
   else if (currentMode === 'arcade') scenes = scenes.filter((s) => s.kind === 'tutorial');
   if (currentPack === 'base') scenes = scenes.filter((s) => !s.pack);
   else scenes = scenes.filter((s) => s.pack === currentPack);
+  const head = el('div', 'scene-head');
+  ['车站', '线路', '天气', '时长', '难度', '车次', '数据'].forEach((t) => head.append(el('span', '', t)));
+  list.append(head);
   scenes.forEach((s) => {
     const cell = el('div', `scene-cell ${currentScene && currentScene.id === s.id ? 'on' : ''}`);
     const line = data.network.lines.find((l) => l.id === s.line);
     const lineName = s.stationName || (s.kind === 'hub' ? hubStationName(s) : (line ? line.name : s.line));
-    cell.append(el('span', 'sc-kind', kinds[s.kind] || s.kind));
-    cell.append(el('div', 'sc-line', lineName));
-    cell.append(el('b', '', s.title));
-    cell.append(el('div', 'sc-meta', `${s.weather} / ${Math.round(s.duration / 60 * 10) / 10}h / 难度 ${s.difficulty} / ${s.trains} 列`));
+    const lineList = s.lines && s.lines.length ? s.lines.join('、') : lineName;
+    cell.append(el('b', 'sc-name', s.title));
+    cell.append(el('span', 'sc-line', lineList));
+    cell.append(el('span', 'sc-wx', s.weather || '晴'));
+    cell.append(el('span', 'sc-time', `${Math.round(s.duration / 60 * 10) / 10}h`));
+    cell.append(el('span', 'sc-diff', `${s.difficulty}`));
+    cell.append(el('span', 'sc-trains', `${s.trains} 列`));
+    cell.append(el('span', 'sc-src', s.source ? '12306' : (kinds[s.kind] || s.kind)));
     cell.addEventListener('click', () => {
       currentScene = s;
       list.querySelectorAll('.scene-cell').forEach((x) => x.classList.remove('on'));

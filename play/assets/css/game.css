@@ -892,3 +892,26 @@ body.pad-mode .act-tr-grid { grid-template-columns: repeat(2, 1fr); }
 .pack-tab:hover { border-color: #8b938c; }
 .pack-tab.on { background: #2f3a33; border-color: #2f3a33; color: #fff; }
 .scene-cell .sc-kind { white-space: nowrap; }
+
+.scene-table { display: block; border: 0; border-top: 1px solid #232821; background: transparent; }
+.scene-head, .scene-cell {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.7fr) minmax(112px, 1.35fr) 42px 42px 38px 52px 54px;
+  align-items: center; gap: 8px;
+  padding: 6px 9px; border: 0; border-bottom: 1px dotted #b8b3a4;
+  background: transparent; box-shadow: none; border-radius: 0;
+}
+.scene-head {
+  color: #7a8175; font-size: 10px; letter-spacing: 1px;
+  border-bottom: 1px solid #232821; padding-top: 3px; padding-bottom: 5px;
+}
+.scene-cell { min-height: 0; }
+.scene-cell:hover { background: #fffdf3; border-color: #b8b3a4; }
+.scene-cell.on { background: #efeade; border-color: #b8b3a4; box-shadow: inset 3px 0 #b23a24; }
+.scene-cell .sc-name { font-size: 12px; margin: 0; font-weight: 600; color: #232821; }
+.scene-cell .sc-line { font-family: inherit; font-size: 11px; color: #47504a; }
+.scene-cell .sc-wx, .scene-cell .sc-time, .scene-cell .sc-diff, .scene-cell .sc-trains, .scene-cell .sc-src {
+  font-size: 11px; color: #5d6459; white-space: nowrap;
+}
+.scene-cell .sc-src { color: #8a4a32; }
+.scene-cell .sc-kind { display: none; }

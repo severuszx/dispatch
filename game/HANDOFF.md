@@ -5,17 +5,17 @@
 - 新增 `data/hub-jl.json`（焦柳 30 站）、`data/hub-nx.json`（宁西 26 站）、`data/scenes-55.json`（56 个开班项，南阳两线各一项）。
 - 55 个不重复站，三等及以上全收；16 个无客运电报码的车站（月山、洛阳东、襄阳北、新丰镇、南阳西、肥东等）按货运/编组运行，场景简介会写明。
 - 12306 当日数据落在 `data/rail-2026-11-22.json`：271 趟车、全程停站；`tools/stations-55.json` 是站表，`tools/fetch-rail-more.mjs` 可重抓。
-- 开班页新增线路筛选；`desktop\app`、`pad\app\src\main\assets`、`site\play`、`site-github\play`、`deploy_github\pages\play` 已同步本轮前端。
+- 开班页“选择车站”改为 7 列密集行表（车站/线路/天气/时长/难度/车次/数据），去掉 4 列卡片网格与线路色块；行高约 23px，焦柳 30 行可一屏滚动查看。根目录与 `desktop\app`、`pad\app\src\main\assets`、`site\play`、`site-github\play`、`deploy_github\pages\play` 已同步，桌面 zip 与 Pad APK 已按行表重打。
 - 作业系统：站内换挂、换向整备、列检、摘挂、待避。信阳 K822 换向为 K389，方向翻转并自动改配股道，实测通过；H1 K101 站内换挂实测通过。
-- 0.4.2 桌面包已重打并替换 Release：`dispatch-0.4.2-win64.zip` 158,416,354 B，sha256 `2b89431dcbe1899a7e48ffa0be7feef4bdd2a6bee4f651f9f130c34c32fb1b53`；包内界面为 0.4.2，焦柳/宁西标签实测可切。
+- 0.4.2 桌面包已重打并替换 Release：`dispatch-0.4.2-win64.zip` 158,416,800 B，sha256 `5b93ace3265d2c31c9dc3eb53bdce33b8af1ea6a4d6e2810a9b7392876f803cb`；包内界面为 0.4.2，焦柳/宁西标签实测可切。
 - 尚未做：更新器下载替换重启全链路实测。
-- Pad 0.4.2 APK 已重打并上传：`dispatch-0.4.2-pad.apk` 331,345 B，sha256 `f8e81f6cf8e587db3db89c05051f80609673833ba0537bee28948173ed3cd6e7`，versionCode 5，验签通过。
+- Pad 0.4.2 APK 已重打并上传：`dispatch-0.4.2-pad.apk` 331,345 B，sha256 `f5648f69950e39eaef1317858d4be7de9a93351f175dbaa406d78995df4a9577`，versionCode 5，验签通过。
 
 ## 官网、仓库与更新器（2026-11-22）
 
 - 新仓库：`https://github.com/severuszx/dispatch`，`main` 分支；官网根目录静态站由 GitHub Pages 发布。
 - 线上官网：`https://severuszx.github.io/dispatch/`；网页版 `/play/`；版本清单 `/latest.json`。
-- Release：`v0.3.4`（桌面 162,608,573 B、Pad 240,874 B）；`v0.4.2`（release id `454302162`，桌面 158,416,354 B、Pad 331,345 B）。
+- Release：`v0.3.4`（桌面 162,608,573 B、Pad 240,874 B）；`v0.4.2`（release id `454302162`，桌面 158,416,800 B、Pad 331,345 B）。
 - 桌面端更新：`desktop/main.js` 启动后 4 秒自动请求 `latest.json`；开机页“检查更新”可手动触发。比较版本后弹原生确认，下载到临时目录，校验 SHA256，退出后由 PowerShell 脚本解压覆盖安装目录并重启。
 - 更新器只在 `app.isPackaged` 生效；开发态手动检查返回“开发环境不检查更新”。预加载桥 `desktop/preload.js` 已用隐藏窗口实测，`window.dispatchUpdate.check()` 返回正常。
 - 仓库 `game/` 存放 0.4.2 源码；`desktop/app`、`pad/app/src/main/assets`、`site/play`、`site-github/play` 已同步 0.4.2 前端；0.4.2 桌面与 Pad 包均已发布。
@@ -136,3 +136,4 @@
 5. 用 `[System.IO.Compression.ZipFile]::CreateFromDirectory` 生成 Windows zip。
 6. 重算 `site\dl\SHA256SUMS.txt`。
 7. 更新 `deploy_github\pages` 根目录的官网、下载链接与 Release 地址；GitHub 登录后建仓库、push、发 Release、开 Pages。
+

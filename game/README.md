@@ -141,9 +141,9 @@ node tools\gen-data.mjs
 - 官网：https://severuszx.github.io/dispatch/
 - 仓库：https://github.com/severuszx/dispatch
 - Release：https://github.com/severuszx/dispatch/releases/tag/v0.4.2
-- 桌面 release：`dispatch-0.4.2-win64.zip`，158,416,354 bytes，sha256 `2b89431dcbe1899a7e48ffa0be7feef4bdd2a6bee4f651f9f130c34c32fb1b53`
+- 桌面 release：`dispatch-0.4.2-win64.zip`，158,416,800 bytes，sha256 `5b93ace3265d2c31c9dc3eb53bdce33b8af1ea6a4d6e2810a9b7392876f803cb`
 - 上一个 Release：https://github.com/severuszx/dispatch/releases/tag/v0.3.4
-- Pad release：`dispatch-0.4.2-pad.apk`，331,345 bytes，sha256 `f8e81f6cf8e587db3db89c05051f80609673833ba0537bee28948173ed3cd6e7`
+- Pad release：`dispatch-0.4.2-pad.apk`，331,345 bytes，sha256 `f5648f69950e39eaef1317858d4be7de9a93351f175dbaa406d78995df4a9577`
 - 更新清单：`https://severuszx.github.io/dispatch/latest.json`
 - 桌面端启动 4 秒后自动检查更新；开机页“检查更新”可手动触发。下载后校验 SHA256，退出并由 PowerShell 替换安装目录后重启。
 
@@ -158,4 +158,5 @@ node tools\gen-data.mjs
 - 自动更新只对打包态生效；开发态点“检查更新”只会提示开发环境不检查。
 - 窄窗口下 8 股道以上车站的站名、车次框与股道号可能挤压。
 - 教程 t2、t5 与通用术语教程未逐步走完，t2 仍写“点车站与站场”。
+
 
