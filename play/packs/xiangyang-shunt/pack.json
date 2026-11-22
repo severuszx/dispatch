@@ -1,0 +1,19 @@
+{
+  "id": "xiangyang-shunt",
+  "name": "襄阳北夜班",
+  "version": "0.1.0",
+  "author": "调度台内置",
+  "note": "襄阳北编组站夜班，12 股道解编，股道占用冲突。",
+  "scene": {
+    "id": "pk-xiangyang-shunt",
+    "kind": "pack",
+    "title": "襄阳北夜班",
+    "line": "linhe",
+    "brief": "编组站夜班，12 股道解编，股道占用冲突。",
+    "terms": ["yard", "track"],
+    "duration": 240,
+    "difficulty": 2,
+    "weather": "晴",
+    "trains": 10
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "station": { "id": "veh", "name": "襄阳北车辆段", "code": "XYC", "line": "襄阳北车辆段走行线" },
+  "yards": [
+    { "id": "dx", "name": "段修库", "type": "段修定检", "tracks": 6, "note": "1—6 道，库内断电作业" },
+    { "id": "cc", "name": "存车线", "type": "客车存车", "tracks": 8, "note": "1—8 道，出所前待命" },
+    { "id": "xc", "name": "洗车线", "type": "外部清洗", "tracks": 2, "note": "1—2 道，洗刷限速" },
+    { "id": "lk", "name": "临修线", "type": "临修换轮", "tracks": 2, "note": "1—2 道，不落轮作业" }
+  ],
+  "trains": [
+    { "id": "vh-01", "no": "0K1012", "type": "K", "yard": "dx", "arr": 362, "dep": 414, "coaches": 18, "priority": 2, "crew": 3 },
+    { "id": "vh-02", "no": "0K1014", "type": "K", "yard": "dx", "arr": 368, "dep": 420, "coaches": 18, "priority": 2, "crew": 3 },
+    { "id": "vh-03", "no": "0T642", "type": "T", "yard": "dx", "arr": 374, "dep": 426, "coaches": 18, "priority": 2, "crew": 3 },
+    { "id": "vh-04", "no": "0Z102", "type": "Z", "yard": "dx", "arr": 380, "dep": 432, "coaches": 19, "priority": 2, "crew": 3 },
+    { "id": "vh-05", "no": "0K1016", "type": "K", "yard": "cc", "arr": 366, "dep": 432, "coaches": 18, "priority": 3, "crew": 1 },
+    { "id": "vh-06", "no": "0K1018", "type": "K", "yard": "cc", "arr": 378, "dep": 444, "coaches": 17, "priority": 3, "crew": 1 },
+    { "id": "vh-07", "no": "0T644", "type": "T", "yard": "cc", "arr": 390, "dep": 456, "coaches": 18, "priority": 3, "crew": 1 },
+    { "id": "vh-08", "no": "0Z104", "type": "Z", "yard": "cc", "arr": 402, "dep": 468, "coaches": 19, "priority": 3, "crew": 1 },
+    { "id": "vh-09", "no": "0K1020", "type": "K", "yard": "cc", "arr": 420, "dep": 486, "coaches": 18, "priority": 3, "crew": 1 },
+    { "id": "vh-10", "no": "0T646", "type": "T", "yard": "xc", "arr": 370, "dep": 394, "coaches": 18, "priority": 4, "crew": 2 },
+    { "id": "vh-11", "no": "0K1022", "type": "K", "yard": "xc", "arr": 386, "dep": 410, "coaches": 17, "priority": 4, "crew": 2 },
+    { "id": "vh-12", "no": "0K1024", "type": "K", "yard": "lk", "arr": 392, "dep": 466, "coaches": 18, "priority": 5, "crew": 3 },
+    { "id": "vh-13", "no": "0Z106", "type": "Z", "yard": "lk", "arr": 404, "dep": 478, "coaches": 19, "priority": 5, "crew": 3 },
+    { "id": "vh-14", "no": "0K1026", "type": "K", "yard": "dx", "arr": 440, "dep": 492, "coaches": 18, "priority": 2, "crew": 3 }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "station": { "id": "dc", "name": "动车段", "code": "DCD", "line": "动车段走行线" },
+  "yards": [
+    { "id": "jck", "name": "检查库", "type": "一级检修", "tracks": 6, "note": "1—6 道，库内断电作业" },
+    { "id": "cc", "name": "存车线", "type": "存车整备", "tracks": 8, "note": "1—8 道，出所前待命" },
+    { "id": "xc", "name": "洗车线", "type": "外部清洗", "tracks": 2, "note": "1—2 道，洗刷限速" },
+    { "id": "lk", "name": "临修线", "type": "临修镟轮", "tracks": 2, "note": "1—2 道，不落轮镟" }
+  ],
+  "trains": [
+    { "id": "dc-01", "no": "0D2101", "type": "动车", "yard": "jck", "arr": 360, "dep": 408, "coaches": 8, "priority": 2, "crew": 2 },
+    { "id": "dc-02", "no": "0D2103", "type": "动车", "yard": "jck", "arr": 366, "dep": 414, "coaches": 8, "priority": 2, "crew": 2 },
+    { "id": "dc-03", "no": "0D2105", "type": "动车", "yard": "jck", "arr": 372, "dep": 420, "coaches": 8, "priority": 2, "crew": 2 },
+    { "id": "dc-04", "no": "0D2107", "type": "动车", "yard": "cc", "arr": 378, "dep": 438, "coaches": 8, "priority": 3, "crew": 1 },
+    { "id": "dc-05", "no": "0D2109", "type": "动车", "yard": "cc", "arr": 384, "dep": 444, "coaches": 8, "priority": 3, "crew": 1 },
+    { "id": "dc-06", "no": "0D2111", "type": "动车", "yard": "cc", "arr": 390, "dep": 450, "coaches": 8, "priority": 3, "crew": 1 },
+    { "id": "dc-07", "no": "0D2113", "type": "动车", "yard": "cc", "arr": 396, "dep": 456, "coaches": 8, "priority": 3, "crew": 1 },
+    { "id": "dc-08", "no": "0D2115", "type": "动车", "yard": "xc", "arr": 372, "dep": 396, "coaches": 8, "priority": 4, "crew": 2 },
+    { "id": "dc-09", "no": "0D2117", "type": "动车", "yard": "xc", "arr": 384, "dep": 408, "coaches": 8, "priority": 4, "crew": 2 },
+    { "id": "dc-10", "no": "0D2119", "type": "动车", "yard": "lk", "arr": 390, "dep": 468, "coaches": 8, "priority": 5, "crew": 3 },
+    { "id": "dc-11", "no": "0D2121", "type": "动车", "yard": "lk", "arr": 402, "dep": 480, "coaches": 8, "priority": 5, "crew": 3 },
+    { "id": "dc-12", "no": "0D2123", "type": "动车", "yard": "jck", "arr": 426, "dep": 474, "coaches": 8, "priority": 2, "crew": 2 },
+    { "id": "dc-13", "no": "0D2125", "type": "动车", "yard": "jck", "arr": 438, "dep": 486, "coaches": 8, "priority": 2, "crew": 2 },
+    { "id": "dc-14", "no": "0D2127", "type": "动车", "yard": "cc", "arr": 444, "dep": 504, "coaches": 8, "priority": 3, "crew": 1 }
+  ]
+}

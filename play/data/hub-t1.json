@@ -1,0 +1,11 @@
+{
+  "station": { "id": "tut", "name": "实训站", "code": "TUT", "line": "教学单场" },
+  "yards": [
+    { "id": "main", "name": "实训站", "type": "单场教学", "tracks": 4, "note": "1—4 道，第一关只练这一个场" }
+  ],
+  "trains": [
+    { "id": "tut-01", "no": "K101", "type": "K", "yard": "main", "arr": null, "dep": 372, "coaches": 16, "priority": 4, "crew": 1 },
+    { "id": "tut-02", "no": "K102", "type": "K", "yard": "main", "arr": 366, "dep": 384, "coaches": 16, "priority": 4, "crew": 1 },
+    { "id": "tut-03", "no": "货1", "type": "货", "yard": "main", "arr": 378, "dep": 396, "coaches": 30, "priority": 6, "crew": 1 }
+  ]
+}
