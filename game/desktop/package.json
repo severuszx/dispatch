@@ -1,0 +1,18 @@
+{
+  "name": "dispatch-desk",
+  "version": "0.4.2",
+  "description": "铁路行车调度模拟桌面端",
+  "main": "main.js",
+  "keywords": [],
+  "license": "ISC",
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^45.4.1"
+  },
+  "productName": "调度台",
+  "author": "TST",
+  "scripts": {
+    "start": "electron .",
+    "pack": "powershell -ExecutionPolicy Bypass -File build.ps1"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "station": { "id": "mar", "name": "襄阳北编组站", "code": "XYB", "line": "汉丹线" },
+  "yards": [
+    { "id": "dd", "name": "到达场", "type": "到达解体", "tracks": 6, "note": "1—6 道，到达列车待解" },
+    { "id": "bc", "name": "编组场", "type": "驼峰编组", "tracks": 12, "note": "1—12 道，按方向集结" },
+    { "id": "cf", "name": "出发场", "type": "出发集结", "tracks": 6, "note": "1—6 道，编成待发" },
+    { "id": "jw", "name": "机务折返段", "type": "折返整备", "tracks": 2, "note": "1—2 道，出入库机车" }
+  ],
+  "trains": [
+    { "id": "mr-01", "no": "31001", "type": "货", "yard": "dd", "arr": 364, "dep": 382, "coaches": 46, "priority": 6 },
+    { "id": "mr-02", "no": "31003", "type": "货", "yard": "dd", "arr": 370, "dep": 388, "coaches": 44, "priority": 6 },
+    { "id": "mr-03", "no": "31005", "type": "货", "yard": "dd", "arr": 376, "dep": 394, "coaches": 48, "priority": 6 },
+    { "id": "mr-04", "no": "21001", "type": "货", "yard": "dd", "arr": 382, "dep": 400, "coaches": 42, "priority": 6 },
+    { "id": "mr-05", "no": "21003", "type": "货", "yard": "dd", "arr": 388, "dep": 406, "coaches": 45, "priority": 6 },
+    { "id": "mr-06", "no": "41001", "type": "货", "yard": "dd", "arr": 396, "dep": 414, "coaches": 40, "priority": 6 },
+    { "id": "mr-07", "no": "41003", "type": "货", "yard": "dd", "arr": 404, "dep": 422, "coaches": 43, "priority": 6 },
+    { "id": "mr-08", "no": "31007", "type": "货", "yard": "dd", "arr": 412, "dep": 430, "coaches": 47, "priority": 6 },
+    { "id": "mr-09", "no": "调1", "type": "调车", "yard": "bc", "arr": null, "dep": 378, "coaches": 0, "priority": 7 },
+    { "id": "mr-10", "no": "调2", "type": "调车", "yard": "bc", "arr": null, "dep": 396, "coaches": 0, "priority": 7 },
+    { "id": "mr-11", "no": "调3", "type": "调车", "yard": "bc", "arr": null, "dep": 414, "coaches": 0, "priority": 7 },
+    { "id": "mr-12", "no": "调4", "type": "调车", "yard": "bc", "arr": null, "dep": 432, "coaches": 0, "priority": 7 },
+    { "id": "mr-13", "no": "调5", "type": "调车", "yard": "bc", "arr": null, "dep": 450, "coaches": 0, "priority": 7 },
+    { "id": "mr-14", "no": "调6", "type": "调车", "yard": "bc", "arr": null, "dep": 468, "coaches": 0, "priority": 7 },
+    { "id": "mr-15", "no": "X101", "type": "货", "yard": "cf", "arr": 372, "dep": 390, "coaches": 48, "priority": 5 },
+    { "id": "mr-16", "no": "X103", "type": "货", "yard": "cf", "arr": 390, "dep": 408, "coaches": 46, "priority": 5 },
+    { "id": "mr-17", "no": "X105", "type": "货", "yard": "cf", "arr": 408, "dep": 426, "coaches": 44, "priority": 5 },
+    { "id": "mr-18", "no": "X107", "type": "货", "yard": "cf", "arr": 426, "dep": 444, "coaches": 42, "priority": 5 },
+    { "id": "mr-19", "no": "X109", "type": "货", "yard": "cf", "arr": 444, "dep": 462, "coaches": 45, "priority": 5 },
+    { "id": "mr-20", "no": "X111", "type": "货", "yard": "cf", "arr": 462, "dep": 480, "coaches": 47, "priority": 5 },
+    { "id": "mr-21", "no": "机1", "type": "机车", "yard": "jw", "arr": null, "dep": 376, "coaches": 0, "priority": 7 },
+    { "id": "mr-22", "no": "机2", "type": "机车", "yard": "jw", "arr": 392, "dep": 420, "coaches": 0, "priority": 7 },
+    { "id": "mr-23", "no": "机3", "type": "机车", "yard": "jw", "arr": null, "dep": 440, "coaches": 0, "priority": 7 },
+    { "id": "mr-24", "no": "机4", "type": "机车", "yard": "jw", "arr": 456, "dep": 480, "coaches": 0, "priority": 7 }
+  ]
+}

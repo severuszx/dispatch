@@ -1,0 +1,449 @@
+[
+  {
+    "id": "t1",
+    "kind": "tutorial",
+    "title": "认识调度台",
+    "stationName": "实训站",
+    "line": "qinglan",
+    "brief": "只看实训站，认上行、下行正线和咽喉道岔，练接车与发车",
+    "terms": [
+      "ctc",
+      "panel",
+      "route",
+      "track",
+      "signal"
+    ],
+    "duration": 240,
+    "difficulty": 1,
+    "weather": "晴",
+    "trains": 3,
+    "hub": "t1",
+    "hubYards": [
+      "main"
+    ]
+  },
+  {
+    "id": "t2",
+    "kind": "tutorial",
+    "title": "单线会让",
+    "line": "qinglan",
+    "brief": "单线会让：两车在青云站一停一过",
+    "terms": [
+      "block",
+      "section",
+      "meet",
+      "track"
+    ],
+    "duration": 300,
+    "difficulty": 1,
+    "weather": "晴",
+    "trains": 8
+  },
+  {
+    "id": "t3",
+    "kind": "tutorial",
+    "title": "红光带与引导接车",
+    "line": "jiangwan",
+    "brief": "判断真占用还是故障",
+    "terms": [
+      "redband",
+      "guide",
+      "switch"
+    ],
+    "duration": 300,
+    "difficulty": 2,
+    "weather": "阴",
+    "trains": 8
+  },
+  {
+    "id": "t4",
+    "kind": "tutorial",
+    "title": "道岔失表与接近区段",
+    "line": "jiangwan",
+    "brief": "列车已接近时先呼叫停车再变更",
+    "terms": [
+      "switchlost",
+      "approach",
+      "guide"
+    ],
+    "duration": 300,
+    "difficulty": 2,
+    "weather": "阴",
+    "trains": 8
+  },
+  {
+    "id": "t5",
+    "kind": "tutorial",
+    "title": "调度命令入门",
+    "line": "jiangwan",
+    "brief": "发对一条命令",
+    "terms": [
+      "order",
+      "block"
+    ],
+    "duration": 300,
+    "difficulty": 2,
+    "weather": "晴",
+    "trains": 8
+  },
+  {
+    "id": "t6",
+    "kind": "tutorial",
+    "title": "晚点与传播",
+    "line": "jiangwan",
+    "brief": "用一次热备切断传播链",
+    "terms": [
+      "entropy",
+      "heat",
+      "stock"
+    ],
+    "duration": 360,
+    "difficulty": 3,
+    "weather": "雨",
+    "trains": 10
+  },
+  {
+    "id": "t7",
+    "kind": "tutorial",
+    "title": "股道开放",
+    "line": "linhe",
+    "brief": "开局开放合适股道，避免站外停车",
+    "terms": [
+      "track",
+      "length",
+      "throat",
+      "panel"
+    ],
+    "duration": 360,
+    "difficulty": 3,
+    "weather": "晴",
+    "trains": 10
+  },
+  {
+    "id": "t8",
+    "kind": "tutorial",
+    "title": "客运参与",
+    "line": "jiangwan",
+    "brief": "压缩停站与保服务的取舍",
+    "terms": [
+      "emotion",
+      "track"
+    ],
+    "duration": 360,
+    "difficulty": 3,
+    "weather": "晴",
+    "trains": 10
+  },
+  {
+    "id": "t9",
+    "kind": "tutorial",
+    "title": "货运参与",
+    "line": "linhe",
+    "brief": "处理一次超偏载甩车",
+    "terms": [
+      "gantry",
+      "hazmat",
+      "hump"
+    ],
+    "duration": 420,
+    "difficulty": 4,
+    "weather": "晴",
+    "trains": 10
+  },
+  {
+    "id": "t10",
+    "kind": "tutorial",
+    "title": "车辆段入门",
+    "line": "linhe",
+    "brief": "排一次出所计划",
+    "terms": [
+      "dd",
+      "heat",
+      "stock"
+    ],
+    "duration": 420,
+    "difficulty": 4,
+    "weather": "雪",
+    "trains": 10
+  },
+  {
+    "id": "t11",
+    "kind": "tutorial",
+    "title": "沙盒开关",
+    "line": "qinglan",
+    "brief": "开一组开关并理解为什么难",
+    "terms": [
+      "ai",
+      "budget"
+    ],
+    "duration": 420,
+    "difficulty": 4,
+    "weather": "晴",
+    "trains": 8
+  },
+  {
+    "id": "s1",
+    "kind": "story",
+    "title": "第一章：学员上岗",
+    "line": "qinglan",
+    "brief": "第一次独立盯台",
+    "terms": [
+      "ctc",
+      "order"
+    ],
+    "duration": 420,
+    "difficulty": 2,
+    "weather": "晴",
+    "trains": 10,
+    "act": 1
+  },
+  {
+    "id": "s2",
+    "kind": "story",
+    "title": "第二章：春运",
+    "line": "linhe",
+    "brief": "图定加临客 22 对，股道不够用",
+    "terms": [
+      "track",
+      "entropy"
+    ],
+    "duration": 600,
+    "difficulty": 4,
+    "weather": "雪",
+    "trains": 14,
+    "act": 2
+  },
+  {
+    "id": "s3",
+    "kind": "story",
+    "title": "第三章：台风",
+    "line": "jiangwan",
+    "brief": "台风封锁与热备底牌",
+    "terms": [
+      "heat",
+      "emotion"
+    ],
+    "duration": 600,
+    "difficulty": 4,
+    "weather": "台风",
+    "trains": 12,
+    "act": 3
+  },
+  {
+    "id": "s4",
+    "kind": "story",
+    "title": "第四章：地震",
+    "line": "qinglan",
+    "brief": "全线停运后的抢修与恢复",
+    "terms": [
+      "section",
+      "order"
+    ],
+    "duration": 600,
+    "difficulty": 5,
+    "weather": "地震",
+    "trains": 10,
+    "act": 4
+  },
+  {
+    "id": "s5",
+    "kind": "story",
+    "title": "第五章：专运",
+    "line": "jiangwan",
+    "brief": "密语、优先级、全站让行",
+    "terms": [
+      "special",
+      "heat"
+    ],
+    "duration": 600,
+    "difficulty": 5,
+    "weather": "晴",
+    "trains": 12,
+    "act": 5
+  },
+  {
+    "id": "s6",
+    "kind": "story",
+    "title": "第六章：事故调查",
+    "line": "linhe",
+    "brief": "从运行图与录音还原事故链",
+    "terms": [
+      "entropy",
+      "hazmat"
+    ],
+    "duration": 720,
+    "difficulty": 5,
+    "weather": "阴",
+    "trains": 12,
+    "act": 6
+  },
+  {
+    "id": "s7",
+    "kind": "story",
+    "title": "第七章：新线开通",
+    "line": "jiangwan",
+    "brief": "新线调试与首日运行",
+    "terms": [
+      "route",
+      "block"
+    ],
+    "duration": 720,
+    "difficulty": 5,
+    "weather": "晴",
+    "trains": 14,
+    "act": 7
+  },
+  {
+    "id": "d1",
+    "kind": "daily",
+    "title": "每日挑战：雨夜宝成",
+    "line": "qinglan",
+    "brief": "暴雨夜，一条单线，两列车同时晚点",
+    "terms": [
+      "section",
+      "emotion"
+    ],
+    "duration": 480,
+    "difficulty": 4,
+    "weather": "暴雨",
+    "trains": 10
+  },
+  {
+    "id": "d2",
+    "kind": "daily",
+    "title": "每日挑战：枢纽爆仓",
+    "line": "linhe",
+    "brief": "到发线全满，只能取舍",
+    "terms": [
+      "track",
+      "entropy"
+    ],
+    "duration": 480,
+    "difficulty": 5,
+    "weather": "晴",
+    "trains": 14
+  },
+  {
+    "id": "d3",
+    "kind": "daily",
+    "title": "每日挑战：冻雨",
+    "line": "jiangwan",
+    "brief": "接触网覆冰，降弓通过",
+    "terms": [
+      "heat",
+      "order"
+    ],
+    "duration": 480,
+    "difficulty": 5,
+    "weather": "冻雨",
+    "trains": 12
+  },
+  {
+    "id": "h1",
+    "kind": "hub",
+    "title": "蚌埠站 · 普速场",
+    "line": "hub",
+    "brief": "只看蚌埠站普速场：上下行正线接入 8 条到发线，接车、会让、发车都在同一张站场图上完成",
+    "terms": [
+      "track",
+      "route",
+      "order"
+    ],
+    "duration": 300,
+    "difficulty": 3,
+    "weather": "晴",
+    "trains": 25,
+    "hub": "bengbu",
+    "hubYards": [
+      "ps"
+    ],
+    "stationName": "蚌埠站"
+  },
+  {
+    "id": "h2",
+    "kind": "hub",
+    "title": "蚌埠东站 · 货运场",
+    "line": "hub",
+    "brief": "只看货运场的 6 条到发线，装卸车按计划进出，正线不封锁",
+    "terms": [
+      "track",
+      "hazmat",
+      "order"
+    ],
+    "duration": 240,
+    "difficulty": 4,
+    "weather": "阴",
+    "trains": 18,
+    "hub": "bengbu",
+    "hubYards": [
+      "hy"
+    ],
+    "stationName": "蚌埠东站"
+  },
+  {
+    "id": "h3",
+    "kind": "hub",
+    "title": "动车段 · 检查库",
+    "line": "hub",
+    "brief": "只看检查库的 6 条检修线，出入所车底和库内作业按同一张图排",
+    "terms": [
+      "track",
+      "dd",
+      "heat"
+    ],
+    "duration": 300,
+    "difficulty": 4,
+    "weather": "雪",
+    "trains": 14,
+    "hub": "dc",
+    "hubYards": [
+      "jck"
+    ],
+    "stationName": "动车段"
+  },
+  {
+    "id": "h4",
+    "kind": "hub",
+    "title": "车辆段 · 段修库",
+    "line": "hub",
+    "brief": "只看段修库的 6 条检修线，车底按出所顺序一列一列放",
+    "terms": [
+      "track",
+      "route",
+      "order"
+    ],
+    "duration": 300,
+    "difficulty": 3,
+    "weather": "多云",
+    "trains": 14,
+    "hub": "veh",
+    "hubYards": [
+      "dx"
+    ],
+    "stationName": "车辆段"
+  },
+  {
+    "id": "h5",
+    "kind": "hub",
+    "title": "襄阳北 · 到达场",
+    "line": "hub",
+    "brief": "只看到达场的 6 条股道，到达列车按驼峰计划一列一列解体",
+    "terms": [
+      "track",
+      "route",
+      "order",
+      "hump"
+    ],
+    "duration": 300,
+    "difficulty": 4,
+    "weather": "晴",
+    "trains": 24,
+    "hub": "mar",
+    "hubYards": [
+      "dd"
+    ],
+    "stationName": "襄阳北"
+  }
+]
+
+

@@ -1,0 +1,152 @@
+# 调度台
+
+单机铁路行车调度模拟，原生 ES modules，无构建步骤。网页版、Windows 桌面端、Pad 横屏端共用同一套前端。当前源码版本 0.4.2；Windows 包与 Pad 包仍为 0.3.4，待按 0.4.2 重打。
+
+## 0.4.2 是什么
+
+0.4.2 把《调度台》收成“单站复线值班”：一局只守一个车站，玩家必须接车、选股道、等发车，不能只点一下“放行”通关。
+
+- 接车：站外车到点前必须预留一条合法股道，到点才自动进站；没接就压站外，晚点和站外等待一起涨，超限结束本班。
+- 站场图：两条正线相邻居中，到发线分在两侧；图头有站名、线路、场型、股道数、值班时钟和天气。
+- 接车预告：T1 左上显示站外列车、始发→终到、计划到和“待接 N 分”，点行可开动作卡。
+- 车次牌：在站车写“车次 + 计划发车 + 终到站”，不堆车型、机车、路局。
+- 动作卡：固定给始发、本站、终到、股道、编组、计划到发、实际到发、下一区间和运用；站外车给 1—4 道按钮，标清占用、反向、货线、客站。
+- 股道专用：T1 的 3 道只接客车，4 道只接货车；客车进货物线、货车进客运站台都会被拒绝。
+- 开班页：整屏方角、无阴影、暖白底，模式与车次紧凑横排，去掉英文代号。
+- 提示条：方角墨块，顶部居中，不挡动作卡。
+
+## 0.4.0 历史状态
+
+0.4.0 把《调度台》从“多站控制台”收成“一局只看一个车站”的站场调度：不再给玩家车站列表，也不允许切站；站场图按复线中间站画上下行正线和咽喉道岔；每列车都带车型、机车和路局。
+
+- 一局一个焦点站。H1 只看蚌埠站普速场，H2 只看货运场，H3 只看动车段检查库，H4 只看段修库，H5 只看到达场；线路关只保留股道最多的一个站作为操作站。
+- 复线为主。客运站、货运到发场、编组到达场按上下行双线画；上半场股道接上行正线，下半场股道接下行正线，正线经咽喉斜向道岔连到各股道；段修库、检查库这类库场仍用一条入库线，并在图头写明“入库线”，不再标成“单线”。
+- 列车卡两行：第一行车次、方向箭头、计划发车；第二行车型 · 机车 · 路局。T1 开局 K101（25G/HXD3D/京局）、K102（25G/SS7E/京局）、货1（C70/HXD3C/京局）分别在 1、3、4 道，2 道空着。
+- H1 普速场开局 4 列在站：T64、Z10 在上行 1、2 道，K101、K845 在下行 5、6 道。
+- 左侧 rail 从 16 项收到 8 项：站场图、运行图、列车一览、报警、事件、命令、记录、电话。车站、段所、甘特、图鉴、复盘、工坊、手册、扩展包从 rail 移入右上角菜单。
+- 顶部 HUD 只留在站、晚点、报警三个实时数；不再在开局显示 0% 正点率和未完成的评分。
+- 动作卡只保留能改变结果的动作：放行出站、改回自动放行、换一条股道、下发调度命令；删掉重复的“查看全部信息”。
+- 全站自绘弹窗、无源码注释、桌面/Pad 内置自绘图标继续保留。
+
+内置五个枢纽关，每关只开放一个场：
+
+| 场景 | 车站 / 段 | 本局唯一场 | 开局在站 |
+| --- | --- | --- | --- |
+| H1 | 蚌埠站 | 普速场 | 4 列 |
+| H2 | 蚌埠东站 | 货运场 | 按时刻表 |
+| H3 | 动车段 | 检查库 | 按时刻表 |
+| H4 | 襄阳北车辆段 | 段修库 | 按时刻表 |
+| H5 | 襄阳北编组站 | 到达场 | 按时刻表 |
+
+另有 T1—T11 教学与标准、S1—S7 剧本、D1—D3 每日；启用扩展包后启动屏会再加扩展场景。
+
+## 目录
+
+```
+index.html            启动屏与主界面外壳
+assets/js             sim / ctc / graph / panels / panels2 / app / tutorial / audio
+assets/css            app.css 主样式，wm.css 窗口，panels.css 面板，game.css A 主题与 PC/Pad 布局
+data/                 线路、两套时刻表、事件库、术语、场景、枢纽作业、hub-t1 教学单场
+packs/                内置扩展包与 index.json
+tools/                serve.mjs 静态服务，gen-data.mjs 数据生成，make-icon.ps1 图标
+desktop/              Electron 壳、打包脚本、图标
+pad/                  手工安卓工程（无 Gradle）、build-apk.ps1
+site/                 官网、网页版副本 site/play、下载 site/dl
+preview/              界面截图与设计原型
+docs/design-v1.md     设计总纲
+```
+
+## 本地运行
+
+```
+node tools\serve.mjs 8123
+```
+
+打开 `http://127.0.0.1:8123/index.html`。Pad 预览加 `?pad=1`。官网在 `dispatch\site` 目录下再用 `serve.mjs 8124`，访问 `http://127.0.0.1:8124/index.html`。
+
+## 桌面端
+
+```
+cd desktop
+$env:ELECTRON_MIRROR="https://npmmirror.com/mirrors/electron/"
+pwsh -File build.ps1
+```
+
+产物 `desktop\dist\调度台-win32-x64\调度台.exe`。打包时前端会复制到 `desktop\app`，再整体进 asar；`main.js` 在打包态从 `resources\app.asar\app` 读资源，开发态从 `desktop\app` 读。
+
+截图模式：
+
+```
+.\调度台.exe --capture=<绝对路径.png> --start
+.\调度台.exe --capture=<绝对路径.png> --start --scene=h4
+```
+
+`--big` 会把站场图窗口放大到整屏。`--scene` 取值对应启动屏场景编号，例如 `h1`、`h4`、`t6`。
+
+## Pad 端
+
+```
+$env:JAVA_HOME="C:\android-build\jdk\jdk-17.0.21.1+2"
+pwsh -File pad\build-apk.ps1
+```
+
+产物 `pad\build\dispatch-pad.apk`，包名 `com.tst.dispatch`，`versionCode 4`、`versionName 0.3.4`，debug keystore 签名。不再弹系统启动对话框，启动屏右侧直接注明“为 Pad 横屏设计，手机打开可能显示不全”，随后进全屏 WebView。Pad 布局由 `?pad=1`、Android 非 Mobile UA 或粗指针且宽度 ≥700 触发。
+
+## 扩展包
+
+`packs/index.json` 列内置包；每个包一个目录，`pack.json` 描述场景：
+
+```
+{
+  "id": "qinling-night",
+  "name": "秦岭夜行",
+  "version": "0.1.0",
+  "author": "调度台内置",
+  "note": "宝成线夜间雾天，秦岭至凤县间临时限速，8 列车。",
+  "scene": {
+    "id": "pk-qinling-night",
+    "kind": "pack",
+    "title": "秦岭夜行",
+    "line": "qinglan",
+    "brief": "分相、慢行与雾天，按图行车。",
+    "terms": ["分相", "慢行"],
+    "duration": 300,
+    "difficulty": 2,
+    "weather": "雾",
+    "trains": 8
+  }
+}
+```
+
+安装状态在 `localStorage` 的 `tst-dispatch-packs`。导入支持 `.json` 和 `.zip`（根目录或一层子目录含 `pack.json`），校验 id、名称、版本、线路、列车数。扩展包浮窗为 440px 卡片列表，安装按钮独立列。
+
+## 数据
+
+```
+node tools\gen-data.mjs
+```
+
+会覆盖 `data/*.json`。事件为示意数据，不是 12306 官方时刻。两套车次方案在 `timetable.json` 与 `timetable-v2.json`；枢纽作业在 `hub.json`、`hub-dc.json`、`hub-veh.json`、`hub-mar.json`。
+
+## 发布
+
+- 官网：https://severuszx.github.io/dispatch/
+- 仓库：https://github.com/severuszx/dispatch
+- Release：https://github.com/severuszx/dispatch/releases/tag/v0.3.4
+- 桌面 release：`dispatch-0.3.4-win64.zip`，162,608,573 bytes，sha256 `9cd7e75c86b9b141faa587bec7b1773d29884781eab65ce4c8ab2b409e061e7f`
+- Pad release：`dispatch-0.3.4-pad.apk`，240,874 bytes，sha256 `f181ee3075b5e6f19c7db6edad9f788b02cab4b8e936cb88cf65dc5fef7f22e9`
+- 更新清单：`https://severuszx.github.io/dispatch/latest.json`
+- 桌面端启动 4 秒后自动检查更新；开机页“检查更新”可手动触发。下载后校验 SHA256，退出并由 PowerShell 替换安装目录后重启。
+
+## 已知道的限制
+
+- 新版车次是示意编组，不是官方 2026-11 调图。
+- H1/H5 在 0.3.4 只做了静态实拍，未实际点车、放行、跑事件；H4 未跑完整班，枢纽评分继续复用线路关逻辑。
+- 特殊事件首件 90 秒、之后 5 分钟一件；5 分钟间隔没有真等一轮验证。
+- Pad 自绘退出框与启动屏已在 1200×800 实拍；APK 已验签，没有实机安装。
+- 音效已重写，未做主观试听。
+- 官网与源码已部署到 GitHub Pages；0.4.2 桌面包与 Pad 包尚未重打，Release 仍是 0.3.4。
+- 自动更新只对打包态生效；开发态点“检查更新”只会提示开发环境不检查。
+- 窄窗口下 8 股道以上车站的站名、车次框与股道号可能挤压。
+- 教程 t2、t5 与通用术语教程未逐步走完，t2 仍写“点车站与站场”。
+

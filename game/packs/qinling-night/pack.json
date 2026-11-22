@@ -1,0 +1,19 @@
+{
+  "id": "qinling-night",
+  "name": "秦岭夜行",
+  "version": "0.1.0",
+  "author": "调度台内置",
+  "note": "宝成线夜间雾天，秦岭至凤县间临时限速，8 列车。",
+  "scene": {
+    "id": "pk-qinling-night",
+    "kind": "pack",
+    "title": "秦岭夜行",
+    "line": "qinglan",
+    "brief": "夜间雾天，秦岭至凤县间临时限速，8 列。",
+    "terms": ["block", "signal"],
+    "duration": 300,
+    "difficulty": 2,
+    "weather": "雾",
+    "trains": 8
+  }
+}

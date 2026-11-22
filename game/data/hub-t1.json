@@ -1,0 +1,12 @@
+{
+  "station": { "id": "tut", "name": "实训站", "code": "TUT", "line": "京广线实训段 · 上下行双线" },
+  "yards": [
+    { "id": "main", "name": "实训站", "type": "复线中间站", "tracks": 4, "platform": 3, "freight": 4, "note": "上下行正线接入，1—2 道接上行，3—4 道接下行的到发线" }
+  ],
+  "trains": [
+    { "id": "tut-01", "no": "K101", "type": "K", "yard": "main", "arr": null, "dep": 372, "coaches": 16, "priority": 4, "crew": 1, "dir": 1 },
+    { "id": "tut-02", "no": "K102", "type": "K", "yard": "main", "arr": 366, "dep": 384, "coaches": 16, "priority": 4, "crew": 1, "dir": 0 },
+    { "id": "tut-03", "no": "货1", "type": "货", "yard": "main", "arr": 378, "dep": 396, "coaches": 40, "priority": 6, "crew": 1, "dir": 0 }
+  ]
+}
+

@@ -1,0 +1,19 @@
+{
+  "id": "jiangwan-peak",
+  "name": "京广晚高峰",
+  "version": "0.1.0",
+  "author": "调度台内置",
+  "note": "京广高铁晚高峰，10 列车，雨天，追踪间隔收紧。",
+  "scene": {
+    "id": "pk-jiangwan-peak",
+    "kind": "pack",
+    "title": "京广晚高峰",
+    "line": "jiangwan",
+    "brief": "晚高峰加雨天，10 列，追踪间隔收紧。",
+    "terms": ["block", "headway"],
+    "duration": 300,
+    "difficulty": 3,
+    "weather": "雨",
+    "trains": 10
+  }
+}

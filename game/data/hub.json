@@ -1,0 +1,44 @@
+{
+  "station": {
+    "id": "bengbu",
+    "name": "蚌埠站",
+    "code": "BBH",
+    "line": "京沪线"
+  },
+  "yards": [
+    { "id": "ps", "name": "普速场", "type": "普速客运", "tracks": 8, "note": "1—8 道，含京沪正线" },
+    { "id": "hy", "name": "货运场", "type": "货运到发", "tracks": 6, "note": "9—12 道货车到发线" },
+    { "id": "hc", "name": "货场", "type": "装卸场", "tracks": 3, "note": "南货场装卸线" },
+    { "id": "kz", "name": "客整场", "type": "客车整备", "tracks": 3, "note": "13—15 道车底整备" },
+    { "id": "dc", "name": "调车场", "type": "调车作业", "tracks": 4, "note": "16—19 道调车线" },
+    { "id": "jw", "name": "机务折返段", "type": "折返段", "tracks": 2, "note": "西南侧折返段" }
+  ],
+  "trains": [
+    { "id": "bb-01", "no": "K101", "type": "K", "yard": "ps", "arr": null, "dep": 390, "coaches": 18, "priority": 4 },
+    { "id": "bb-02", "no": "T64", "type": "T", "yard": "ps", "arr": null, "dep": 406, "coaches": 18, "priority": 3 },
+    { "id": "bb-03", "no": "Z10", "type": "Z", "yard": "ps", "arr": null, "dep": 424, "coaches": 19, "priority": 3 },
+    { "id": "bb-04", "no": "K845", "type": "K", "yard": "ps", "arr": null, "dep": 370, "coaches": 17, "priority": 4 },
+    { "id": "bb-05", "no": "1461", "type": "普快", "yard": "ps", "arr": 438, "dep": 450, "coaches": 16, "priority": 5 },
+    { "id": "bb-06", "no": "K359", "type": "K", "yard": "ps", "arr": 462, "dep": 474, "coaches": 17, "priority": 4 },
+    { "id": "bb-07", "no": "K102", "type": "K", "yard": "ps", "arr": 486, "dep": 498, "coaches": 18, "priority": 4 },
+    { "id": "bb-08", "no": "T63", "type": "T", "yard": "ps", "arr": 510, "dep": 522, "coaches": 18, "priority": 3 },
+    { "id": "bb-09", "no": "X101", "type": "货", "yard": "hy", "arr": 372, "dep": 410, "coaches": 42, "priority": 6 },
+    { "id": "bb-10", "no": "31001", "type": "货", "yard": "hy", "arr": 390, "dep": 430, "coaches": 45, "priority": 6 },
+    { "id": "bb-11", "no": "41002", "type": "货", "yard": "hy", "arr": 405, "dep": 445, "coaches": 38, "priority": 6 },
+    { "id": "bb-12", "no": "21003", "type": "货", "yard": "hy", "arr": 420, "dep": 460, "coaches": 44, "priority": 6 },
+    { "id": "bb-13", "no": "X102", "type": "货", "yard": "hy", "arr": 440, "dep": 480, "coaches": 40, "priority": 6 },
+    { "id": "bb-14", "no": "31004", "type": "货", "yard": "hy", "arr": 465, "dep": 505, "coaches": 46, "priority": 6 },
+    { "id": "bb-15", "no": "41005", "type": "货", "yard": "hy", "arr": 490, "dep": 530, "coaches": 39, "priority": 6 },
+    { "id": "bb-16", "no": "21006", "type": "货", "yard": "hy", "arr": 515, "dep": 555, "coaches": 43, "priority": 6 },
+    { "id": "bb-17", "no": "货1", "type": "货", "yard": "hc", "arr": null, "dep": 420, "coaches": 20, "priority": 7 },
+    { "id": "bb-18", "no": "货2", "type": "货", "yard": "hc", "arr": null, "dep": 480, "coaches": 22, "priority": 7 },
+    { "id": "bb-19", "no": "0K101", "type": "K", "yard": "kz", "arr": null, "dep": 382, "coaches": 18, "priority": 6 },
+    { "id": "bb-20", "no": "0T64", "type": "T", "yard": "kz", "arr": null, "dep": 400, "coaches": 18, "priority": 6 },
+    { "id": "bb-21", "no": "0Z10", "type": "Z", "yard": "kz", "arr": 430, "dep": 445, "coaches": 19, "priority": 6 },
+    { "id": "bb-22", "no": "调1", "type": "调车", "yard": "dc", "arr": null, "dep": 390, "coaches": 0, "priority": 7 },
+    { "id": "bb-23", "no": "调2", "type": "调车", "yard": "dc", "arr": null, "dep": 450, "coaches": 0, "priority": 7 },
+    { "id": "bb-24", "no": "机1", "type": "机车", "yard": "jw", "arr": null, "dep": 380, "coaches": 0, "priority": 7 },
+    { "id": "bb-25", "no": "机2", "type": "机车", "yard": "jw", "arr": 410, "dep": 430, "coaches": 0, "priority": 7 }
+  ]
+}
+
