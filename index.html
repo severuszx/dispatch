@@ -22,7 +22,7 @@
       <a href="#download">下载</a>
       <a href="#log">日志</a>
     </nav>
-    <span class="build">v0.3.4 / win · pad · web</span>
+    <span class="build">v0.4.2 / win · pad · web</span>
   </div>
 </header>
 
@@ -169,7 +169,7 @@
   <section id="packs">
     <div class="wrap">
       <h2><span class="no">05</span>扩展包</h2>
-      <p class="sub">游戏内有一个「扩展包」窗口：安装、启用、停用、移除、载入，也可以直接导入文件。v0.3.4 内置三个包，导入开放。</p>
+      <p class="sub">游戏内有一个「扩展包」窗口：安装、启用、停用、移除、载入，也可以直接导入文件。v0.4.2 内置焦柳线、宁西线 55 站资源包，导入开放。</p>
       <figure class="shot">
         <img src="shots/packs.png" alt="A 版扩展包浮窗：内置包列表，每行写清作者、场景、列车数与天气，右侧安装按钮">
         <figcaption><span>扩展包浮窗 · 安装 / 启用 / 载入</span><span>游戏内实拍</span></figcaption>
@@ -196,13 +196,13 @@
       <div class="dl">
         <div class="item">
           <h3>Windows 桌面端</h3>
-          <div class="meta">v0.3.4 · x64 · 目录版 · 约 155 MiB</div>
+          <div class="meta">v0.4.2 · x64 · 目录版 · 约 151 MiB</div>
           <p>内置运行库与本地服务，断网可用。解压后运行 <code>调度台.exe</code>。</p>
-          <a class="btn primary" href="https://github.com/severuszx/dispatch/releases/download/v0.3.4/dispatch-0.3.4-win64.zip">下载 zip</a>
+          <a class="btn primary" href="https://github.com/severuszx/dispatch/releases/download/v0.4.2/dispatch-0.4.2-win64.zip">下载 zip</a>
         </div>
         <div class="item">
           <h3>网页版</h3>
-          <div class="meta">v0.3.4 · 无构建 · 需 Chrome / Edge</div>
+          <div class="meta">v0.4.2 · 无构建 · 需 Chrome / Edge</div>
           <p>直接打开即玩。存档在浏览器本地，清缓存会丢进度。</p>
           <a class="btn" href="play/index.html">打开网页版</a>
         </div>
@@ -228,8 +228,8 @@
       <h2><span class="no">07</span>开发日志</h2>
       <div class="log">
         <div class="entry">
-          <div class="date">2026-11-22 · v0.3.4</div>
-          <p>整套界面按 A 方案重做：白底、浅灰分区、1px 细边、橙红占用线，彻底去掉纸面手绘与深色终端风。PC 工作台默认常开右侧“列车动作”，选中车后显示位置、计划、状态、编组四格信息与放行影响；Pad 点车后底部单任务卡接管视线。单站教学关改成 4 条直线股道拉通，底部教练横条不再压住股道。运行图在单站场景改为按股道占用显示，虚线标到计划发车。左侧报警、事件、命令、记录、扩展包全部改成互斥浮窗；退出确认也改成游戏内自绘弹窗，不再调用系统 alert/confirm；Pad 启动说明从系统对话框移进启动屏右侧。</p>
+          <div class="date">2026-11-22 · v0.4.2</div>
+          <p>新增焦柳线全线 30 站、宁西线全线 26 站资源包，按 12306 2026-11-22 当日车次排班，共 55 个不重复车站；大型枢纽、线路交汇、换向列车写入站表。新增站内换挂、待避、列检、摘挂、换向五类行车作业，作业未完成会阻断发车。开班页增加线路标签，可按基础场景、焦柳线、宁西线分别选站。整套界面按 A 方案重做：白底、浅灰分区、1px 细边、橙红占用线，去掉纸面手绘与深色终端风。PC 工作台默认常开右侧“列车动作”，选中车后显示位置、计划、状态、编组与放行影响；Pad 点车后底部单任务卡接管视线。左侧报警、事件、命令、记录、扩展包改成互斥浮窗；退出确认改为游戏内自绘弹窗。</p>
         </div>
         <div class="entry">
           <div class="date">2026-11-22 · v0.3.3</div>
@@ -246,7 +246,7 @@
       </div>
       <h3>已知问题</h3>
       <ul>
-        <li>新版车次为示意编组：增加 4 列/线、部分车次改号，不对应官方 2026-11 调图。</li>
+        <li>焦柳、宁西两线车次取 12306 2026-11-22 当日实际停站；月山、沁阳、留庄、洛阳北、洛阳东、襄阳北、荆门东、枝江、三江县、融安、融水、洛满、柳江、新丰镇、南阳西、肥东 16 个无客运电报码车站用货运/编组车次。</li>
         <li>PC 默认常开右侧列车动作栏，其它面板从左侧 rail 以互斥浮窗打开；Pad 默认只显示站场图和底部任务卡。</li>
         <li>H1—H5 的接管、交回、逐列放行已跑通；H5 已跑满 300 分到结束并弹出评分复盘，H4 只验证进入与弹窗。枢纽关的报警传播与评分仍复用线路关逻辑，未逐场校准。</li>
         <li>Pad 端 0.3.4 APK 已重新构建并验签，versionCode 4；本轮没有实机试装。</li>
@@ -259,7 +259,7 @@
 
 <footer>
   <div class="wrap">
-    <p>调度台 · 单机铁路调度模拟 · v0.3.4</p>
+    <p>调度台 · 单机铁路调度模拟 · v0.4.2</p>
     <p>时刻表为按线路里程与区段速度推算的示意运行图，不代表任何官方时刻；线路、车站、车次仅用于模拟。</p>
     <p class="mono">build 2026-11-22 · engine es-modules · desktop electron · data 908/364/40/26</p>
   </div>
@@ -267,4 +267,5 @@
 
 </body>
 </html>
+
 

@@ -1,13 +1,7 @@
 {
-  "version": "0.3.4",
-  "published": "2026-11-22",
-  "notes": [
-    "0.3.4 桌面端与 Pad 端发布包",
-    "桌面端加入自动更新检查"
-  ],
-  "win": {
-    "url": "https://github.com/severuszx/dispatch/releases/download/v0.3.4/dispatch-0.3.4-win64.zip",
-    "sha256": "9cd7e75c86b9b141faa587bec7b1773d29884781eab65ce4c8ab2b409e061e7f",
-    "size": 162608573
-  }
+  "version": "0.4.2",
+  "notes": "55 站资源包：焦柳线 30 站、宁西线 26 站；站内换挂、换向、列检、摘挂、待避；12306 2026-11-22 当日车次。",
+  "url": "https://github.com/severuszx/dispatch/releases/download/v0.4.2/dispatch-0.4.2-win64.zip",
+  "size": 158416354,
+  "sha256": "2b89431dcbe1899a7e48ffa0be7feef4bdd2a6bee4f651f9f130c34c32fb1b53"
 }
