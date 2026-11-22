@@ -1,0 +1,13 @@
+{
+  "version": "0.4.2",
+  "published": "2026-11-22",
+  "notes": [
+    "站内换挂、待避、列检等作业会实际占用股道并卡住发车",
+    "桌面端加入自动更新检查"
+  ],
+  "win": {
+    "url": "https://github.com/severuszx/dispatch/releases/download/v0.4.2/dispatch-0.4.2-win64.zip",
+    "sha256": "",
+    "size": 0
+  }
+}
