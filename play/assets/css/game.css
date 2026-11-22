@@ -828,6 +828,7 @@ html, body {
 }
 .act-tr:hover { background: #fffdf3; }
 .act-tr.on { border-color: #356b4a; background: #eef4ec; color: #2b5b3d; }
+.act-tr.reserved { border-color: #d8a53e; background: #fff6dc; color: #8a6112; opacity: 1; }
 .act-tr.off { opacity: .4; }
 .act-tr small { display: block; margin-top: 2px; font-size: 8px; font-weight: 400; color: #7b8277; letter-spacing: 0; }
 .act-tr-help { color: #848b80; font-size: 9px; line-height: 1.6; margin-top: 6px; }
@@ -915,3 +916,33 @@ body.pad-mode .act-tr-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .scene-cell .sc-src { color: #8a4a32; }
 .scene-cell .sc-kind { display: none; }
+
+.scene-remote {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  padding: 14px 10px; border-bottom: 1px dotted #b8b3a4; background: #fffdf3;
+}
+.scene-remote b { font-size: 13px; color: #232821; }
+.scene-remote span { font-size: 11px; color: #6c7368; }
+.scene-remote .scene-dl {
+  margin-top: 6px; padding: 5px 12px; border: 1px solid #2f3a33; border-radius: 2px;
+  background: #2f3a33; color: #fff; font-size: 12px; cursor: pointer;
+}
+.scene-remote .scene-dl:hover { background: #1f2923; }
+
+@keyframes paneIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes drawerIn { from { opacity: 0; transform: scale(.97) translateY(-5px); } to { opacity: 1; transform: none; } }
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes alarmPulse { 0%, 100% { box-shadow: inset 3px 0 #b23a24; } 50% { box-shadow: inset 3px 0 #b23a24, 0 0 0 2px rgba(178,58,36,.16); } }
+
+button, .pack-tab, .mode-card, .scene-cell, .act-tr, .diff-card, .tt-card {
+  transition: background-color .15s ease, border-color .15s ease, transform .12s ease, box-shadow .15s ease, color .15s ease;
+}
+button:active, .pack-tab:active, .mode-card:active, .act-tr:active { transform: translateY(1px) scale(.985); }
+.mode-card:hover, .diff-card:hover, .tt-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(24,34,29,.07); }
+.scene-cell:hover { transform: translateX(2px); }
+.boot-pane.on { animation: paneIn .22s ease-out; }
+.drawer-win { transform-origin: top right; animation: drawerIn .17s ease-out; }
+.toast { animation: toastIn .2s ease-out; }
+.alert-row.danger, .alarm-row.danger { animation: alarmPulse 1.4s ease-in-out infinite; }
+.scene-dl:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(24,34,29,.14); }
+.pack-tab.on, .mode-card.on { box-shadow: 0 1px 0 rgba(0,0,0,.08); }

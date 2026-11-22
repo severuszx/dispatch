@@ -17,6 +17,26 @@ const THROAT = 30;
 const PAD_L = 90;
 const PAD_R = 80;
 
+function trackRole(conf, no) {
+  if (!conf) return 'mixed';
+  const n = Number(conf.tracks) || 0;
+  if (Array.isArray(conf.platform) || Array.isArray(conf.freight)) {
+    if (Array.isArray(conf.platform) && conf.platform.includes(no)) return 'platform';
+    if (Array.isArray(conf.freight) && conf.freight.includes(no)) return 'freight';
+    return 'mixed';
+  }
+  const p = Number(conf.platform) || 0;
+  const f = Number(conf.freight) || 0;
+  if (n >= 6) {
+    if (p && no <= p) return 'platform';
+    if (f && no > p) return 'freight';
+    return 'mixed';
+  }
+  if (p && no === p) return 'platform';
+  if (f && no === f) return 'freight';
+  return 'mixed';
+}
+
 export class CTCView {
   constructor(canvas, opts = {}) {
     this.canvas = canvas;
@@ -26,6 +46,7 @@ export class CTCView {
     this.onPick = opts.onPick || (() => {});
     this.onInspect = opts.onInspect || (() => {});
     this.hit = [];
+    this.frame = 0;
     this.resize();
     const ro = new ResizeObserver(() => { this.resize(); this.draw(); });
     ro.observe(canvas.parentElement || canvas);
@@ -49,9 +70,8 @@ export class CTCView {
   }
 
   setSnapshot(snap) {
-    const prev = this.snap;
     this.snap = snap;
-    if (!prev || prev.clock !== snap.clock || prev.trains !== snap.trains) this.draw();
+    this.draw();
   }
 
   font(size, mono) {
@@ -101,6 +121,11 @@ export class CTCView {
     this.drawHubHead(s);
     this.drawYard(s);
     this.drawLegend();
+    const entering = (s.trains || []).some((t) => (t.status === 'station' && t.enterWall && performance.now() - t.enterWall < 1600)
+      || (t.status === 'running' && t.departWall && performance.now() - t.departWall < 6100));
+    if (entering && !this.frame) {
+      this.frame = requestAnimationFrame(() => { this.frame = 0; this.draw(); });
+    }
   }
 
   drawHubHead(s) {
@@ -554,19 +579,25 @@ export class CTCView {
       const tr = list ? list[k] : null;
       const busy = tr && tr.train;
       const blocked = tr && tr.blocked;
+      const reserved = !!(busy && s.trains.find((tt) => tt.id === busy && tt.reserved));
+      const role = trackRole(conf, k + 1);
       const mainY = double ? (k < half ? upY : downY) : upY;
 
       lead(throatL, mainY, trackL, ty);
       lead(throatR, mainY, trackR, ty);
 
-      ctx.strokeStyle = blocked ? COL.amber : busy ? COL.red : COL.track;
-      ctx.lineWidth = busy || blocked ? 5 : 3.5;
+      ctx.save();
+      ctx.shadowColor = blocked || reserved ? 'rgba(213,137,31,.55)' : busy ? 'rgba(232,75,48,.35)' : 'transparent';
+      ctx.shadowBlur = blocked || reserved ? 10 : busy ? 6 : 0;
+      ctx.strokeStyle = blocked ? COL.amber : reserved ? COL.amber : busy ? COL.red : COL.track;
+      ctx.lineWidth = busy || blocked || reserved ? 5 : 3.5;
       ctx.beginPath();
       ctx.moveTo(trackL, ty);
       ctx.lineTo(trackR, ty);
       ctx.stroke();
+      ctx.restore();
       if (busy || blocked) {
-        ctx.strokeStyle = '#f3d8d2';
+        ctx.strokeStyle = reserved ? '#f4d99b' : '#f3d8d2';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(trackL, ty);
@@ -581,7 +612,13 @@ export class CTCView {
       ctx.moveTo(trackR, ty - 6); ctx.lineTo(trackR, ty + 6);
       ctx.stroke();
 
-      ctx.fillStyle = busy || blocked ? COL.red : COL.green;
+      const pulse = .55 + .45 * Math.sin(performance.now() / 520 + k * 1.7);
+      ctx.fillStyle = blocked ? COL.amber : reserved ? COL.amber : busy ? COL.red : COL.green;
+      ctx.globalAlpha = .22 * pulse;
+      ctx.beginPath();
+      ctx.arc(trackL - 14, ty, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
       ctx.beginPath();
       ctx.arc(trackL - 14, ty, 3.6, 0, Math.PI * 2);
       ctx.fill();
@@ -590,13 +627,28 @@ export class CTCView {
       ctx.fillStyle = COL.dim;
       ctx.textAlign = 'right';
       ctx.fillText(String(k + 1), trackL - 22, ty - 10);
+      if (role !== 'mixed') {
+        this.font(8, true);
+        ctx.fillStyle = role === 'freight' ? COL.amber : COL.faint;
+        ctx.textAlign = 'right';
+        ctx.fillText(role === 'freight' ? '货场' : '站台', trackR - 4, ty - 10);
+        ctx.textAlign = 'left';
+      }
 
       if (busy) {
         const t = s.trains.find((tt) => tt.id === busy);
-        if (t && t.status === 'station') this.drawTrainAt(t, (trackL + trackR) / 2, ty, true, 1);
-        else if (t) {
+        if (t && t.status === 'station') {
+          const p = t.enterWall ? Math.max(0, Math.min(1, (performance.now() - t.enterWall) / 1500)) : 1;
+          if (p < 1) {
+            const fromX = t.dir > 0 ? throatL : throatR;
+            const fromY = double ? (t.dir > 0 ? upY : downY) : upY;
+            this.drawTrainAt(t, fromX + ((trackL + trackR) / 2 - fromX) * p, fromY + (ty - fromY) * p, false, .9);
+          } else {
+            this.drawTrainAt(t, (trackL + trackR) / 2, ty, true, 1);
+          }
+        } else if (t) {
           this.font(9, true);
-          ctx.fillStyle = COL.red;
+          ctx.fillStyle = COL.amber;
           ctx.textAlign = 'center';
           ctx.fillText(`${t.no} 预留`, (trackL + trackR) / 2, ty);
           ctx.textAlign = 'left';
@@ -607,17 +659,35 @@ export class CTCView {
 
     const upApproach = approach.filter((t) => t.dir > 0);
     const downApproach = approach.filter((t) => t.dir < 0);
-    upApproach.forEach((t, i) => {
-      const x = left - 56;
-      const y = upY - 15 - i * 19;
-      this.drawApproachTag(t, x, y, id, i);
+    upApproach.forEach((t) => {
+      const p = Math.max(.06, Math.min(1, (s.clock - (t.planArr - 8)) / 8));
+      this.drawTrainAt(t, entry + (throatL - entry) * p, upY, false, .82);
     });
-    downApproach.forEach((t, i) => {
-      const w = 92;
-      const x = right - w - 8;
-      const y = downY - 8 - i * 17;
-      this.drawApproachTag(t, x, y, id, i);
+    downApproach.forEach((t) => {
+      const p = Math.max(.06, Math.min(1, (s.clock - (t.planArr - 8)) / 8));
+      this.drawTrainAt(t, right - (right - throatR) * p, downY, false, .82);
     });
+    for (const t of s.trains || []) {
+      if (t.status !== 'running' || !t.section) continue;
+      const p = t.departWall ? Math.max(0, Math.min(1, (performance.now() - t.departWall) / 6000)) : Math.max(0, Math.min(1, t.progress || 0));
+      const fromTrack = (t.originTrack || 0) > 0 ? ySlot(slotFor((t.originTrack || 1) - 1)) : (t.dir > 0 ? upY : downY);
+      const center = (trackL + trackR) / 2;
+      if (t.dir > 0) {
+        if (p < .36) {
+          const q = p / .36;
+          this.drawTrainAt(t, center + (throatR - center) * q, fromTrack + (upY - fromTrack) * q, false, .9);
+        } else {
+          const q = (p - .36) / .64;
+          this.drawTrainAt(t, throatR + (exit - throatR) * q, upY, false, .9);
+        }
+      } else if (p < .36) {
+        const q = p / .36;
+        this.drawTrainAt(t, center + (throatL - center) * q, fromTrack + (downY - fromTrack) * q, false, .9);
+      } else {
+        const q = (p - .36) / .64;
+        this.drawTrainAt(t, throatL - (throatL - entry) * q, downY, false, .9);
+      }
+    }
   }
 
   drawApproachTag(t, x, y, station, idx) {
@@ -629,8 +699,8 @@ export class CTCView {
     const bx = Math.max(4, Math.min(ctxW - w - 4, x));
     const by = Math.round(y - h / 2);
     ctx.save();
-    ctx.fillStyle = late > 0 ? '#fff1ec' : (t.reserved ? '#eef4ec' : '#f7f4ea');
-    ctx.strokeStyle = late > 0 ? COL.red : (t.reserved ? '#356b4a' : '#6c766e');
+    ctx.fillStyle = late > 0 ? '#fff1ec' : (t.reserved ? '#fff6dc' : '#f7f4ea');
+    ctx.strokeStyle = late > 0 ? COL.red : (t.reserved ? COL.amber : '#6c766e');
     ctx.lineWidth = 1;
     ctx.fillRect(bx, by, w, h);
     ctx.strokeRect(bx + .5, by + .5, w - 1, h - 1);
@@ -643,7 +713,7 @@ export class CTCView {
     ctx.fillStyle = late > 0 ? COL.red : '#6d786f';
     ctx.fillText(late > 0 ? `晚 ${late} 分` : fmt(t.planArr), bx + 44, by + h / 2);
     ctx.textAlign = 'right';
-    ctx.fillStyle = t.reserved ? '#356b4a' : COL.dim;
+    ctx.fillStyle = t.reserved ? COL.amber : COL.dim;
     ctx.fillText(t.reserved && t.trackNo ? `${t.trackNo}道预留` : '待接', bx + w - 5, by + h / 2);
     this.hit.push({ type: 'train', id: t.id, x: bx, y: by, w, h });
   }
@@ -743,19 +813,20 @@ export class CTCView {
       const tr = list ? list[k] : null;
       const busy = tr && tr.train;
       const blocked = tr && tr.blocked;
+      const reserved = !!(busy && s.trains.find((tt) => tt.id === busy && tt.reserved));
       const upper = k < half;
       const mainY = double ? (upper ? upY : downY) : upY;
 
       lead(throatL, mainY, trackL, ty);
       lead(throatR, mainY, trackR, ty);
 
-      ctx.strokeStyle = blocked ? COL.red : COL.track;
-      ctx.lineWidth = blocked ? 5 : 4;
+      ctx.strokeStyle = blocked ? COL.red : reserved ? COL.amber : COL.track;
+      ctx.lineWidth = blocked || reserved ? 5 : 4;
       ctx.beginPath();
       ctx.moveTo(trackL, ty);
       ctx.lineTo(trackR, ty);
       ctx.stroke();
-      ctx.strokeStyle = busy || blocked ? '#f3c7be' : '#c4ced7';
+      ctx.strokeStyle = blocked ? '#f3c7be' : reserved ? '#f4d99b' : busy ? '#f3c7be' : '#c4ced7';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(trackL, ty);
@@ -769,7 +840,7 @@ export class CTCView {
       ctx.moveTo(trackR, ty - 5); ctx.lineTo(trackR, ty + 5);
       ctx.stroke();
 
-      ctx.fillStyle = busy || blocked ? COL.red : COL.green;
+      ctx.fillStyle = blocked ? COL.red : reserved ? COL.amber : busy ? COL.red : COL.green;
       ctx.beginPath();
       ctx.arc(trackL - 9, ty, 3.4, 0, Math.PI * 2);
       ctx.fill();
@@ -804,12 +875,39 @@ export class CTCView {
     const by = Math.round(y - h / 2);
     ctx.save();
     ctx.fillStyle = '#fffdf7';
+    ctx.shadowColor = late > 0 ? 'rgba(232,75,48,.20)' : 'rgba(28,38,34,.20)';
+    ctx.shadowBlur = atStation ? 10 : 6;
+    ctx.shadowOffsetY = 2;
     ctx.fillRect(bx, by, w, h);
     ctx.restore();
+    if (!atStation) {
+      const trail = t.dir > 0 ? -1 : 1;
+      ctx.strokeStyle = late > 0 ? 'rgba(232,75,48,.22)' : 'rgba(38,49,62,.16)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= 2; i += 1) {
+        const tx = bx + (trail > 0 ? w + i * 9 : -i * 9);
+        ctx.beginPath();
+        ctx.moveTo(tx, by + h * .35);
+        ctx.lineTo(tx + trail * 12, by + h * .35);
+        ctx.moveTo(tx, by + h * .65);
+        ctx.lineTo(tx + trail * 12, by + h * .65);
+        ctx.stroke();
+      }
+      const hx = t.dir > 0 ? bx + w : bx;
+      const hy = by + h / 2;
+      const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, 16);
+      grad.addColorStop(0, 'rgba(255,231,168,.55)');
+      grad.addColorStop(1, 'rgba(255,231,168,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.strokeStyle = late > 0 ? COL.red : '#4d5850';
     ctx.lineWidth = 1;
     ctx.strokeRect(bx + .5, by + .5, w - 1, h - 1);
-    ctx.fillStyle = late > 0 ? COL.red : '#8f2f1d';
+    const stripe = late > 0 ? COL.red : t.type === 'X' || t.type === '货' || t.type === 'N' || t.type === 'G' ? '#7d5a36' : t.type === '检' || t.type === '修' ? '#b8861f' : t.type === 'T' ? '#345c86' : t.type === 'Z' ? '#2f6b4f' : '#8f2f1d';
+    ctx.fillStyle = stripe;
     ctx.fillRect(bx + 1, by + 1, 3 * scale, h - 2);
     const baseY = atStation ? y - 5 * scale : y;
     ctx.fillStyle = COL.dim;
@@ -824,11 +922,13 @@ export class CTCView {
     ctx.fillStyle = late > 0 ? COL.red : COL.dim;
     ctx.fillText(time, bx + w - 8 * scale - lateW, baseY);
     if (atStation) {
-      const route = t.destName ? `终到 ${t.destName}` : '';
+      const route = t.destName ? `终到 ${t.destName}` : t.coaches ? `${t.coaches}辆 · ${t.trainClass || '运用车'}` : '';
+      const pending = (t.tasks || []).filter((x) => x.state !== 'done').length;
+      const sub = t.status === 'station' && pending ? `${route} · 待${pending}项` : route;
       this.font(8.5 * scale, false);
       ctx.fillStyle = '#4f5a51';
       ctx.textAlign = 'left';
-      if (route) ctx.fillText(route, bx + 20 * scale, y + 9 * scale);
+      if (sub) ctx.fillText(sub, bx + 20 * scale, y + 9 * scale);
     }
     if (lateText) {
       ctx.fillStyle = '#fff4ef';
@@ -923,7 +1023,7 @@ export class CTCView {
 
   drawLegend() {
     const ctx = this.ctx;
-    const items = [['股道占用', COL.red], ['信号开放', COL.green], ['股道空闲', COL.track]];
+    const items = [['股道占用', COL.red], ['股道预留', COL.amber], ['信号开放', COL.green], ['股道空闲', COL.track]];
     this.font(9, false);
     let x = this.w - 12;
     for (const [label, color] of items) {

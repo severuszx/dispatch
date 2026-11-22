@@ -25,6 +25,10 @@ let currentDifficulty = storage('tst-dispatch-difficulty') || 'standard';
 let currentTT = storage('tst-dispatch-tt') || 'old';
 let realism = { ...REALISM_DEFAULT };
 let currentPack = 'base';
+const PACK_BASE = 'https://severuszx.github.io/dispatch/data/packs/';
+let baseScenarios = [];
+const packCache = { jiaoliu: null, ningxi: null };
+const packLoading = { jiaoliu: false, ningxi: false };
 let views = {};
 let inspectId = null;
 let started = false;
@@ -60,6 +64,11 @@ const DIFFICULTIES = [
 ];
 
 function boot() {
+  document.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button, .pack-tab, .scene-cell, .mode-card, .act-tr, .diff-card, .tt-card')) {
+      audio.sfx('click');
+    }
+  }, { passive: true });
   loadData().then(() => {
     buildBoot();
     bindBoot();
@@ -69,22 +78,53 @@ function boot() {
 }
 
 async function loadData() {
-  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx, scenes55] = await Promise.all([
+  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar] = await Promise.all([
     fetchJson('data/network.json'), fetchJson('data/timetable.json'), fetchJson('data/timetable-v2.json'),
     fetchJson('data/events.json'),
     fetchJson('data/glossary.json'), fetchJson('data/scenarios.json'), fetchJson('data/orders.json'),
     fetchJson('data/hub.json'), fetchJson('data/hub-t1.json'), fetchJson('data/hub-dc.json'), fetchJson('data/hub-veh.json'), fetchJson('data/hub-mar.json'),
-    fetchJson('data/hub-jl.json'), fetchJson('data/hub-nx.json'), fetchJson('data/scenes-55.json'),
   ]);
   const packScenes = enabledPackScenes();
+  baseScenarios = scenarios.concat(packScenes);
   data = {
     network, timetable, timetable2, events, glossary,
-    scenarios: scenarios.concat(packScenes).concat(scenes55),
-    orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx,
+    scenarios: baseScenarios.slice(),
+    orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl: {}, hubnx: {},
   };
   sim.loadData(data);
   const meta = document.getElementById('bootMeta');
-  if (meta) meta.textContent = '06:00 接班 · 本机离线运行';
+  if (meta) meta.textContent = '06:00 接班 · 附加线路包按需从云端载入';
+}
+
+async function loadCloudPack(id) {
+  if (packCache[id] || packLoading[id]) return packCache[id];
+  packLoading[id] = true;
+  renderPackTabs();
+  renderScenes();
+  try {
+    const res = await fetch(`${PACK_BASE}${id}.json`, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`云端资源包 ${id} ${res.status}`);
+    const bundle = await res.json();
+    packCache[id] = bundle;
+    const target = id === 'jiaoliu' ? data.hubjl : data.hubnx;
+    Object.assign(target, bundle.stations || {});
+    const loadedScenes = Object.keys(packCache).filter((k) => packCache[k]).flatMap((k) => packCache[k].scenes || []);
+    data.scenarios = baseScenarios.concat(loadedScenes);
+    sim.loadData(data);
+    toast(`${bundle.name || id} 已从云端载入`);
+  } catch (e) {
+    toast(`云端资源包下载失败：${e.message}`);
+  } finally {
+    packLoading[id] = false;
+    renderPackTabs();
+    renderScenes();
+    const first = data.scenarios.find((s) => s.pack === id);
+    if (first && currentPack === id) {
+      currentScene = first;
+      renderScenes();
+    }
+  }
+  return packCache[id];
 }
 
 async function fetchJson(path) {
@@ -207,13 +247,13 @@ function renderPackTabs() {
   box.innerHTML = '';
   const counts = {
     base: data.scenarios.filter((s) => !s.pack).length,
-    jiaoliu: data.scenarios.filter((s) => s.pack === 'jiaoliu').length,
-    ningxi: data.scenarios.filter((s) => s.pack === 'ningxi').length,
+    jiaoliu: packCache.jiaoliu ? (packCache.jiaoliu.scenes || []).length : 30,
+    ningxi: packCache.ningxi ? (packCache.ningxi.scenes || []).length : 26,
   };
   const tabs = [
     ['base', `基础场景 ${counts.base}`],
-    ['jiaoliu', `焦柳线全线 ${counts.jiaoliu}`],
-    ['ningxi', `宁西线全线 ${counts.ningxi}`],
+    ['jiaoliu', packCache.jiaoliu ? `焦柳线全线 ${counts.jiaoliu}` : `焦柳线全线 · 云端 ${counts.jiaoliu}`],
+    ['ningxi', packCache.ningxi ? `宁西线全线 ${counts.ningxi}` : `宁西线全线 · 云端 ${counts.ningxi}`],
   ];
   tabs.forEach(([id, label]) => {
     const b = el('button', `pack-tab ${currentPack === id ? 'on' : ''}`, label);
@@ -222,6 +262,7 @@ function renderPackTabs() {
       currentPack = id;
       renderPackTabs();
       renderScenes();
+      if (id !== 'base' && !packCache[id] && !packLoading[id]) loadCloudPack(id);
     });
     box.append(b);
   });
@@ -239,6 +280,22 @@ function renderScenes() {
   const head = el('div', 'scene-head');
   ['车站', '线路', '天气', '时长', '难度', '车次', '数据'].forEach((t) => head.append(el('span', '', t)));
   list.append(head);
+  if (currentPack !== 'base' && !packCache[currentPack]) {
+    const row = el('div', 'scene-remote');
+    const name = currentPack === 'jiaoliu' ? '焦柳线全线' : '宁西线全线';
+    row.append(el('b', '', packLoading[currentPack] ? `${name} 正在从云端下载` : `${name} 尚未下载`));
+    row.append(el('span', '', packLoading[currentPack] ? '首次进入才拉取，下载后本次会话内复用。' : '资源包不在安装包里，点右侧按钮从官网拉取。'));
+    if (!packLoading[currentPack]) {
+      const btn = el('button', 'scene-dl', '从云端下载');
+      btn.type = 'button';
+      btn.addEventListener('click', () => loadCloudPack(currentPack));
+      row.append(btn);
+    }
+    list.append(row);
+    const detail = document.getElementById('sceneDetail');
+    if (detail) detail.textContent = `${name}｜未下载｜点“从云端下载”后载入车站与车次`;
+    return;
+  }
   scenes.forEach((s) => {
     const cell = el('div', `scene-cell ${currentScene && currentScene.id === s.id ? 'on' : ''}`);
     const line = data.network.lines.find((l) => l.id === s.line);
@@ -250,7 +307,7 @@ function renderScenes() {
     cell.append(el('span', 'sc-time', `${Math.round(s.duration / 60 * 10) / 10}h`));
     cell.append(el('span', 'sc-diff', `${s.difficulty}`));
     cell.append(el('span', 'sc-trains', `${s.trains} 列`));
-    cell.append(el('span', 'sc-src', s.source ? '12306' : (kinds[s.kind] || s.kind)));
+    cell.append(el('span', 'sc-src', s.special ? '混合车种' : s.source ? '12306' : (kinds[s.kind] || s.kind)));
     cell.addEventListener('click', () => {
       currentScene = s;
       list.querySelectorAll('.scene-cell').forEach((x) => x.classList.remove('on'));
@@ -623,6 +680,7 @@ function mountCTC(body) {
   if (location.search.includes('debug')) {
     window.__ctc = view;
     window.__sim = sim;
+    window.__audio = audio;
   }
   view.setSnapshot(sim.getSnapshot());
   sim.subscribe((s) => view.setSnapshot(s.getSnapshot()));
@@ -656,8 +714,8 @@ function ctx() {
     },
     showGraph() { openWindow('graph'); },
     review() { openWindow('score'); showReview(views.scoreWin.body, ctx()); },
-    closeReview() { if (views.scoreWin) { showReview(views.scoreWin.body, ctx()); } },
-    restart() { restartScene(); },
+    closeReview() { views.scoreWin?.hide(); },
+    restart() { restartScene(); views.scoreWin?.hide(); },
     sandboxChange(key, val) {
       if (key === 'L0:闭塞方式') sim.conditions.phoneBlock = !val;
       if (key === 'L6:命令校验') sim.realism.orderCheck = val ? 1 : 0;
@@ -886,6 +944,8 @@ function onFinish() {
 
 function restartScene() {
   sim.setup(currentScene, currentMode, realism, storage('tst-dispatch-sandbox') || {}, currentDifficulty, currentTT);
+  inspectId = null;
+  closeSide();
   sim.start();
   if (views.ctc) views.ctc.setSnapshot(sim.getSnapshot());
   if (views.graph) views.graph.setSnapshot(sim.getSnapshot());

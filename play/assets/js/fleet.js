@@ -30,7 +30,10 @@ export function sceneRoute(scene, dir, stationName) {
 export function trainClass(raw) {
   const type = String((raw && raw.type) || '');
   const no = String((raw && raw.no) || '');
-  if (type === '货' || type === '路用') return '货物列车';
+  if (type === '货' || type === '路用' || type === 'X' || type === 'N' || type === 'G') return '货物列车';
+  if (type === '检') return '轨道检测车';
+  if (type === '修') return '检修车';
+  if (type === '工') return '工程作业车';
   if (no.startsWith('Z')) return '直达特快';
   if (no.startsWith('T')) return '特快旅客';
   if (no.startsWith('K')) return '快速旅客';
@@ -50,6 +53,9 @@ export function trainSpec(raw, fallbackBureau) {
   const override = OVERRIDE[no] || OVERRIDE[key];
   if (override) return { ...override, bureau };
   if (type === '调') return { model: 'DF7G', loco: '调车机', bureau };
+  if (type === '检') return { model: 'SY25K', loco: 'HXD3D', bureau };
+  if (type === '修') return { model: 'N17', loco: 'DF7G', bureau };
+  if (type === '工') return { model: 'X6K', loco: 'DF7G', bureau };
   if (type === '救援') return { model: 'N17', loco: 'DF7G', bureau };
   if (head === 'G') return { model: 'CR400AF', loco: '动车组自走', bureau };
   if (head === 'D') return { model: 'CRH380A', loco: '动车组自走', bureau };

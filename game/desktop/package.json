@@ -1,6 +1,6 @@
 {
   "name": "dispatch-desk",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "铁路行车调度模拟桌面端",
   "main": "main.js",
   "keywords": [],

@@ -22,9 +22,14 @@ export class AudioEngine {
     this.master = null;
     this.sfxBus = null;
     this.ambBus = null;
+    this.musicBus = null;
     this.noiseBuf = null;
     this.ambSrc = null;
     this.rainSrc = null;
+    this.musicTimer = null;
+    this.musicStep = 0;
+    this.musicId = null;
+    this.musicOn = false;
     this.on = true;
     this.trackId = null;
   }
@@ -40,6 +45,9 @@ export class AudioEngine {
     this.ambBus = this.ctx.createGain();
     this.ambBus.gain.value = 1;
     this.ambBus.connect(this.master);
+    this.musicBus = this.ctx.createGain();
+    this.musicBus.gain.value = 0.62;
+    this.musicBus.connect(this.master);
     this.sfxBus = this.ctx.createGain();
     this.sfxBus.gain.value = 1;
     this.sfxBus.connect(this.master);
@@ -116,10 +124,85 @@ export class AudioEngine {
     const track = TRACKS[trackId] || TRACKS.day;
     this.stopAmbience();
     this.ambience(track.room, track.rain);
+    this.music(trackId);
+  }
+
+  music(trackId) {
+    const c = this.ensure();
+    if (!c) return;
+    this.resume();
+    if (this.musicId === trackId && this.musicTimer) return;
+    this.stopMusic();
+    this.musicId = trackId;
+    this.musicOn = true;
+    this.musicStep = 0;
+    const bar = () => this.musicBar(trackId);
+    bar();
+    this.musicTimer = setInterval(bar, 7600);
+  }
+
+  musicBar(trackId) {
+    if (!this.musicOn || !this.on || !this.ctx || !this.musicBus) return;
+    const c = this.ctx;
+    const t0 = c.currentTime + 0.06;
+    const dark = trackId === 'night' || trackId === 'incident' || trackId === 'rain';
+    const sparse = trackId === 'review' || trackId === 'tutorial';
+    const seqs = dark
+      ? [[2, 5, 9], [2, 5, 10], [1, 4, 8], [0, 3, 7]]
+      : sparse
+        ? [[0, 4, 7], [5, 9, 2], [3, 7, 10], [7, 11, 2]]
+        : [[2, 5, 9], [10, 2, 5], [5, 8, 0], [0, 4, 7]];
+    const chord = seqs[(this.musicStep + (dark ? 1 : 0)) % seqs.length];
+    const root = dark ? 174.6 : 196;
+    chord.forEach((semi, i) => {
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = i === 1 ? 'triangle' : 'sine';
+      osc.frequency.value = root * Math.pow(2, semi / 12);
+      const gain = (sparse ? 0.022 : 0.03) * (i === 1 ? 0.8 : 1);
+      g.gain.setValueAtTime(0, t0 + i * 0.05);
+      g.gain.linearRampToValueAtTime(gain, t0 + 1.1 + i * 0.05);
+      g.gain.linearRampToValueAtTime(gain * 0.85, t0 + 5.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 7.4);
+      osc.connect(g).connect(this.musicBus);
+      osc.start(t0 + i * 0.05);
+      osc.stop(t0 + 7.5);
+    });
+    const bass = c.createOscillator();
+    const bg = c.createGain();
+    bass.type = 'sine';
+    bass.frequency.value = root * 0.5 * Math.pow(2, chord[0] / 12);
+    bg.gain.setValueAtTime(0, t0);
+    bg.gain.linearRampToValueAtTime(0.035, t0 + 0.8);
+    bg.gain.exponentialRampToValueAtTime(0.0001, t0 + 7.2);
+    bass.connect(bg).connect(this.musicBus);
+    bass.start(t0);
+    bass.stop(t0 + 7.3);
+    if (this.musicStep % 4 === 2) {
+      const bell = c.createOscillator();
+      const bgn = c.createGain();
+      bell.type = 'triangle';
+      bell.frequency.value = root * Math.pow(2, (chord[2] + 12) / 12);
+      bgn.gain.setValueAtTime(0, t0 + 1.8);
+      bgn.gain.linearRampToValueAtTime(0.012, t0 + 1.86);
+      bgn.gain.exponentialRampToValueAtTime(0.0001, t0 + 3.4);
+      bell.connect(bgn).connect(this.musicBus);
+      bell.start(t0 + 1.8);
+      bell.stop(t0 + 3.5);
+    }
+    this.musicStep += 1;
+  }
+
+  stopMusic() {
+    this.musicOn = false;
+    if (this.musicTimer) clearInterval(this.musicTimer);
+    this.musicTimer = null;
+    this.musicId = null;
   }
 
   stop() {
     this.stopAmbience();
+    this.stopMusic();
     this.trackId = null;
   }
 

@@ -39,6 +39,7 @@ class Sim {
     this.startClock = 360;
     this.running = false;
     this.finished = false;
+    this.finishReason = null;
     this.trains = [];
     this.sections = new Map();
     this.tracks = new Map();
@@ -120,7 +121,7 @@ class Sim {
     }
     for (const t of this.trains) {
       if (t.status !== 'pending') continue;
-      const ft = this.freeTrack(t.station);
+      const ft = this.freeTrack(t.station, 0, t);
       if (ft) { ft.train = t.id; t.trackNo = ft.no; }
     }
     this.startClock = 360;
@@ -171,7 +172,11 @@ class Sim {
       for (let i = 1; i <= count; i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null, lenM: i > half ? 650 : 520 });
       this.tracks.set(id, list);
     });
-    this.startClock = scene.start == null ? 360 : scene.start;
+    const baseStart = scene.start == null ? 360 : scene.start;
+    const firstArr = (this.hub.trains || [])
+      .filter((t) => this.stationOrder.includes(t.yard) && t.arr != null)
+      .reduce((m, t) => Math.min(m, t.arr), Infinity);
+    this.startClock = Math.max(baseStart, Number.isFinite(firstArr) ? firstArr : baseStart);
     this.limits = { late: scene.lateLimit || 15, wait: scene.waitLimit || 12 };
     this.clock = this.startClock;
     this.trains = (this.hub.trains || [])
@@ -180,7 +185,7 @@ class Sim {
       .map((t) => this.makeHubTrain(t));
     for (const t of this.trains) {
       if (t.status !== 'station') continue;
-      const ft = this.freeTrack(t.station, t.dir);
+      const ft = this.freeTrack(t.station, t.dir, t);
       if (ft) { ft.train = t.id; t.trackNo = ft.no; }
     }
     this.metrics.total = this.trains.length;
@@ -206,35 +211,76 @@ class Sim {
     const dir = raw.dir === 0 ? -1 : raw.dir === 1 ? 1 : (Number.isFinite(digits) && digits > 0 && digits % 2 === 0 ? 1 : -1);
     const stationName = this.stations[raw.yard] ? this.stations[raw.yard].name : '';
     const route = sceneRoute(this.scene, dir, stationName);
-    const coaches = raw.coaches || (raw.type === '货' ? 40 : 16);
+    const coaches = raw.coaches || (raw.type === '货' ? 40 : raw.type === '检' ? 4 : raw.type === '修' ? 6 : raw.type === '工' ? 8 : 16);
     const tasks = (raw.tasks || []).map((x, i) => ({
       id: `${raw.id}-task-${i}`, kind: x.kind, title: x.title || '站内作业', min: x.min || 5,
       left: x.min || 5, state: 'wait', loco: x.loco || '', bureau: x.bureau || '', cars: x.cars || 0,
     }));
+    const freight = ['X', '货', 'N', 'G'].includes(raw.type);
+    const passenger = ['K', 'T', 'Z'].includes(raw.type);
+    if (!raw.through && !tasks.length) {
+      const add = (kind, title, min) => {
+        tasks.push({ id: `${raw.id}-task-${tasks.length}`, kind, title, min, left: min, state: 'wait' });
+      };
+      if (freight) {
+        add('check', '货票核验', 3);
+        add('load', '装卸作业', 4);
+        add('shunt', '摘挂调车', 3);
+      } else if (passenger) {
+        add('check', '客运乘降', 5);
+      } else if (raw.type === '检') {
+        add('inspect', '检测作业', 20);
+      } else if (raw.type === '修') {
+        add('inspect', '检修整备', 30);
+      } else if (raw.type === '工') {
+        add('load', '路料装卸', 15);
+      }
+    }
     return {
       id: raw.id, no: raw.no, type: raw.type, priority: raw.priority || 5,
       from: raw.yard, to: raw.yard, dir, station: raw.yard,
       model: spec.model, loco: spec.loco, bureau: spec.bureau,
       trainClass: trainClass(raw),
+      freight,
       originName: raw.origin || route.from, destName: raw.dest || route.to, nextSection: route.section,
       planArr: arr, planDep: dep, dep, arr, dwell: Math.max(1, dep - arr),
       coaches, lengthM: coaches * (raw.type === '货' ? 14 : 25), stock: raw.stockGroup || '', crew: raw.crew || 1,
       stops: [{ st: raw.yard, arr: raw.arr, dep: raw.dep }], stopIdx: 0, trace: [],
       status: inYard ? 'station' : 'approach', section: null, late: 0, progress: 0,
-      departAt: null, arriveReal: inYard ? this.startClock : null, arriveAt: null, trackNo: null, nextTrack: null, originTrack: null,
+      departAt: null, arriveReal: inYard ? this.startClock : null, arriveAt: null, enterWall: null, departWall: null, trackNo: null, nextTrack: null, originTrack: null,
       holdOutside: 0, notes: [], release: false, hold: false, reserved: false, special: raw.special || false,
+      through: !!raw.through,
       tasks, waitForNo: raw.waitFor || '', turnback: raw.turnback || null, waitWarned: false,
     };
   }
 
   tickHub() {
     for (const t of this.trains) {
+      if (t.status === 'running') {
+        const dur = Math.max(1, t.arriveAt - t.departAt);
+        t.progress = clamp((this.clock - t.departAt) / dur, 0, 1);
+        if (this.clock >= t.arriveAt) {
+          t.status = 'terminated';
+          t.late = Math.max(t.late, this.clock - t.planDep);
+          this.metrics.onTime += t.late <= 3 ? 1 : 0;
+          this.metrics.delaySum += t.late;
+          this.metrics.terminated = (this.metrics.terminated || 0) + 1;
+          this.pushLog(`${t.no} 出清本站，进入 ${t.nextSection || '下一区间'}`);
+          if (this.trains.every((x) => x.status === 'terminated')) this.finish('all');
+        }
+        continue;
+      }
       if (t.status === 'approach' || t.status === 'pending') {
         if (this.clock < t.planArr) continue;
+        if (t.through && !t.trackNo) {
+          const ft = this.freeTrack(t.station, 0, t);
+          if (ft) { ft.train = t.id; t.trackNo = ft.no; }
+        }
         const tr = t.trackNo ? (this.tracks.get(t.station) || []).find((x) => x.no === t.trackNo) : null;
         if (tr && tr.train === t.id && !tr.blocked) {
           t.status = 'station';
           t.arriveReal = this.clock;
+          t.enterWall = (typeof performance !== 'undefined' ? performance.now() : Date.now());
           t.late = Math.max(t.late, this.clock - t.planArr);
           t.holdOutside = 0;
           t.reserved = false;
@@ -257,6 +303,7 @@ class Sim {
         this.finishTask(t, task);
       }
       if (this.clock < t.planDep) continue;
+      if (t.through) { this.leaveHub(t); continue; }
       if (this.isStationControlled(t.station) && !t.release) {
         t.hold = true;
         t.late = Math.max(t.late, this.clock - t.planDep);
@@ -341,14 +388,17 @@ class Sim {
       const block = this.departBlock(t);
       if (block) { t.hold = true; return; }
     }
-    t.status = 'terminated';
+    t.originTrack = t.trackNo;
+    t.departAt = this.clock;
+    t.arriveAt = this.clock + 3;
+    t.departWall = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    t.status = 'running';
+    t.section = { a: t.station, b: 'next', progress: 0 };
+    t.release = false;
+    t.hold = false;
     t.late = Math.max(t.late, this.clock - t.planDep);
     this.releaseTrack(t);
-    this.metrics.onTime += t.late <= 3 ? 1 : 0;
-    this.metrics.delaySum += t.late;
-    this.metrics.terminated = (this.metrics.terminated || 0) + 1;
-    this.pushLog(`${t.no} ${this.stations[t.station].name} 出清`);
-    if (this.trains.every((x) => x.status === 'terminated')) this.finish('all');
+    this.pushLog(`${t.no} ${this.stations[t.station].name} 发车，进入 ${t.nextSection || '下一区间'}`);
   }
 
   makeTrain(t) {
@@ -418,9 +468,18 @@ class Sim {
     return this.trains.find((t) => t.status === 'running' && t.section && this.sectionKey(t.section.a, t.section.b) === key);
   }
 
-  freeTrack(station, dir = 0) {
+  freeTrack(station, dir = 0, t = null) {
     const list = this.tracks.get(station) || [];
-    const free = list.filter((tr) => !tr.train && !tr.blocked && !tr.reserved);
+    let free = list.filter((tr) => !tr.train && !tr.blocked && !tr.reserved);
+    if (t && this.hubMode) {
+      const conf = this.stations[station];
+      free = free.filter((tr) => {
+        const role = this.trackRole(conf, tr.no);
+        if (role === 'platform' && t.freight) return false;
+        if (role === 'freight' && !t.freight) return false;
+        return true;
+      });
+    }
     if (dir && list.length >= 3) {
       const half = Math.ceil(list.length / 2);
       const pref = dir > 0 ? free.filter((tr) => tr.no <= half) : free.filter((tr) => tr.no > half);
@@ -438,11 +497,10 @@ class Sim {
 
   start() {
     if (this.timer) clearInterval(this.timer);
-    this.timer = setInterval(() => {
-      if (!this.paused && !this.finished) {
+    this.timer = setInterval(() => {      if (!this.paused && !this.finished) {
         for (let i = 0; i < this.speed; i += 1) this.step();
       }
-    }, 700);
+    }, 2000);
     this.running = true;
   }
 
@@ -484,7 +542,7 @@ class Sim {
       }
       if (t.status === 'waiting') {
         if (this.occupiedCount(t.station) < this.stations[t.station].tracks) {
-          const ft = this.freeTrack(t.station);
+          const ft = this.freeTrack(t.station, 0, t);
           if (ft) {
             ft.train = t.id;
             t.trackNo = ft.no;
@@ -513,7 +571,7 @@ class Sim {
   }
 
   parkSingle(t) {
-    const ft = this.freeTrack(t.station);
+    const ft = this.freeTrack(t.station, 0, t);
     if (!ft) { t.status = 'waiting'; t.holdOutside = this.clock; this.alarm('股道不足', `${t.no} 无空余股道`, 'warn'); return; }
     ft.train = t.id;
     t.trackNo = ft.no;
@@ -592,7 +650,7 @@ class Sim {
     const list = this.tracks.get(station) || [];
     let ft = t.nextTrack ? list.find((x) => x.no === t.nextTrack) : null;
     if (ft && ft.train !== t.id) ft = null;
-    if (!ft) ft = this.freeTrack(station);
+    if (!ft) ft = this.freeTrack(station, 0, t);
     if (!ft) {
       t.status = 'waiting';
       t.station = station;
@@ -822,6 +880,26 @@ class Sim {
     };
   }
 
+  trackRole(conf, no) {
+    if (!conf) return 'mixed';
+    const n = Number(conf.tracks) || 0;
+    if (Array.isArray(conf.platform) || Array.isArray(conf.freight)) {
+      if (Array.isArray(conf.platform) && conf.platform.includes(no)) return 'platform';
+      if (Array.isArray(conf.freight) && conf.freight.includes(no)) return 'freight';
+      return 'mixed';
+    }
+    const p = Number(conf.platform) || 0;
+    const f = Number(conf.freight) || 0;
+    if (n >= 6) {
+      if (p && no <= p) return 'platform';
+      if (f && no > p) return 'freight';
+      return 'mixed';
+    }
+    if (p && no === p) return 'platform';
+    if (f && no === f) return 'freight';
+    return 'mixed';
+  }
+
   trackValid(t, tr) {
     const list = this.tracks.get(t.station) || [];
     const half = Math.ceil(list.length / 2);
@@ -830,13 +908,10 @@ class Sim {
     if (tr.train && tr.train !== t.id) return false;
     if (tr.lenM && t.lengthM > tr.lenM) return false;
     const conf = this.stations[t.station];
-    if (this.hubMode && conf) {
-      const platform = Array.isArray(conf.platform) ? conf.platform : [conf.platform];
-      const freight = Array.isArray(conf.freight) ? conf.freight : [conf.freight];
-      if (t.type === '货' && platform.includes(tr.no)) return false;
-      if (t.type !== '货' && freight.includes(tr.no)) return false;
-    }
-    if (this.hubMode && list.length >= 3) {
+    const role = this.trackRole(conf, tr.no);
+    if (this.hubMode && role === 'platform' && t.freight) return false;
+    if (this.hubMode && role === 'freight' && !t.freight) return false;
+    if (this.hubMode && list.length >= 3 && role === 'mixed') {
       if (t.dir > 0 && tr.no > half) return false;
       if (t.dir < 0 && tr.no <= half) return false;
     }
@@ -849,10 +924,10 @@ class Sim {
     const tr = list.find((x) => x.no === trackNo);
     if (!t || !tr) return false;
     if (tr.train && tr.train !== trainId) return false;
+    if (tr.reserved && tr.train !== trainId) return false;
     if (!this.trackValid(t, tr)) return false;
     if (t.status === 'station' && (t.tasks || []).some((x) => x.state === 'active')) return false;
     if (t.status === 'approach' || t.status === 'pending') {
-      if (this.clock < t.planArr - 4) return false;
       if (t.trackNo) this.releaseTrack(t);
       tr.train = trainId;
       t.trackNo = trackNo;

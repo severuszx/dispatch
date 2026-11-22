@@ -1,6 +1,26 @@
 # 交接
 
-## 55 站资源包与事件（2026-11-22 本轮）
+## 0.4.3 当前状态（2026-11-22）
+
+0.4.3 把“列车真的在站场图里跑”和“货车、客车、车辆段有区别”落到代码里，版本号已统一到 0.4.3，桌面/Pad 包已重打。
+
+- 接车动画：`tickHub()` 进站写 `enterWall`，`ctc.js` 站内车按 1500ms 从咽喉斜插股道；发车写 `departWall`，按 6000ms 从股道斜出正线再驶向出站口。
+- 区间运行：`leaveHub()` 不再直接 `terminated`，置 `running`、`departAt/arriveAt`、`progress`；`tickHub()` 推进并出清，出清后才释放股道。
+- 货场/站台：`trackRole()` 统一判定，`trackValid()`、`panels2.trackState()`、`drawYard()` 共用；6 道以上 1—3 道站台、其余货场，4 道按配置单线。
+- 货车作业链：无预置任务的货车自动挂“货票核验 3 分、装卸 4 分、摘挂 3 分”；客车挂“客运乘降 5 分”；检测、检修、工程车沿用 20/30/15 分。
+- 车辆段：K/T/Z、货物、检测、检修、工程车的色条分色；车卡副标题补编组辆数与车种。
+- 云端包：`app.js` 的 `PACK_BASE` 指 `https://severuszx.github.io/dispatch/data/packs/`；首次点焦柳/宁西标签下载并合并，安装包不预装 55 站。
+- 背景音乐：`audio.js` WebAudio 程序化四套和弦循环，`play()` 启动、`stop()` 停止。
+- 交付：`dispatch-0.4.3-win64.zip` 162,629,906 B，sha256 `6352945d8c2ad91e279df1b3edaae89936dbcb74c287a82150e254caeca9012f`；Pad `dispatch-pad.apk` 257,329 B，sha256 `639804f87113d6ba76d74dd7dc788ec3ecd09e936dd6482fb2584cd54d01f5f6`，versionCode 5、versionName 0.4.3。
+- `latest.json` 已更新为 0.4.3 的 size/hash；官网首页、游戏副本、桌面/Pad 资源均已同步。
+
+### 尚未做
+
+- 桌面更新器“下载→SHA256→退出替换→重启”仍未真机全链路实测。
+- Pad 0.4.3 APK 未实机安装试跑。
+- 接车 1500ms、发车 6000ms 的手感需用户实测；BGM 音量与开关是否保留待验收。
+
+## 0.4.2 与 55 站资源包（2026-11-22 上一轮）
 
 - 新增 `data/hub-jl.json`（焦柳 30 站）、`data/hub-nx.json`（宁西 26 站）、`data/scenes-55.json`（56 个开班项，南阳两线各一项）。
 - 55 个不重复站，三等及以上全收；16 个无客运电报码的车站（月山、洛阳东、襄阳北、新丰镇、南阳西、肥东等）按货运/编组运行，场景简介会写明。

@@ -181,24 +181,29 @@ export function buildInspectPanel(body, ctx) {
 
   function trackState(t, tr) {
     const list = sim.tracks.get(t.station) || [];
-    if (tr.no === t.trackNo) return { label: t.status === 'station' ? '本列占用' : '本列已预留', ok: false };
+    if (tr.no === t.trackNo) return { label: t.status === 'station' ? '本列占用' : '本列已预留', ok: false, self: true };
     const conf = sim.stations[t.station] || {};
-    if (sim.hubMode && t.type === '货' && (Array.isArray(conf.platform) ? conf.platform : [conf.platform]).includes(tr.no)) return { label: '客运站台，不接货车', ok: false };
-    if (sim.hubMode && t.type !== '货' && (Array.isArray(conf.freight) ? conf.freight : [conf.freight]).includes(tr.no)) return { label: '货物线，不接客车', ok: false };
+    const role = sim.trackRole(conf, tr.no);
+    if (sim.hubMode && t.freight && role === 'platform') return { label: '客运站台，不接货车', ok: false };
+    if (sim.hubMode && !t.freight && role === 'freight') return { label: '货场线路，不接客车', ok: false };
     if (tr.blocked) return { label: '封锁', ok: false };
-    if (tr.train && tr.train !== t.id) return { label: '占用', ok: false };
+    if (tr.reserved && tr.train !== t.id) return { label: '他车预留', ok: false };
+    if (tr.train && tr.train !== t.id) {
+      const other = sim.getTrain(tr.train);
+      return { label: other && other.reserved ? '他车预留' : '占用', ok: false };
+    }
     if (tr.lenM && t.lengthM > tr.lenM) return { label: '长度不足', ok: false };
     const half = Math.ceil(list.length / 2);
-    if (sim.hubMode && list.length >= 3 && ((t.dir > 0 && tr.no > half) || (t.dir < 0 && tr.no <= half))) return { label: '方向不符', ok: false };
-    return { label: '可用', ok: true };
+    if (sim.hubMode && list.length >= 3 && role === 'mixed' && ((t.dir > 0 && tr.no > half) || (t.dir < 0 && tr.no <= half))) return { label: '方向不符', ok: false };
+    return { label: role === 'freight' ? '货场可用' : role === 'platform' ? '站台可用' : '可用', ok: true };
   }
 
   function reason(t, controlled) {
     if (t.status === 'running') return '列车已在区间内运行，本站只监视，不再改动进路。';
     if (t.status === 'approach' || t.status === 'pending') {
-      if (sim.clock < t.planArr - 4) return `距计划到点 ${t.planArr - sim.clock} 分。到点前 4 分才允许接入，先核准股道方向与有效长。`;
-      if (!t.trackNo) return '列车已到站外，尚未指定接车股道。车会一直压在区间外，晚点和站外停车同时累计。';
-      return `已指定 ${t.trackNo} 道，到点后自动接入；如需改线，在接入前换股道。`;
+      if (!t.trackNo) return `计划 ${fmtClock(t.planArr)} 到站，现在先预排接车股道，到点自动接入。一直不排股道会在站外压车，压满 ${sim.limits.wait} 分判负。`;
+      if (sim.clock < t.planArr) return `已预留 ${t.trackNo} 道，${fmtClock(t.planArr)} 到点自动接入，接入前可换线。`;
+      return `已预留 ${t.trackNo} 道，等股道条件满足后接入；站外已停 ${sim.clock - t.planArr} 分，限 ${sim.limits.wait} 分。`;
     }
     if (t.release) return '已放行，等待列车出清。出清前股道仍被占用。';
     if (t.hold) return `已超过计划发车 ${t.late} 分，仍占用 ${t.trackNo || '—'} 道。再压下去会撞晚点红线。`;
@@ -232,16 +237,22 @@ export function buildInspectPanel(body, ctx) {
     wrap.classList.toggle('is-running', t.status === 'running');
     title.innerHTML = `<b>${escapeHtml(t.no)}</b><span class="act-chip">${escapeHtml(t.trainClass || t.model || t.type || '列车')}</span><span class="act-dir">${t.dir > 0 ? '上行' : '下行'}</span>`;
     route.innerHTML = `<div class="act-route-leg"><small>始发</small><b>${escapeHtml(t.originName || '—')}</b></div><span class="act-route-arrow">→</span><div class="act-route-leg is-here"><small>本站</small><b>${escapeHtml(stationName)}</b></div><span class="act-route-arrow">→</span><div class="act-route-leg"><small>终到</small><b>${escapeHtml(t.destName || '—')}</b></div>`;
-    const stateText = isApron ? '站外待接' : t.release ? '已放行' : t.hold ? `晚 ${t.late} 分` : '在站';
+    const stateText = isApron ? (t.reserved ? `已预留 ${t.trackNo} 道` : '站外待接') : t.release ? '已放行' : t.hold ? `晚 ${t.late} 分` : '在站';
     const workBlock = t.status === 'station' && sim.departBlock ? sim.departBlock(t) : '';
-    facts.innerHTML = [
+    const factRows = [
       ['股道', `${t.trackNo ? `${t.trackNo} 道` : '未指定'}${isPlatform ? ' · 站台' : ''}${tr && tr.lenM ? ` · 有效长 ${tr.lenM} m` : ''}`],
       ['编组', `${t.coaches || '—'} 辆 · ${t.lengthM || '—'} m`],
       ['计划到发', `${fm(t.planArr)} 到 · ${fm(t.planDep)} 发`],
       ['实际到发', `${fm(t.arrivalReal || t.arriveReal)} 到 · ${fm(t.departAt)} 发`],
       ['下一区间', `${escapeHtml(t.nextSection || '—')}`],
       ['运用', `${escapeHtml(t.model || '—')} · ${escapeHtml(t.loco || '—')} · ${escapeHtml(t.bureau || '—')}`],
-    ].map(([k, v]) => `<div class="act-fact"><span>${k}</span><b>${v}</b></div>`).join('');
+    ];
+    if (isApron) {
+      const until = t.holdOutside ? t.holdOutside + sim.limits.wait : t.planArr + sim.limits.wait;
+      const rest = Math.max(0, until - sim.clock);
+      factRows.push(['站外限时', `${rest} 分后判负 · ${fm(until)}`]);
+    }
+    facts.innerHTML = factRows.map(([k, v]) => `<div class="act-fact"><span>${k}</span><b>${v}</b></div>`).join('');
     const stateRow = el('div', 'act-state');
     stateRow.innerHTML = `<span>${escapeHtml(stateText)}</span><small>${sim.limits ? `晚点红线 ${sim.limits.late} 分 · 站外红线 ${sim.limits.wait} 分` : ''}</small>`;
     facts.append(stateRow);
@@ -281,20 +292,14 @@ export function buildInspectPanel(body, ctx) {
     }
 
     if (isApron) {
-      const early = sim.clock < t.planArr - 4;
-      const main = el('button', 'act-btn act-main', t.reserved ? `已预留 ${t.trackNo} 道 · 等到点` : t.trackNo ? `接入 ${t.trackNo} 道` : '先选接车股道');
-      main.disabled = early || t.reserved;
+      const main = el('button', 'act-btn act-main', t.reserved ? `已预留 ${t.trackNo} 道 · ${fmtClock(t.planArr)} 接入` : t.trackNo ? `接入 ${t.trackNo} 道` : '先选接车股道');
+      main.disabled = !!t.reserved;
       main.addEventListener('click', () => {
         if (!t.trackNo) { showTracks = true; render(); return; }
         if (sim.assignTrack(t.id, t.station, t.trackNo)) { toast(`${t.no} 接入 ${t.trackNo} 道`, 'ok'); render(); }
-        else toast('现在还不能接入，核对到点和股道条件', 'err');
+        else toast('股道条件不满足，核对方向、站台和有效长', 'err');
       });
       actions.append(main);
-      if (early) {
-        const wait = el('button', 'act-btn act-sub', `等到点 · 还有 ${t.planArr - sim.clock} 分`);
-        wait.disabled = true;
-        actions.append(wait);
-      }
       showTracks = true;
     } else if (t.status === 'station') {
       if (!controlled) {
@@ -332,7 +337,7 @@ export function buildInspectPanel(body, ctx) {
       const conf = sim.stations[t.station] || {};
       listNow.forEach((x) => {
         const st = trackState(t, x);
-        const b = el('button', `act-tr ${x.no === t.trackNo ? 'on' : ''} ${st.ok ? '' : 'off'}`, `${x.no} 道`);
+        const b = el('button', `act-tr ${x.no === t.trackNo ? 'on' : ''} ${st.ok || st.self ? '' : 'off'} ${t.reserved && x.no === t.trackNo ? 'reserved' : ''}`, `${x.no} 道`);
         if (!st.ok) {
           const short = st.label.replace('货物线，不接客车', '货线').replace('客运站台，不接货车', '客站').replace('方向不符', '反向').replace('长度不足', '太短').replace('本列占用', '本列').replace('本列已预留', '已预留');
           b.innerHTML = `${x.no} 道<small>${short}</small>`;
@@ -357,7 +362,7 @@ export function buildInspectPanel(body, ctx) {
   render();
   sim.subscribe((s, evt) => { if (evt === 'tick' || evt === 'route' || evt === 'control') render(); });
   body.append(wrap);
-  return { update() {}, destroy() {} };
+  return { update() { render(); }, destroy() {} };
 }
 
 export function buildInspectPanelOld(body, ctx) {
