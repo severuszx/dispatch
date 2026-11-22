@@ -14,9 +14,9 @@
     { "id": "jw", "name": "机务折返段", "type": "折返段", "tracks": 2, "note": "西南侧折返段" }
   ],
   "trains": [
-    { "id": "bb-01", "no": "K101", "type": "K", "yard": "ps", "arr": 378, "dep": 390, "coaches": 18, "priority": 4 },
-    { "id": "bb-02", "no": "T64", "type": "T", "yard": "ps", "arr": 396, "dep": 406, "coaches": 18, "priority": 3 },
-    { "id": "bb-03", "no": "Z10", "type": "Z", "yard": "ps", "arr": 414, "dep": 424, "coaches": 19, "priority": 3 },
+    { "id": "bb-01", "no": "K101", "type": "K", "yard": "ps", "arr": null, "dep": 390, "coaches": 18, "priority": 4, "tasks": [ { "kind": "swap", "title": "站内换挂", "min": 8, "loco": "HXD3C", "bureau": "武局" } ] },
+    { "id": "bb-02", "no": "T64", "type": "T", "yard": "ps", "arr": null, "dep": 406, "coaches": 18, "priority": 3 },
+    { "id": "bb-03", "no": "Z10", "type": "Z", "yard": "ps", "arr": null, "dep": 424, "coaches": 19, "priority": 3 },
     { "id": "bb-04", "no": "K845", "type": "K", "yard": "ps", "arr": null, "dep": 370, "coaches": 17, "priority": 4 },
     { "id": "bb-05", "no": "1461", "type": "普快", "yard": "ps", "arr": 438, "dep": 450, "coaches": 16, "priority": 5 },
     { "id": "bb-06", "no": "K359", "type": "K", "yard": "ps", "arr": 462, "dep": 474, "coaches": 17, "priority": 4 },
@@ -41,3 +41,4 @@
     { "id": "bb-25", "no": "机2", "type": "机车", "yard": "jw", "arr": 410, "dep": 430, "coaches": 0, "priority": 7 }
   ]
 }
+

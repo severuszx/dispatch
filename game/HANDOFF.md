@@ -1,5 +1,14 @@
 # 交接
 
+## 55 站资源包与事件（2026-11-22 本轮）
+
+- 新增 `data/hub-jl.json`（焦柳 30 站）、`data/hub-nx.json`（宁西 26 站）、`data/scenes-55.json`（56 个开班项，南阳两线各一项）。
+- 55 个不重复站，三等及以上全收；16 个无客运电报码的车站（月山、洛阳东、襄阳北、新丰镇、南阳西、肥东等）按货运/编组运行，场景简介会写明。
+- 12306 当日数据落在 `data/rail-2026-11-22.json`：271 趟车、全程停站；`tools/stations-55.json` 是站表，`tools/fetch-rail-more.mjs` 可重抓。
+- 开班页新增线路筛选；`desktop\app`、`pad\app\src\main\assets`、`site\play`、`site-github\play`、`deploy_github\pages\play` 已同步本轮前端。
+- 作业系统：站内换挂、换向整备、列检、摘挂、待避。信阳 K822 换向为 K389，方向翻转并自动改配股道，实测通过；H1 K101 站内换挂实测通过。
+- 尚未做：0.4.2 安装包、更新器下载替换重启全链路、Pad 端 0.4.2 包。
+
 ## 官网、仓库与更新器（2026-11-22）
 
 - 新仓库：`https://github.com/severuszx/dispatch`，`main` 分支；官网根目录静态站由 GitHub Pages 发布。

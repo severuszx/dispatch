@@ -55,9 +55,8 @@ export class GraphView {
     this.hits = [];
     const s = this.snap;
     if (!s) return;
-    const order = s.stationOrder;
-    if (s.hub && order.length > 1) { this.drawHubPlan(s); return; }
-    if (order.length < 2) { this.drawTracks(s); return; }
+    this.drawTracks(s);
+    return;
 
     const padL = 58;
     const padR = 16;
@@ -265,10 +264,11 @@ export class GraphView {
 
   drawTracks(s) {
     const ctx = this.ctx;
-    const tracks = s.tracks.get ? s.tracks.get(s.stationOrder[0]) : [];
+    const focus = s.focusStation || s.stationOrder[0];
+    const tracks = s.tracks.get ? s.tracks.get(focus) : [];
     const padL = 60;
     const padT = 46;
-    const span = s.hub ? 60 : this.span;
+    const span = 60;
     const tEnd = s.clock + span * 0.55;
     const tStart = tEnd - span;
     const xOf = (m) => padL + ((m - tStart) / span) * (this.w - padL - 16);
@@ -290,14 +290,14 @@ export class GraphView {
       ctx.textAlign = 'right';
       ctx.fillText(`${tr.no} 道`, padL - 12, y);
       ctx.textAlign = 'left';
-      if (!s.trains.some((t) => t.trackNo === tr.no && t.status !== 'pending' && t.status !== 'terminated')) {
+      if (!s.trains.some((t) => t.station === focus && t.trackNo === tr.no && t.status !== 'pending' && t.status !== 'terminated')) {
         this.font(9, false);
         ctx.fillStyle = C.faint;
         ctx.fillText('空闲', padL + 8, y - 4);
       }
     });
     for (const t of s.trains) {
-      if (t.status === 'pending') continue;
+      if (t.status === 'pending' || t.station !== focus) continue;
       const k = (t.trackNo || 1) - 1;
       if (k < 0 || k >= n) continue;
       const y = padT + k * rowH + rowH / 2;
@@ -331,7 +331,7 @@ export class GraphView {
     ctx.beginPath(); ctx.moveTo(nowX, padT - 10); ctx.lineTo(nowX, this.h - 20); ctx.stroke();
     this.font(9, false);
     ctx.fillStyle = C.faint;
-    if (this.w >= 560) ctx.fillText(s.hub ? '本站股道占用 · 实线已占用，虚线到计划发车' : '编组站股道占用', 12, 12);
+    if (this.w >= 560) ctx.fillText('本站股道占用 · 实线已占用，虚线到计划发车', 12, 12);
   }
 
   click(e) {

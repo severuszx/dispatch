@@ -98,15 +98,41 @@ export class CTCView {
     if (!s) return;
     this.hit = [];
     ctx.textBaseline = 'middle';
-    if (s.hub && s.stationOrder.length <= 1) {
-      this.drawYard(s);
-    } else {
-      if (s.hub) this.drawHub(s);
-      else if (s.stationOrder.length <= 1) this.drawYard(s);
-      else this.drawLine(s);
-      this.drawHead(s);
-    }
+    this.drawHubHead(s);
+    this.drawYard(s);
     this.drawLegend();
+  }
+
+  drawHubHead(s) {
+    const ctx = this.ctx;
+    const st = s.focusStation && s.stations ? s.stations[s.focusStation] : null;
+    const station = (s.scene && s.scene.stationName) || '';
+    const yard = st ? st.name : '本站';
+    const name = station && station !== yard ? `${station} ${yard}` : yard;
+    const lineName = (s.hub && s.hub.line) || (st && s.line.name !== st.name ? s.line.name : '');
+    ctx.fillStyle = COL.red;
+    ctx.fillRect(12, 18, 4, 38);
+    this.font(23, true);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = COL.text;
+    ctx.fillText(name, 24, 32);
+    this.font(9.5, false);
+    ctx.fillStyle = COL.dim;
+    const sub = [lineName, st ? (st.type || '复线中间站') : '', st ? `${st.tracks || 0} 股道` : ''].filter(Boolean).join('　');
+    ctx.fillText(sub, 24, 51);
+    this.font(18, true);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = COL.text;
+    ctx.fillText(s.clockText, this.w - 16, 30);
+    this.font(9, false);
+    ctx.fillStyle = COL.dim;
+    ctx.fillText(`${s.weather}　值班员在岗`, this.w - 16, 50);
+    ctx.strokeStyle = COL.frame;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(10, 66.5);
+    ctx.lineTo(this.w - 10, 66.5);
+    ctx.stroke();
   }
 
   drawHead(s) {
@@ -391,128 +417,425 @@ export class CTCView {
     ctx.textAlign = 'left';
   }
 
+  drawApproachBoard(list) {
+    const ctx = this.ctx;
+    const rows = list.slice(0, 4);
+    const w = 352;
+    const rowH = 18;
+    const h = 26 + Math.max(1, rows.length) * rowH;
+    const x = 24;
+    const y = 74;
+    ctx.save();
+    ctx.fillStyle = '#f7f4ea';
+    ctx.strokeStyle = '#b8b3a4';
+    ctx.lineWidth = 1;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
+    ctx.fillStyle = COL.red;
+    ctx.fillRect(x, y, 3, h);
+    ctx.restore();
+    this.font(8.5, true);
+    ctx.fillStyle = COL.dim;
+    ctx.textAlign = 'left';
+    ctx.fillText('接车预告', x + 10, y + 13);
+    ctx.textAlign = 'right';
+    this.font(7.5, false);
+    ctx.fillStyle = COL.faint;
+    ctx.fillText('站外待接 · 点车次指定股道', x + w - 8, y + 13);
+    ctx.textAlign = 'left';
+    if (!rows.length) {
+      this.font(9, false);
+      ctx.fillStyle = COL.faint;
+      ctx.fillText('暂无站外列车，正线空闲。', x + 10, y + 32);
+      return;
+    }
+    rows.forEach((t, i) => {
+      const ry = y + 26 + i * rowH + rowH / 2;
+      const now = this.snap.clock || 0;
+      const wait = Math.round(t.planArr - now);
+      this.font(9, true);
+      ctx.fillStyle = COL.text;
+      ctx.fillText(t.no, x + 10, ry);
+      this.font(8, false);
+      ctx.fillStyle = COL.dim;
+      ctx.fillText(`${t.originName || '—'}→${t.destName || '—'}`, x + 60, ry);
+      ctx.fillText(fmt(t.planArr), x + 222, ry);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = t.reserved ? '#356b4a' : COL.red;
+      const label = t.reserved && t.trackNo ? `${t.trackNo} 道预留` : (wait >= 0 ? `待接 ${wait}分` : `压站外 ${-wait}分`);
+      ctx.fillText(label, x + w - 8, ry);
+      ctx.textAlign = 'left';
+      this.hit.push({ type: 'train', id: t.id, x, y: ry - rowH / 2, w, h: rowH });
+    });
+  }
+
   drawYard(s) {
     const ctx = this.ctx;
-    const id = s.stationOrder[0];
+    const id = s.focusStation || s.stationOrder[0];
+    const conf = s.stations[id];
+    const n = Math.max(1, conf.tracks || 1);
+    const list = s.tracks.get ? s.tracks.get(id) : s.tracks[id];
+    const padCoach = document.body.classList.contains('pad-mode') && !!document.getElementById('tutorialCoach');
+    const top = 106;
+    const bottom = this.h - (padCoach ? 226 : 54);
+    const half = Math.ceil(n / 2);
+    const yardType = String(conf.type || '');
+    const depotYard = /库|存车|洗车|临修|货场|调车|折返/.test(yardType);
+    const double = (!!s.hub && !depotYard) || String((s.line && s.line.kind) || '').includes('双');
+    const slots = double ? n + 2 : n + 1;
+    const maxGap = n <= 4 ? 86 : 62;
+    const gap = Math.max(36, Math.min(maxGap, (bottom - top) / Math.max(1, slots - 1)));
+    const span = (slots - 1) * gap;
+    const yTop = Math.round((top + bottom) / 2 - span / 2);
+    const slotFor = (k) => (double ? (k < half ? k : k + 2) : (k < half ? k : k + 1));
+    const ySlot = (k) => Math.round(yTop + k * gap);
+    const upY = ySlot(half);
+    const downY = double ? ySlot(half + 1) : upY;
+    const narrow = this.w < 620;
+    const left = narrow ? 40 : 66;
+    const right = this.w - left;
+    const entry = left + 10;
+    const exit = right - 10;
+    const throatL = left + 48;
+    const throatR = right - 48;
+    const trackL = left + 92;
+    const trackR = right - 92;
+    const approach = (s.trains || [])
+      .filter((t) => t.station === id && (t.status === 'approach' || t.status === 'pending'))
+      .sort((a, b) => (a.planArr ?? a.planDep ?? 9999) - (b.planArr ?? b.planDep ?? 9999));
+    if (!narrow && yTop > 165) this.drawApproachBoard(approach);
+
+    const main = (y) => {
+      ctx.strokeStyle = '#2f3a34';
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(entry, y); ctx.lineTo(exit, y); ctx.stroke();
+      ctx.strokeStyle = '#b9c1ba';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(entry, y); ctx.lineTo(exit, y); ctx.stroke();
+    };
+    const lead = (x1, y1, x2, y2) => {
+      ctx.strokeStyle = '#8a958d';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    };
+
+    main(upY);
+    if (double) main(downY);
+
+    this.font(8.5, false);
+    ctx.fillStyle = COL.faint;
+    ctx.textAlign = 'right';
+    ctx.fillText(double ? '上行正线' : depotYard ? '入库线' : '正线', right - 10, upY - 12);
+    if (double) {
+      ctx.textAlign = 'left';
+      ctx.fillText('下行正线', left + 8, downY + 17);
+    }
+
+    for (const [sx, sy] of [[throatL, upY], [throatR, upY], [throatL, downY], [throatR, downY]]) {
+      if (!double && sy !== upY) continue;
+      ctx.fillStyle = '#4f5b53';
+      ctx.beginPath();
+      ctx.moveTo(sx, sy - 4); ctx.lineTo(sx + 4, sy); ctx.lineTo(sx, sy + 4); ctx.lineTo(sx - 4, sy);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    this.font(9, true);
+    ctx.fillStyle = COL.dim;
+    ctx.textAlign = 'right';
+    ctx.fillText('▸', right - 2, upY);
+    if (double) {
+      ctx.textAlign = 'left';
+      ctx.fillText('◂', left + 2, downY);
+    }
+
+    for (let k = 0; k < n; k += 1) {
+      const ty = ySlot(slotFor(k));
+      const tr = list ? list[k] : null;
+      const busy = tr && tr.train;
+      const blocked = tr && tr.blocked;
+      const mainY = double ? (k < half ? upY : downY) : upY;
+
+      lead(throatL, mainY, trackL, ty);
+      lead(throatR, mainY, trackR, ty);
+
+      ctx.strokeStyle = blocked ? COL.amber : busy ? COL.red : COL.track;
+      ctx.lineWidth = busy || blocked ? 5 : 3.5;
+      ctx.beginPath();
+      ctx.moveTo(trackL, ty);
+      ctx.lineTo(trackR, ty);
+      ctx.stroke();
+      if (busy || blocked) {
+        ctx.strokeStyle = '#f3d8d2';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(trackL, ty);
+        ctx.lineTo(trackR, ty);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#59655e';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(trackL, ty - 6); ctx.lineTo(trackL, ty + 6);
+      ctx.moveTo(trackR, ty - 6); ctx.lineTo(trackR, ty + 6);
+      ctx.stroke();
+
+      ctx.fillStyle = busy || blocked ? COL.red : COL.green;
+      ctx.beginPath();
+      ctx.arc(trackL - 14, ty, 3.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      this.font(10, true);
+      ctx.fillStyle = COL.dim;
+      ctx.textAlign = 'right';
+      ctx.fillText(String(k + 1), trackL - 22, ty - 10);
+
+      if (busy) {
+        const t = s.trains.find((tt) => tt.id === busy);
+        if (t && t.status === 'station') this.drawTrainAt(t, (trackL + trackR) / 2, ty, true, 1);
+        else if (t) {
+          this.font(9, true);
+          ctx.fillStyle = COL.red;
+          ctx.textAlign = 'center';
+          ctx.fillText(`${t.no} 预留`, (trackL + trackR) / 2, ty);
+          ctx.textAlign = 'left';
+        }
+      }
+      this.hit.push({ type: 'track', station: id, track: k + 1, x: trackL, y: ty - 14, w: trackR - trackL, h: 28 });
+    }
+
+    const upApproach = approach.filter((t) => t.dir > 0);
+    const downApproach = approach.filter((t) => t.dir < 0);
+    upApproach.forEach((t, i) => {
+      const x = left - 56;
+      const y = upY - 15 - i * 19;
+      this.drawApproachTag(t, x, y, id, i);
+    });
+    downApproach.forEach((t, i) => {
+      const w = 92;
+      const x = right - w - 8;
+      const y = downY - 8 - i * 17;
+      this.drawApproachTag(t, x, y, id, i);
+    });
+  }
+
+  drawApproachTag(t, x, y, station, idx) {
+    const ctx = this.ctx;
+    const ctxW = this.w || ctx.canvas.width;
+    const late = t.late || 0;
+    const w = 92;
+    const h = 17;
+    const bx = Math.max(4, Math.min(ctxW - w - 4, x));
+    const by = Math.round(y - h / 2);
+    ctx.save();
+    ctx.fillStyle = late > 0 ? '#fff1ec' : (t.reserved ? '#eef4ec' : '#f7f4ea');
+    ctx.strokeStyle = late > 0 ? COL.red : (t.reserved ? '#356b4a' : '#6c766e');
+    ctx.lineWidth = 1;
+    ctx.fillRect(bx, by, w, h);
+    ctx.strokeRect(bx + .5, by + .5, w - 1, h - 1);
+    ctx.restore();
+    this.font(8.5, true);
+    ctx.fillStyle = late > 0 ? COL.red : COL.text;
+    ctx.textAlign = 'left';
+    ctx.fillText(t.no, bx + 5, by + h / 2);
+    this.font(7.5, false);
+    ctx.fillStyle = late > 0 ? COL.red : '#6d786f';
+    ctx.fillText(late > 0 ? `晚 ${late} 分` : fmt(t.planArr), bx + 44, by + h / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = t.reserved ? '#356b4a' : COL.dim;
+    ctx.fillText(t.reserved && t.trackNo ? `${t.trackNo}道预留` : '待接', bx + w - 5, by + h / 2);
+    this.hit.push({ type: 'train', id: t.id, x: bx, y: by, w, h });
+  }
+
+  drawYardOld(s) {
+    const ctx = this.ctx;
+    const id = s.focusStation || s.stationOrder[0];
     const conf = s.stations[id];
     const n = Math.max(1, conf.tracks || 1);
     const list = s.tracks.get ? s.tracks.get(id) : s.tracks[id];
     const padCoach = document.body.classList.contains('pad-mode') && !!document.getElementById('tutorialCoach');
     const top = 122;
-    const bottom = this.h - (padCoach ? 230 : 54);
+    const bottom = this.h - (padCoach ? 230 : 58);
     const gap = Math.min(104, Math.max(58, (bottom - top) / Math.max(1, n - 1)));
     const span = (n - 1) * gap;
     const yFirst = Math.round((top + bottom) / 2 - span / 2);
-    const left = 84;
-    const right = this.w - 86;
-
-    this.font(27, false);
-    ctx.fillStyle = COL.text;
-    ctx.textAlign = 'left';
-    ctx.fillText(conf.name, left, 38);
-    const nameW = ctx.measureText(conf.name).width;
     const narrow = this.w < 620;
+    const left = narrow ? 40 : 66;
+    const right = this.w - left;
+    const entry = left + 18;
+    const throatL = left + 54;
+    const throatR = right - 54;
+    const trackL = left + 80;
+    const trackR = right - 80;
+    const half = Math.ceil(n / 2);
+    const upY = yFirst - 26;
+    const downY = yFirst + span + 26;
+    const yardType = String(conf.type || '');
+    const depotYard = /库|存车|洗车|临修|货场|调车|折返/.test(yardType);
+    const double = (!!s.hub && !depotYard) || String((s.line && s.line.kind) || '').includes('双');
+    const stationCount = s.trains.filter((t) => t.station === id && t.status === 'station').length;
+    const lineMode = double ? '上下行双线' : depotYard ? '入库线' : '单线';
+
+    this.font(9, false);
+    ctx.fillStyle = COL.faint;
+    ctx.textAlign = 'left';
+    const topLabel = s.line.name === conf.name ? ((s.hub && s.hub.line) ? s.hub.line : `${s.line.kind || ''} · ${s.line.block || ''}`) : s.line.name;
+    ctx.fillText(topLabel, left, 21);
+    this.font(26, false);
+    ctx.fillStyle = COL.text;
+    ctx.fillText(conf.name, left, 49);
+    const nameW = ctx.measureText(conf.name).width;
     if (!narrow) {
       this.font(9, false);
       ctx.fillStyle = COL.faint;
-      ctx.fillText(`${conf.type || '编组站'} · ${n} 股道　${conf.unmanned ? '无人站' : '有人值守'}`, left + nameW + 14, 38);
+      ctx.fillText(`${conf.type || '中间站'} · ${n} 股道 · ${lineMode}`, left + nameW + 14, 49);
     }
     ctx.textAlign = 'right';
     this.font(10, true);
     ctx.fillStyle = COL.faint;
-    const onDuty = s.trains.filter((t) => t.status !== 'terminated').length;
-    ctx.fillText(narrow ? `${onDuty} 列 · ${s.clockText}` : `在站 ${onDuty} 列　·　区间空闲　·　${s.clockText}`, this.w - 30, 38);
+    ctx.fillText(narrow ? `本站 ${stationCount} 列 · ${s.clockText}` : `本站 ${stationCount} 列　·　${s.clockText}`, this.w - left, 49);
     ctx.strokeStyle = COL.frame;
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(30, 62.5); ctx.lineTo(this.w - 30, 62.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(30, 64.5); ctx.lineTo(this.w - 30, 64.5); ctx.stroke();
     ctx.textAlign = 'left';
 
-    ctx.strokeStyle = '#cfd7de';
-    ctx.setLineDash([5, 6]);
-    ctx.beginPath(); ctx.moveTo(left, yFirst - 24); ctx.lineTo(left, yFirst + span + 24); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(right, yFirst - 24); ctx.lineTo(right, yFirst + span + 24); ctx.stroke();
-    ctx.setLineDash([]);
+    this.font(8.5, false);
+    ctx.fillStyle = COL.faint;
+    ctx.fillText(double ? '上行正线' : depotYard ? '入库线' : '正线', entry, upY - 8);
+    if (double) ctx.fillText('下行正线', entry, downY + 16);
+
+    const main = (x1, y1, x2, y2) => {
+      ctx.strokeStyle = '#9aa8b4';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.strokeStyle = '#eef2f5';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    };
+    const lead = (x1, y1, x2, y2) => {
+      ctx.strokeStyle = '#b4c0ca';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    };
+
+    main(entry, upY, throatL, upY);
+    if (double) main(entry, downY, throatL, downY);
+    main(throatR, upY, right - 18, upY);
+    if (double) main(throatR, downY, right - 18, downY);
+
+    ctx.fillStyle = '#6e7d8a';
+    for (const [sx, sy] of [[throatL, upY], [throatR, upY], [throatL, downY], [throatR, downY]]) {
+      if (!double && sy === downY) continue;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy - 4); ctx.lineTo(sx + 4, sy); ctx.lineTo(sx, sy + 4); ctx.lineTo(sx - 4, sy);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    this.font(9, true);
+    ctx.fillStyle = COL.dim;
+    ctx.fillText('▸', right - 15, upY);
+    if (double) ctx.fillText('◂', left + 3, downY);
 
     for (let k = 0; k < n; k += 1) {
       const ty = Math.round(yFirst + k * gap);
       const tr = list ? list[k] : null;
       const busy = tr && tr.train;
       const blocked = tr && tr.blocked;
+      const upper = k < half;
+      const mainY = double ? (upper ? upY : downY) : upY;
+
+      lead(throatL, mainY, trackL, ty);
+      lead(throatR, mainY, trackR, ty);
+
       ctx.strokeStyle = blocked ? COL.red : COL.track;
       ctx.lineWidth = blocked ? 5 : 4;
       ctx.beginPath();
-      ctx.moveTo(left, ty);
-      ctx.lineTo(right, ty);
+      ctx.moveTo(trackL, ty);
+      ctx.lineTo(trackR, ty);
+      ctx.stroke();
+      ctx.strokeStyle = busy || blocked ? '#f3c7be' : '#c4ced7';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(trackL, ty);
+      ctx.lineTo(trackR, ty);
       ctx.stroke();
 
-      this.font(12, true);
+      ctx.strokeStyle = '#7d8b98';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(trackL, ty - 5); ctx.lineTo(trackL, ty + 5);
+      ctx.moveTo(trackR, ty - 5); ctx.lineTo(trackR, ty + 5);
+      ctx.stroke();
+
+      ctx.fillStyle = busy || blocked ? COL.red : COL.green;
+      ctx.beginPath();
+      ctx.arc(trackL - 9, ty, 3.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      this.font(11, true);
       ctx.fillStyle = COL.faint;
       ctx.textAlign = 'left';
-      ctx.fillText(String(k + 1), left + 1, ty - 13);
+      ctx.fillText(String(k + 1), trackL - 4, ty - 12);
 
       if (busy) {
         const t = s.trains.find((tt) => tt.id === busy);
-        if (t) this.drawTrainAt(t, (left + right) / 2, ty, true, 1.5);
+        if (t) this.drawTrainAt(t, (trackL + trackR) / 2, ty, true, 1.45);
       }
-      this.hit.push({ type: 'track', station: id, track: k + 1, x: left, y: ty - 10, w: right - left, h: 20 });
-
-      for (const sx of [left - 8, right + 8]) {
-        ctx.fillStyle = busy || blocked ? COL.red : COL.green;
-        ctx.beginPath();
-        ctx.arc(sx, ty, 5, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      this.hit.push({ type: 'track', station: id, track: k + 1, x: trackL, y: ty - 10, w: trackR - trackL, h: 20 });
     }
   }
 
   drawTrainAt(t, x, y, atStation, scale = 1) {
     const ctx = this.ctx;
     const late = t.late || 0;
-    const color = late > 15 ? COL.red : late > 5 ? COL.amber : COL.train;
-    const h = 28 * scale;
+    const h = (atStation ? 30 : 23) * scale;
     const arrow = t.dir > 0 ? '▸' : '◂';
-    this.font(12 * scale, true);
-    const label = t.no;
-    const tw = ctx.measureText(label).width;
-    const time = fmt(t.planDep);
-    this.font(7.5 * scale, true);
-    const timeW = time ? ctx.measureText(time).width : 0;
+    this.font(11 * scale, true);
+    const noW = ctx.measureText(t.no).width;
+    this.font(8 * scale, true);
+    const time = atStation ? `${fmt(t.planDep)}发` : fmt(t.planDep);
+    const timeW = ctx.measureText(time).width;
     const lateText = late > 0 ? `+${late}` : '';
-    const lateW = lateText ? ctx.measureText(lateText).width : 0;
-    const w = Math.max(88 * scale, 12 * scale + tw + 16 * scale + timeW + (lateText ? 9 * scale + lateW : 0) + 10 * scale);
+    const lateW = lateText ? ctx.measureText(lateText).width + 8 * scale : 0;
+    const w = Math.max(120 * scale, 10 * scale + noW + 14 * scale + timeW + lateW + 16 * scale);
     const bx = Math.round(x - w / 2);
     const by = Math.round(y - h / 2);
     ctx.save();
-    ctx.shadowColor = 'rgba(20,35,50,.11)';
-    ctx.shadowBlur = 10 * scale;
-    ctx.shadowOffsetY = 3 * scale;
-    ctx.fillStyle = COL.trainBox;
-    this.roundRect(bx, by, w, h, 5 * scale);
-    ctx.fill();
+    ctx.fillStyle = '#fffdf7';
+    ctx.fillRect(bx, by, w, h);
     ctx.restore();
-    ctx.strokeStyle = '#cfd7de';
+    ctx.strokeStyle = late > 0 ? COL.red : '#4d5850';
     ctx.lineWidth = 1;
-    this.roundRect(bx, by, w, h, 5 * scale);
-    ctx.stroke();
-    ctx.fillStyle = color === COL.train ? COL.red : color;
-    ctx.fillRect(bx + 1, by + 1, 4 * scale, h - 2);
+    ctx.strokeRect(bx + .5, by + .5, w - 1, h - 1);
+    ctx.fillStyle = late > 0 ? COL.red : '#8f2f1d';
+    ctx.fillRect(bx + 1, by + 1, 3 * scale, h - 2);
+    const baseY = atStation ? y - 5 * scale : y;
+    ctx.fillStyle = COL.dim;
     this.font(9 * scale, true);
-    ctx.fillStyle = COL.faint;
     ctx.textAlign = 'left';
-    ctx.fillText(arrow, bx + 10 * scale, y);
-    this.font(12 * scale, true);
+    ctx.fillText(arrow, bx + 9 * scale, baseY);
+    this.font(11 * scale, true);
     ctx.fillStyle = COL.text;
-    ctx.fillText(label, bx + 10 * scale + 10 * scale, y);
+    ctx.fillText(t.no, bx + 20 * scale, baseY);
     ctx.textAlign = 'right';
-    if (time) {
-      this.font(7.5 * scale, true);
-      ctx.fillStyle = COL.dim;
-      ctx.fillText(time, bx + w - 10 * scale, y - (lateText ? 4 * scale : 0));
+    this.font(8 * scale, true);
+    ctx.fillStyle = late > 0 ? COL.red : COL.dim;
+    ctx.fillText(time, bx + w - 8 * scale - lateW, baseY);
+    if (atStation) {
+      const route = t.destName ? `终到 ${t.destName}` : '';
+      this.font(8.5 * scale, false);
+      ctx.fillStyle = '#4f5a51';
+      ctx.textAlign = 'left';
+      if (route) ctx.fillText(route, bx + 20 * scale, y + 9 * scale);
     }
     if (lateText) {
-      this.font(7.5 * scale, true);
-      ctx.fillStyle = late > 15 ? COL.red : COL.amber;
-      ctx.fillText(lateText, bx + w - 10 * scale, y + 6 * scale);
+      ctx.fillStyle = '#fff4ef';
+      ctx.fillRect(bx + w - lateW - 4 * scale, by + 4 * scale, lateW + 2 * scale, h - 8 * scale);
+      this.font(8 * scale, true);
+      ctx.fillStyle = COL.red;
+      ctx.fillText(lateText, bx + w - 5 * scale, baseY);
     }
     ctx.textAlign = 'left';
     this.hit.push({ type: 'train', id: t.id, x: bx, y: by, w, h });

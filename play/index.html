@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>调度台</title>
-<link rel="stylesheet" href="assets/css/app.css?v=0.3.4p">
-<link rel="stylesheet" href="assets/css/wm.css?v=0.3.4p">
-<link rel="stylesheet" href="assets/css/panels.css?v=0.3.4p">
-<link rel="stylesheet" href="assets/css/game.css?v=0.3.4p">
+<link rel="stylesheet" href="assets/css/app.css?v=0.4.2p">
+<link rel="stylesheet" href="assets/css/wm.css?v=0.4.2p">
+<link rel="stylesheet" href="assets/css/panels.css?v=0.4.2p">
+<link rel="stylesheet" href="assets/css/game.css?v=0.4.2p">
 </head>
 <body>
 
@@ -17,35 +17,35 @@
       <div class="bb-brand">
         <span class="brand-mark">调</span>
         <b>调度台</b>
-        <span>列车调度模拟 / 桌面终端</span>
+        <span>双线中间站 · 行车值班台</span>
       </div>
       <div class="bb-meta">
         <span id="bootMeta" class="mono"></span>
-        <span class="bb-ver mono">v0.3.4</span>
+        <span class="bb-ver mono">v0.4.2</span>
       </div>
     </header>
     <div class="boot-main">
       <aside class="boot-nav">
         <div class="bn-label">值班准备</div>
         <nav id="bootTabs">
-          <button data-btab="mode" class="on"><span class="mono">01</span>运行模式</button>
-          <button data-btab="scene"><span class="mono">02</span>运行场景</button>
+          <button data-btab="mode" class="on"><span class="mono">01</span>值班强度</button>
+          <button data-btab="scene"><span class="mono">02</span>选择车站</button>
           <button data-btab="sandbox"><span class="mono">03</span>规则开关</button>
           <button data-btab="realism"><span class="mono">04</span>真实度</button>
           <button data-btab="load"><span class="mono">05</span>存档与工坊</button>
         </nav>
         <div class="bn-note">
-          车次与时刻为示意运行图，不代表官方时刻。进入席位后所有操作立即生效。
+          车次与时刻为示意运行图，不代表官方时刻。进入值班后所有操作立即生效。
         </div>
       </aside>
       <section class="boot-stage">
         <div class="boot-pane on" id="paneMode">
           <div class="stage-head">
-            <h1>运行模式</h1>
-            <p>选择值班强度。模式决定提示、命令校验与事件密度，不改变线路数据。</p>
+            <h1>开班准备</h1>
+            <p>先定值班强度、岗位和车次。开班后，本站接车、放行和处置都由你一人负责。</p>
           </div>
           <div class="sec">
-            <h2>模式</h2>
+            <h2>值班强度</h2>
             <div class="mode-list" id="modeGrid"></div>
           </div>
           <div class="sec">
@@ -64,6 +64,7 @@
           </div>
           <div class="sec">
             <h2>场景</h2>
+            <div class="pack-tabs" id="packTabs"></div>
             <div class="scene-table" id="sceneList"></div>
             <div class="scene-detail" id="sceneDetail"></div>
           </div>
@@ -110,10 +111,12 @@
       </section>
       <aside class="boot-summary">
         <div class="bs-label">本次值班</div>
-        <div class="bs-row"><span>席位</span><b class="mono">01 / 列调</b></div>
+        <div class="bs-row"><span>值班站</span><b id="bsStation">实训站</b></div>
+        <div class="bs-row"><span>本班任务</span><b id="bsTask">认识调度台</b></div>
+        <div class="bs-row"><span>岗位</span><b class="mono">值班员</b></div>
         <div class="bs-row"><span>难度</span><b id="bsDiff">值班员</b></div>
         <div class="bs-row"><span>车次方案</span><b id="bsTT">老版车次</b></div>
-        <div class="bs-row"><span>版本</span><b class="mono">0.3.4</b></div>
+        <div class="bs-row"><span>版本</span><b class="mono">0.4.2</b></div>
         <div class="bs-note" id="sceneDetailSide"></div>
         <div class="bs-note pad-note">为 Pad 横屏设计，手机打开可能显示不全。</div>
       </aside>
@@ -121,8 +124,9 @@
     <footer class="boot-foot">
       <div class="foot-hint mono">数据只在本机运行 · 不上传存档与工坊</div>
       <div class="foot-btns">
+        <button class="btn hidden" id="bootUpdate">检查更新</button>
         <button class="btn" id="bootQuit">退出</button>
-        <button class="btn btn-primary" id="bootGo">进入席位</button>
+        <button class="btn btn-primary" id="bootGo">开始值班</button>
       </div>
     </footer>
   </div>
@@ -130,7 +134,7 @@
 
 <div id="askLayer" class="ask-layer">
   <div class="ask-card" role="dialog" aria-modal="true" aria-labelledby="askTitle">
-    <div class="ask-kicker mono">退出席位</div>
+    <div class="ask-kicker mono">退出</div>
     <h3 id="askTitle">要退出调度台吗？</h3>
     <p>还没保存的站场状态和本班进度会丢掉，已保存的存档不受影响。</p>
     <div class="ask-actions">
@@ -146,11 +150,11 @@
       <span class="brand-mark">调</span>
       <div class="brand-text">
         <b>调度台</b>
-        <span class="mono">DISPATCH DESK</span>
+        <span class="mono">行车值班台</span>
       </div>
     </div>
     <div class="scene-block">
-      <span class="tb-label">当前场景</span>
+      <span class="tb-label">值班站</span>
       <b id="tbScene">—</b>
     </div>
     <div class="clock-block">
@@ -159,8 +163,8 @@
       <span class="mono dim" id="tbSpeed">已运行 0 分</span>
     </div>
     <div class="metric-block">
-      <div class="metric"><span>正点</span><b class="mono" id="tbPunc">100%</b></div>
-      <div class="metric"><span>得分</span><b class="mono" id="tbScore">0</b></div>
+      <div class="metric"><span>在站/待接</span><b class="mono" id="tbPunc">3</b></div>
+      <div class="metric"><span>晚点</span><b class="mono" id="tbScore">0</b></div>
       <div class="metric alarm"><span>报警</span><b class="mono" id="tbAlarm">0</b></div>
     </div>
     <div class="topbar-actions">
@@ -172,43 +176,32 @@
   </header>
 
   <div class="shell">
-    <nav class="rail" id="rail">
+      <nav class="rail" id="rail">
       <div class="rail-group">
-        <div class="rail-label">运行监控</div>
-        <button data-panel="ctc" class="on"><span class="mono">CTC</span>站场图</button>
-        <button data-panel="graph"><span class="mono">GPH</span>运行图</button>
-        <button data-panel="station"><span class="mono">STN</span>车站与站场</button>
-        <button data-panel="trains"><span class="mono">TRN</span>列车一览</button>
+        <div class="rail-label">行车</div>
+        <button data-panel="ctc" class="on">站场图</button>
+        <button data-panel="graph">运行图</button>
+        <button data-panel="trains">车次簿</button>
       </div>
       <div class="rail-group">
-        <div class="rail-label">处置</div>
-        <button data-panel="alarms"><span class="mono">ALM</span>报警栏</button>
-        <button data-panel="events"><span class="mono">EVT</span>事件处置</button>
-        <button data-panel="cmd"><span class="mono">CMD</span>调度命令</button>
-        <button data-panel="orders"><span class="mono">LOG</span>命令记录</button>
-        <button data-panel="radio"><span class="mono">RAD</span>调度电话</button>
+        <div class="rail-label">调度</div>
+        <button data-panel="alarms">信号报警</button>
+        <button data-panel="events">事故与事件</button>
+        <button data-panel="cmd">调度命令</button>
+        <button data-panel="orders">行车日志</button>
+        <button data-panel="radio">调度电话</button>
       </div>
-      <div class="rail-group">
-        <div class="rail-label">资料与扩展</div>
-        <button data-panel="gloss"><span class="mono">GLS</span>术语图鉴</button>
-        <button data-panel="depot"><span class="mono">DEP</span>段所状态</button>
-        <button data-panel="gantt"><span class="mono">GNT</span>股道甘特</button>
-        <button data-panel="score"><span class="mono">RPT</span>评分复盘</button>
-        <button data-panel="packs"><span class="mono">PKG</span>扩展包</button>
-        <button data-panel="workshop"><span class="mono">WKS</span>创意工坊</button>
-        <button data-panel="help"><span class="mono">DOC</span>值班手册</button>
-      </div>
-      <div class="rail-foot mono">席位 01<br>v0.3.4</div>
+      <div class="rail-foot mono">v0.4.2</div>
     </nav>
 
     <main class="workspace" id="desk">
       <section class="grid-top">
         <div class="dock-pane" data-win="ctc">
-          <div class="dock-head"><span class="dh-code mono">CTC-1</span><span class="dh-title">站场图</span><span class="dh-meta mono" id="metaCtc"></span></div>
+          <div class="dock-head"><span class="dh-title">站场图</span><span class="dh-meta mono" id="metaCtc"></span></div>
           <div class="dock-body"></div>
         </div>
         <div class="dock-pane graph-float hidden" data-win="graph">
-          <div class="dock-head"><span class="dh-code mono">GPH-2</span><span class="dh-title">运行图</span><span class="dh-meta mono" id="metaGraph"></span><button class="dock-close" id="graphClose" title="关闭">×</button></div>
+          <div class="dock-head"><span class="dh-title">运行图</span><span class="dh-meta mono" id="metaGraph"></span><button class="dock-close" id="graphClose" title="关闭">×</button></div>
           <div class="dock-body"></div>
         </div>
       </section>
@@ -216,8 +209,7 @@
 
     <aside class="side hidden" id="side">
       <div class="side-head">
-        <span class="mono" id="sideCode">STN-7</span>
-        <b id="sideTitle">车站与站场</b>
+        <b id="sideTitle">列车动作</b>
         <button id="sideClose" title="关闭">×</button>
       </div>
       <div class="side-body" id="sideBody"></div>
@@ -225,7 +217,7 @@
   </div>
 
   <footer class="statusbar" id="taskbar">
-    <div class="sb-left mono" id="sbSeat">席位 01 · 列调 · 标准模式</div>
+    <div class="sb-left mono" id="sbSeat">实训站 · 值班员 · 老版运行图</div>
     <div class="sb-center" id="sbControl"><span class="sb-label">站控</span><span id="sbControlText">全部自律</span></div>
     <div class="sb-right mono">点车次卡片 → 右侧选下一步 · 空格 暂停</div>
   </footer>
@@ -259,6 +251,8 @@
 </div>
 <div id="toast" class="toast hidden"></div>
 
-<script type="module" src="assets/js/app.js?v=0.3.4p"></script>
+<script type="module" src="assets/js/app.js?v=0.4.2p"></script>
 </body>
 </html>
+
+

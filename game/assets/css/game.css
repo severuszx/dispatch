@@ -886,3 +886,9 @@ body.pad-mode .act-tr-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .mode-card p, .diff-card p, .tt-card p { margin: 0; flex: 1; font-size: 11px; line-height: 1.6; }
 .mode-card.on, .diff-card.on, .tt-card.on { background: #efeade; box-shadow: inset 3px 0 #b23a24; }
+
+.pack-tabs { display: flex; gap: 6px; margin: 0 0 10px; flex-wrap: wrap; }
+.pack-tab { border: 1px solid #d7d9d2; background: #fff; color: #47504a; padding: 6px 10px; font: inherit; font-size: 12px; cursor: pointer; border-radius: 2px; }
+.pack-tab:hover { border-color: #8b938c; }
+.pack-tab.on { background: #2f3a33; border-color: #2f3a33; color: #fff; }
+.scene-cell .sc-kind { white-space: nowrap; }

@@ -5,7 +5,7 @@
     "title": "认识调度台",
     "stationName": "实训站",
     "line": "qinglan",
-    "brief": "只看一个站，认清接车与发车",
+    "brief": "只看实训站，认上行、下行正线和咽喉道岔，练接车与发车",
     "terms": [
       "ctc",
       "panel",
@@ -25,9 +25,9 @@
   {
     "id": "t2",
     "kind": "tutorial",
-    "title": "两车会车",
+    "title": "单线会让",
     "line": "qinglan",
-    "brief": "单线两站让两车安全交会",
+    "brief": "单线会让：两车在青云站一停一过",
     "terms": [
       "block",
       "section",
@@ -43,7 +43,7 @@
     "id": "t3",
     "kind": "tutorial",
     "title": "红光带与引导接车",
-    "line": "qinglan",
+    "line": "jiangwan",
     "brief": "判断真占用还是故障",
     "terms": [
       "redband",
@@ -59,7 +59,7 @@
     "id": "t4",
     "kind": "tutorial",
     "title": "道岔失表与接近区段",
-    "line": "qinglan",
+    "line": "jiangwan",
     "brief": "列车已接近时先呼叫停车再变更",
     "terms": [
       "switchlost",
@@ -75,7 +75,7 @@
     "id": "t5",
     "kind": "tutorial",
     "title": "调度命令入门",
-    "line": "qinglan",
+    "line": "jiangwan",
     "brief": "发对一条命令",
     "terms": [
       "order",
@@ -341,9 +341,9 @@
   {
     "id": "h1",
     "kind": "hub",
-    "title": "蚌埠站：普速与货运同场",
+    "title": "蚌埠站 · 普速场",
     "line": "hub",
-    "brief": "一个站六个场，普速、货运、货场、客整、调车、折返同时盯",
+    "brief": "只看蚌埠站普速场：上下行正线接入 8 条到发线，接车、会让、发车都在同一张站场图上完成",
     "terms": [
       "track",
       "route",
@@ -353,14 +353,18 @@
     "difficulty": 3,
     "weather": "晴",
     "trains": 25,
-    "hub": "bengbu"
+    "hub": "bengbu",
+    "hubYards": [
+      "ps"
+    ],
+    "stationName": "蚌埠站"
   },
   {
     "id": "h2",
     "kind": "hub",
-    "title": "蚌埠东货运站",
+    "title": "蚌埠东站 · 货运场",
     "line": "hub",
-    "brief": "货运场、货场、调车场单独一班，装卸与到发同时排",
+    "brief": "只看货运场的 6 条到发线，装卸车按计划进出，正线不封锁",
     "terms": [
       "track",
       "hazmat",
@@ -372,18 +376,16 @@
     "trains": 18,
     "hub": "bengbu",
     "hubYards": [
-      "hy",
-      "hc",
-      "dc"
+      "hy"
     ],
     "stationName": "蚌埠东站"
   },
   {
     "id": "h3",
     "kind": "hub",
-    "title": "动车段 · 夜班检修",
+    "title": "动车段 · 检查库",
     "line": "hub",
-    "brief": "检查库、存车线、洗车线、临修线同时开班，出所计划压在一条走行线上",
+    "brief": "只看检查库的 6 条检修线，出入所车底和库内作业按同一张图排",
     "terms": [
       "track",
       "dd",
@@ -395,19 +397,16 @@
     "trains": 14,
     "hub": "dc",
     "hubYards": [
-      "jck",
-      "cc",
-      "xc",
-      "lk"
+      "jck"
     ],
     "stationName": "动车段"
   },
   {
     "id": "h4",
     "kind": "hub",
-    "title": "车辆段 · 客车整备",
+    "title": "车辆段 · 段修库",
     "line": "hub",
-    "brief": "段修库、存车线、洗车线、临修线独立开班，车底按出所顺序排",
+    "brief": "只看段修库的 6 条检修线，车底按出所顺序一列一列放",
     "terms": [
       "track",
       "route",
@@ -417,14 +416,18 @@
     "difficulty": 3,
     "weather": "多云",
     "trains": 14,
-    "hub": "veh"
+    "hub": "veh",
+    "hubYards": [
+      "dx"
+    ],
+    "stationName": "车辆段"
   },
   {
     "id": "h5",
     "kind": "hub",
-    "title": "襄阳北编组站 · 驼峰解体",
+    "title": "襄阳北 · 到达场",
     "line": "hub",
-    "brief": "到达、编组、出发、机务折返四场独立控制，解体与集结同时进行",
+    "brief": "只看到达场的 6 条股道，到达列车按驼峰计划一列一列解体",
     "terms": [
       "track",
       "route",
@@ -435,6 +438,12 @@
     "difficulty": 4,
     "weather": "晴",
     "trains": 24,
-    "hub": "mar"
+    "hub": "mar",
+    "hubYards": [
+      "dd"
+    ],
+    "stationName": "襄阳北"
   }
 ]
+
+

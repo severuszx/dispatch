@@ -1,4 +1,5 @@
 import { clamp, fmtClock, hash, rnd } from './util.js';
+import { trainSpec, sceneBureau, sceneRoute, trainClass } from './fleet.js';
 
 const BASE_SECTION_MIN = { qinglan: 28, jiangwan: 12, linhe: 4 };
 const PRIORITY_LABEL = { 1: 'G', 2: 'D', 3: 'Z/T', 4: 'K', 5: '普快', 6: '货', 7: '路用', 8: '救援', 9: '专运' };
@@ -48,6 +49,7 @@ class Sim {
     this.log = [];
     this.conditions = { speedLimits: [], blockSections: [], blockTracks: [], extraDwell: 0, crewStress: 0, phoneBlock: false, localControl: false };
     this.control = new Set();
+    this.focusStation = null;
     this.hubMode = false;
     this.hub = null;
     this.resources = { hotEmu: 2, hotLoco: 2, rescue: 1, power: 1, pway: 1 };
@@ -73,7 +75,7 @@ class Sim {
     });
   }
 
-  loadData({ network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar }) {
+  loadData({ network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx }) {
     this.network = network;
     this.timetables = { old: timetable, new: timetable2 || timetable };
     this.timetable = timetable;
@@ -83,7 +85,7 @@ class Sim {
     this.glossary = glossary.terms;
     this.ordersData = orders || { orders: {} };
     this.hubData = hub || null;
-    this.hubDatas = { t1: hubt1, bengbu: hub, dc: hubdc, veh: hubveh, mar: hubmar };
+    this.hubDatas = { t1: hubt1, bengbu: hub, dc: hubdc, veh: hubveh, mar: hubmar, ...(hubjl || {}), ...(hubnx || {}) };
   }
 
   setup(scene, mode, realism, sandbox, difficulty, ttVersion) {
@@ -103,13 +105,17 @@ class Sim {
     this.line = net.lines.find((l) => l.id === lineId);
     this.stationOrder = this.line.stations;
     this.stations = net.stations;
+    this.focusStation = scene.focus || this.stationOrder.slice().sort((a, b) => this.stations[b].tracks - this.stations[a].tracks)[0];
+    this.control = new Set([this.focusStation]);
     const trains = this.timetable[lineId].slice(0, scene.trains || 10);
     this.trains = trains.map((t) => this.makeTrain(t));
     this.metrics.total = this.trains.length;
     for (const st of this.stationOrder) {
       const conf = this.stations[st];
       const list = [];
-      for (let i = 1; i <= conf.tracks; i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null });
+      const count = conf.tracks || 1;
+      const half = Math.ceil(count / 2);
+      for (let i = 1; i <= count; i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null, lenM: i > half ? 650 : 520 });
       this.tracks.set(st, list);
     }
     for (const t of this.trains) {
@@ -118,6 +124,7 @@ class Sim {
       if (ft) { ft.train = t.id; t.trackNo = ft.no; }
     }
     this.startClock = 360;
+    this.limits = { late: scene.lateLimit || 15, wait: scene.waitLimit || 12 };
     this.clock = 360;
     this.eventPool = this.eventsForScene(scene);
     this.nextEventAt = 360 + Math.round((6 + Math.floor(rnd(hash(scene.id))() * 8)) / this.diffFactor());
@@ -138,38 +145,46 @@ class Sim {
     const all = this.hub.yards || [];
     const picked = scene.hubYards && scene.hubYards.length ? scene.hubYards : all.map((y) => y.id);
     const yardIds = picked.filter((id) => all.some((y) => y.id === id));
-    this.stationOrder = yardIds;
+    const focusYard = scene.yard && yardIds.includes(scene.yard) ? scene.yard : yardIds[0];
+    this.stationOrder = focusYard ? [focusYard] : [];
+    this.focusStation = focusYard || null;
     this.stations = {};
     all.forEach((y) => {
-      if (!yardIds.includes(y.id)) return;
+      if (y.id !== focusYard) return;
       this.stations[y.id] = { ...y, km: 0, unmanned: false, code: y.id.toUpperCase() };
     });
     this.lineId = 'hub';
+    const stationTitle = scene.stationName || this.hub.station.name;
+    const stationLines = scene.lines || this.hub.station.lines || [this.hub.station.line];
+    const yardTitle = focusYard ? this.stations[focusYard].name : '本站';
     this.line = {
-      id: 'hub', name: scene.stationName || this.hub.station.name,
-      kind: '综合枢纽', block: '站内联锁', length: 0, stations: yardIds,
+      id: 'hub', name: stationTitle === yardTitle ? stationTitle : `${stationTitle} · ${yardTitle}`,
+      kind: '复线站', block: '站内联锁', length: 0, stations: this.stationOrder, lines: stationLines,
     };
     this.weather = scene.weather || '晴';
     this.tracks = new Map();
-    yardIds.forEach((id) => {
+    this.stationOrder.forEach((id) => {
       const conf = this.stations[id];
       const list = [];
-      for (let i = 1; i <= (conf.tracks || 1); i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null });
+      const count = conf.tracks || 1;
+      const half = Math.ceil(count / 2);
+      for (let i = 1; i <= count; i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null, lenM: i > half ? 650 : 520 });
       this.tracks.set(id, list);
     });
-    this.startClock = 360;
-    this.clock = 360;
+    this.startClock = scene.start == null ? 360 : scene.start;
+    this.limits = { late: scene.lateLimit || 15, wait: scene.waitLimit || 12 };
+    this.clock = this.startClock;
     this.trains = (this.hub.trains || [])
-      .filter((t) => yardIds.includes(t.yard))
+      .filter((t) => this.stationOrder.includes(t.yard))
       .slice(0, scene.trains || 99)
       .map((t) => this.makeHubTrain(t));
     for (const t of this.trains) {
       if (t.status !== 'station') continue;
-      const ft = this.freeTrack(t.station);
+      const ft = this.freeTrack(t.station, t.dir);
       if (ft) { ft.train = t.id; t.trackNo = ft.no; }
     }
     this.metrics.total = this.trains.length;
-    this.control = new Set(yardIds);
+    this.control = new Set(this.stationOrder);
     this.eventPool = this.eventsForScene(scene);
     this.eventCursor = 0;
     this.nextEventAt = this.startClock + Math.round((6 + Math.floor(rnd(hash(scene.id))() * 8)) / this.diffFactor());
@@ -186,45 +201,146 @@ class Sim {
     const arr = raw.arr == null ? start : raw.arr;
     const dep = raw.dep == null ? arr + 10 : raw.dep;
     const inYard = raw.arr == null || raw.arr <= start;
+    const spec = trainSpec(raw, sceneBureau(this.scene));
+    const digits = Number(String(raw.no || '').replace(/\D/g, ''));
+    const dir = raw.dir === 0 ? -1 : raw.dir === 1 ? 1 : (Number.isFinite(digits) && digits > 0 && digits % 2 === 0 ? 1 : -1);
+    const stationName = this.stations[raw.yard] ? this.stations[raw.yard].name : '';
+    const route = sceneRoute(this.scene, dir, stationName);
+    const coaches = raw.coaches || (raw.type === '货' ? 40 : 16);
+    const tasks = (raw.tasks || []).map((x, i) => ({
+      id: `${raw.id}-task-${i}`, kind: x.kind, title: x.title || '站内作业', min: x.min || 5,
+      left: x.min || 5, state: 'wait', loco: x.loco || '', bureau: x.bureau || '', cars: x.cars || 0,
+    }));
     return {
       id: raw.id, no: raw.no, type: raw.type, priority: raw.priority || 5,
-      from: raw.yard, to: raw.yard, dir: 1, station: raw.yard,
+      from: raw.yard, to: raw.yard, dir, station: raw.yard,
+      model: spec.model, loco: spec.loco, bureau: spec.bureau,
+      trainClass: trainClass(raw),
+      originName: raw.origin || route.from, destName: raw.dest || route.to, nextSection: route.section,
       planArr: arr, planDep: dep, dep, arr, dwell: Math.max(1, dep - arr),
-      coaches: raw.coaches || (raw.type === '货' ? 40 : 16), stock: raw.stockGroup || '', crew: raw.crew || 1,
+      coaches, lengthM: coaches * (raw.type === '货' ? 14 : 25), stock: raw.stockGroup || '', crew: raw.crew || 1,
       stops: [{ st: raw.yard, arr: raw.arr, dep: raw.dep }], stopIdx: 0, trace: [],
-      status: inYard ? 'station' : 'pending', section: null, late: 0, progress: 0,
-      departAt: null, arriveAt: null, trackNo: null, nextTrack: null, originTrack: null,
-      holdOutside: 0, notes: [], release: false, hold: false, special: raw.special || false,
+      status: inYard ? 'station' : 'approach', section: null, late: 0, progress: 0,
+      departAt: null, arriveReal: inYard ? this.startClock : null, arriveAt: null, trackNo: null, nextTrack: null, originTrack: null,
+      holdOutside: 0, notes: [], release: false, hold: false, reserved: false, special: raw.special || false,
+      tasks, waitForNo: raw.waitFor || '', turnback: raw.turnback || null, waitWarned: false,
     };
   }
 
   tickHub() {
     for (const t of this.trains) {
-      if (t.status === 'pending') {
+      if (t.status === 'approach' || t.status === 'pending') {
         if (this.clock < t.planArr) continue;
-        const ft = this.freeTrack(t.station);
-        if (!ft) { t.holdOutside = this.clock; t.late = Math.max(t.late, this.clock - t.planArr); continue; }
-        ft.train = t.id;
-        t.trackNo = ft.no;
-        t.status = 'station';
-        t.arriveReal = this.clock;
+        const tr = t.trackNo ? (this.tracks.get(t.station) || []).find((x) => x.no === t.trackNo) : null;
+        if (tr && tr.train === t.id && !tr.blocked) {
+          t.status = 'station';
+          t.arriveReal = this.clock;
+          t.late = Math.max(t.late, this.clock - t.planArr);
+          t.holdOutside = 0;
+          t.reserved = false;
+          this.pushLog(`${t.no} 接入 ${this.stations[t.station].name} ${tr.no} 道`);
+          continue;
+        }
+        if (!t.holdOutside) {
+          t.holdOutside = this.clock;
+          this.alarm('待接', `${t.no} 已到站外，未指定接车股道`, 'danger');
+        }
         t.late = Math.max(t.late, this.clock - t.planArr);
-        t.holdOutside = 0;
-        this.pushLog(`${t.no} 接入 ${this.stations[t.station].name} ${ft.no} 道`);
         continue;
       }
       if (t.status !== 'station') continue;
+      for (const task of t.tasks || []) {
+        if (task.state !== 'active') continue;
+        task.left = Math.max(0, task.left - 1);
+        if (task.left > 0) continue;
+        task.state = 'done';
+        this.finishTask(t, task);
+      }
       if (this.clock < t.planDep) continue;
       if (this.isStationControlled(t.station) && !t.release) {
         t.hold = true;
         t.late = Math.max(t.late, this.clock - t.planDep);
         continue;
       }
+      const block = this.departBlock(t);
+      if (block) {
+        t.hold = true;
+        t.late = Math.max(t.late, this.clock - t.planDep);
+        if (!t.waitWarned) {
+          t.waitWarned = true;
+          this.alarm('待避', `${t.no} ${block}`, 'warn');
+          this.pushLog(`${t.no} 暂不发车：${block}`);
+        }
+        continue;
+      }
       this.leaveHub(t);
     }
   }
 
+  finishTask(t, task) {
+    if (task.kind === 'swap') {
+      if (task.loco) t.loco = task.loco;
+      if (task.bureau) t.bureau = task.bureau;
+    }
+    if (task.kind === 'cars' && task.cars) {
+      t.coaches = task.cars;
+      t.lengthM = task.cars * (t.type === '货' ? 14 : 25);
+    }
+    if (task.kind === 'turnback' && t.turnback) {
+      const oldTrack = t.trackNo;
+      t.no = t.turnback.no || t.no;
+      t.destName = t.turnback.dest || t.destName;
+      t.dir = -t.dir;
+      t.nextSection = t.turnback.section || t.nextSection;
+      t.turnbackDone = true;
+      if (oldTrack) this.releaseTrack(t);
+      t.trackNo = null;
+      const list = this.tracks.get(t.station) || [];
+      const pick = list.find((tr) => !tr.train && this.trackValid(t, tr));
+      if (pick) {
+        this.assignTrack(t.id, t.station, pick.no);
+        this.pushLog(`${t.no} 换向完成，改开 ${t.destName}，转 ${pick.no} 道`);
+      } else {
+        t.hold = true;
+        this.alarm('换向', `${t.no} 换向后没有可用股道`, 'danger');
+        this.pushLog(`${t.no} 换向完成，但暂无可用股道`);
+      }
+    } else {
+      this.pushLog(`${t.no} ${task.title}完成`);
+    }
+    this.emit('task');
+  }
+
+  departBlock(t) {
+    const task = (t.tasks || []).find((x) => x.state !== 'done');
+    if (task) return `${task.title}未完成（${task.left} 分）`;
+    if (t.waitForNo) {
+      const other = this.trains.find((x) => x.no === t.waitForNo);
+      if (other && other.status !== 'terminated') return `待避 ${t.waitForNo} 出清`;
+    }
+    return '';
+  }
+
+  startTask(trainId, taskId) {
+    const t = this.getTrain(trainId);
+    if (!t || t.status !== 'station') return false;
+    const task = (t.tasks || []).find((x) => x.id === taskId);
+    if (!task || task.state !== 'wait') return false;
+    if ((t.tasks || []).some((x) => x.state === 'active')) return false;
+    if (t.release) return false;
+    task.state = 'active';
+    task.left = task.min;
+    this.alarm('作业', `${t.no} ${task.title}开始，占用 ${t.trackNo} 道 ${task.min} 分`, 'warn');
+    this.pushLog(`${t.no} ${task.title}开始，占用 ${t.trackNo} 道`);
+    this.emit('task');
+    return true;
+  }
+
   leaveHub(t) {
+    if (t.status === 'station') {
+      const block = this.departBlock(t);
+      if (block) { t.hold = true; return; }
+    }
     t.status = 'terminated';
     t.late = Math.max(t.late, this.clock - t.planDep);
     this.releaseTrack(t);
@@ -256,9 +372,11 @@ class Sim {
     } else {
       stops = t.stops.map((s) => ({ st: s.st, arr: s.arr, dep: s.dep }));
     }
+    const spec = trainSpec(t, sceneBureau(this.scene));
     return {
       id: t.id, no: t.no, type: t.type, priority: t.priority, from: t.from, to: t.to,
       fromIdx, toIdx, dir, dep: stops[0].dep, arr: stops[stops.length - 1].arr,
+      model: spec.model, loco: spec.loco, bureau: spec.bureau,
       planDep: stops[0].dep, planArr: stops[stops.length - 1].arr,
       dwell: t.dwell || 2, coaches: t.coaches, stock: t.stockGroup, crew: t.crew,
       stops, stopIdx: 0, trace: [],
@@ -300,9 +418,15 @@ class Sim {
     return this.trains.find((t) => t.status === 'running' && t.section && this.sectionKey(t.section.a, t.section.b) === key);
   }
 
-  freeTrack(station) {
+  freeTrack(station, dir = 0) {
     const list = this.tracks.get(station) || [];
-    return list.find((tr) => !tr.train && !tr.blocked && !tr.reserved) || null;
+    const free = list.filter((tr) => !tr.train && !tr.blocked && !tr.reserved);
+    if (dir && list.length >= 3) {
+      const half = Math.ceil(list.length / 2);
+      const pref = dir > 0 ? free.filter((tr) => tr.no <= half) : free.filter((tr) => tr.no > half);
+      if (pref.length) return pref[0];
+    }
+    return free[0] || null;
   }
 
   occupiedCount(station) {
@@ -336,6 +460,7 @@ class Sim {
     this.tickFeed();
     this.tickAlarms();
     this.evaluate();
+    this.checkLimits();
     if (this.clock >= this.startClock + (this.scene.duration || 300)) this.finish('time');
     this.emit('tick');
   }
@@ -697,13 +822,47 @@ class Sim {
     };
   }
 
+  trackValid(t, tr) {
+    const list = this.tracks.get(t.station) || [];
+    const half = Math.ceil(list.length / 2);
+    if (!tr) return false;
+    if (tr.blocked) return false;
+    if (tr.train && tr.train !== t.id) return false;
+    if (tr.lenM && t.lengthM > tr.lenM) return false;
+    const conf = this.stations[t.station];
+    if (this.hubMode && conf) {
+      const platform = Array.isArray(conf.platform) ? conf.platform : [conf.platform];
+      const freight = Array.isArray(conf.freight) ? conf.freight : [conf.freight];
+      if (t.type === '货' && platform.includes(tr.no)) return false;
+      if (t.type !== '货' && freight.includes(tr.no)) return false;
+    }
+    if (this.hubMode && list.length >= 3) {
+      if (t.dir > 0 && tr.no > half) return false;
+      if (t.dir < 0 && tr.no <= half) return false;
+    }
+    return true;
+  }
+
   assignTrack(trainId, station, trackNo) {
     const t = this.getTrain(trainId);
     const list = this.tracks.get(station) || [];
     const tr = list.find((x) => x.no === trackNo);
     if (!t || !tr) return false;
     if (tr.train && tr.train !== trainId) return false;
-    if (tr.blocked) return false;
+    if (!this.trackValid(t, tr)) return false;
+    if (t.status === 'station' && (t.tasks || []).some((x) => x.state === 'active')) return false;
+    if (t.status === 'approach' || t.status === 'pending') {
+      if (this.clock < t.planArr - 4) return false;
+      if (t.trackNo) this.releaseTrack(t);
+      tr.train = trainId;
+      t.trackNo = trackNo;
+      t.reserved = true;
+      t.holdOutside = 0;
+      this.pushLog(`${t.no} 预留 ${this.stations[station].name} ${trackNo} 道，等到点接入`);
+      this.decisions.push({ t: this.clock, event: 'apron', title: '接车股道', branch: `${this.stations[station].name} ${trackNo} 道`, risk: '低', train: t.no });
+      this.emit('route');
+      return true;
+    }
     if (t.trackNo) this.releaseTrack(t);
     tr.train = trainId;
     t.trackNo = trackNo;
@@ -742,7 +901,16 @@ class Sim {
   releaseTrain(id) {
     const t = this.getTrain(id);
     if (!t) return false;
+    if (t.status !== 'station') return false;
+    const block = this.departBlock(t);
+    if (block) {
+      this.alarm('放行拒绝', `${t.no} ${block}`, 'danger');
+      this.pushLog(`${t.no} 放行被拒：${block}`);
+      this.emit('control');
+      return false;
+    }
     t.release = true;
+    t.hold = false;
     this.pushLog(`${t.no} 放行`);
     this.emit('control');
     return true;
@@ -850,6 +1018,21 @@ class Sim {
     if (this.alarms.length > 220) this.alarms.length = 220;
   }
 
+  checkLimits() {
+    if (this.finished || !this.limits) return;
+    const late = this.trains.find((t) => t.status !== 'terminated' && t.late >= this.limits.late);
+    if (late) {
+      this.accident = { type: 'late', no: late.no, late: late.late };
+      this.finish('late');
+      return;
+    }
+    const stuck = this.trains.find((t) => (t.status === 'waiting' || t.status === 'approach') && t.holdOutside && this.clock - t.holdOutside >= this.limits.wait);
+    if (stuck) {
+      this.accident = { type: 'blocked', no: stuck.no, wait: this.clock - stuck.holdOutside };
+      this.finish('blocked');
+    }
+  }
+
   evaluate() {
     const total = this.trains.length || 1;
     const terminated = this.trains.filter((t) => t.status === 'terminated');
@@ -897,9 +1080,10 @@ class Sim {
       events: this.activeEvents, decisions: this.decisions, log: this.log,
       orderFeed: this.orderFeed, radioFeed: this.radioFeed,
       score: this.scoreTotal(), weather: this.weather, stations: this.stations,
-      stationOrder: this.stationOrder, line: this.line, lineId: this.lineId,
-      hub: this.hubMode ? { station: this.line.name, yards: [...this.stationOrder] } : null,
+      stationOrder: this.stationOrder, focusStation: this.focusStation, line: this.line, lineId: this.lineId,
+      hub: this.hubMode ? { station: this.line.name, line: (this.hub.station && this.hub.station.line) || '', lines: this.line.lines || [], yards: [...this.stationOrder] } : null,
       finished: this.finished, finishReason: this.finishReason, accident: this.accident,
+      limits: this.limits,
       budget: this.metrics.budget, priorityLabel: PRIORITY_LABEL,
     };
   }

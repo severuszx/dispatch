@@ -88,15 +88,12 @@ export function createWindow(def) {
     pane.dataset.win = id;
     const head = document.createElement('div');
     head.className = 'drawer-head';
-    const code = document.createElement('span');
-    code.className = 'mono';
-    code.textContent = def.code || id.toUpperCase();
     const title = document.createElement('b');
     title.textContent = def.title || id;
     const close = document.createElement('button');
     close.textContent = '×';
     close.title = '关闭';
-    head.append(code, title, close);
+    head.append(title, close);
     pane.append(head);
     deskEl.append(pane);
     const idx = [...deskEl.querySelectorAll('.drawer-win')].length - 1;

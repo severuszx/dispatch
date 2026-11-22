@@ -24,6 +24,7 @@ let currentMode = 'standard';
 let currentDifficulty = storage('tst-dispatch-difficulty') || 'standard';
 let currentTT = storage('tst-dispatch-tt') || 'old';
 let realism = { ...REALISM_DEFAULT };
+let currentPack = 'base';
 let views = {};
 let inspectId = null;
 let started = false;
@@ -68,14 +69,19 @@ function boot() {
 }
 
 async function loadData() {
-  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar] = await Promise.all([
+  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx, scenes55] = await Promise.all([
     fetchJson('data/network.json'), fetchJson('data/timetable.json'), fetchJson('data/timetable-v2.json'),
     fetchJson('data/events.json'),
     fetchJson('data/glossary.json'), fetchJson('data/scenarios.json'), fetchJson('data/orders.json'),
     fetchJson('data/hub.json'), fetchJson('data/hub-t1.json'), fetchJson('data/hub-dc.json'), fetchJson('data/hub-veh.json'), fetchJson('data/hub-mar.json'),
+    fetchJson('data/hub-jl.json'), fetchJson('data/hub-nx.json'), fetchJson('data/scenes-55.json'),
   ]);
   const packScenes = enabledPackScenes();
-  data = { network, timetable, timetable2, events, glossary, scenarios: scenarios.concat(packScenes), orders, hub, hubt1, hubdc, hubveh, hubmar };
+  data = {
+    network, timetable, timetable2, events, glossary,
+    scenarios: scenarios.concat(packScenes).concat(scenes55),
+    orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx,
+  };
   sim.loadData(data);
   const meta = document.getElementById('bootMeta');
   if (meta) meta.textContent = '06:00 接班 · 本机离线运行';
@@ -116,6 +122,7 @@ function buildBoot() {
   renderRealism();
   renderDifficulty();
   renderTT();
+  renderPackTabs();
   renderScenes();
   renderBootSandbox();
   renderSaves();
@@ -194,13 +201,41 @@ function updateRealismLabel() {
   if (v) v.textContent = avg < 0.6 ? '街机' : avg < 1.4 ? '标准' : avg < 2.2 ? '偏拟真' : '拟真';
 }
 
+function renderPackTabs() {
+  const box = document.getElementById('packTabs');
+  if (!box) return;
+  box.innerHTML = '';
+  const counts = {
+    base: data.scenarios.filter((s) => !s.pack).length,
+    jiaoliu: data.scenarios.filter((s) => s.pack === 'jiaoliu').length,
+    ningxi: data.scenarios.filter((s) => s.pack === 'ningxi').length,
+  };
+  const tabs = [
+    ['base', `基础场景 ${counts.base}`],
+    ['jiaoliu', `焦柳线全线 ${counts.jiaoliu}`],
+    ['ningxi', `宁西线全线 ${counts.ningxi}`],
+  ];
+  tabs.forEach(([id, label]) => {
+    const b = el('button', `pack-tab ${currentPack === id ? 'on' : ''}`, label);
+    b.type = 'button';
+    b.addEventListener('click', () => {
+      currentPack = id;
+      renderPackTabs();
+      renderScenes();
+    });
+    box.append(b);
+  });
+}
+
 function renderScenes() {
   const list = document.getElementById('sceneList');
   list.innerHTML = '';
-  const kinds = { tutorial: '教学', story: '剧本', daily: '每日', sandbox: '自定', pack: '扩展', hub: '枢纽' };
+  const kinds = { tutorial: '教学', story: '剧本', daily: '每日', sandbox: '自定', pack: '线路', hub: '枢纽' };
   let scenes = data.scenarios.slice();
   if (currentMode === 'story') scenes = scenes.filter((s) => s.kind === 'story');
   else if (currentMode === 'arcade') scenes = scenes.filter((s) => s.kind === 'tutorial');
+  if (currentPack === 'base') scenes = scenes.filter((s) => !s.pack);
+  else scenes = scenes.filter((s) => s.pack === currentPack);
   scenes.forEach((s) => {
     const cell = el('div', `scene-cell ${currentScene && currentScene.id === s.id ? 'on' : ''}`);
     const line = data.network.lines.find((l) => l.id === s.line);
@@ -578,7 +613,10 @@ function mountCTC(body) {
     onInspect: (id) => { openTrain(id); },
   });
   views.ctc = view;
-  if (location.search.includes('debug')) window.__ctc = view;
+  if (location.search.includes('debug')) {
+    window.__ctc = view;
+    window.__sim = sim;
+  }
   view.setSnapshot(sim.getSnapshot());
   sim.subscribe((s) => view.setSnapshot(s.getSnapshot()));
   const ro = new ResizeObserver(() => { view.resize(); view.draw(); });

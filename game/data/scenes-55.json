@@ -1,0 +1,1702 @@
+[
+ {
+  "id": "jl-jiaozuo",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "焦作站 · 二等站",
+  "stationName": "焦作站",
+  "line": "jiaoliu",
+  "hub": "jl-jiaozuo",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 二等站 · 4 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 4,
+  "start": 930,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-yueshan",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "月山站 · 一等站",
+  "stationName": "月山站",
+  "line": "jiaoliu",
+  "hub": "jl-yueshan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、太焦线 · 一等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 10,
+  "start": 355,
+  "lines": [
+   "焦柳线",
+   "太焦线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-qinyang",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "沁阳站 · 三等站",
+  "stationName": "沁阳站",
+  "line": "jiaoliu",
+  "hub": "jl-qinyang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-jiyuan",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "济源站 · 三等站",
+  "stationName": "济源站",
+  "line": "jiaoliu",
+  "hub": "jl-jiyuan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 3 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 3,
+  "start": 1211,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-liuzhuang",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "留庄站 · 三等站",
+  "stationName": "留庄站",
+  "line": "jiaoliu",
+  "hub": "jl-liuzhuang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-luoyangbei",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "洛阳北站 · 二等站",
+  "stationName": "洛阳北站",
+  "line": "jiaoliu",
+  "hub": "jl-luoyangbei",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、陇海线 · 二等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线",
+   "陇海线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-luoyangdong",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "洛阳东站 · 一等站",
+  "stationName": "洛阳东站",
+  "line": "jiaoliu",
+  "hub": "jl-luoyangdong",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、陇海线 · 一等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 10,
+  "start": 355,
+  "lines": [
+   "焦柳线",
+   "陇海线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-guanlin",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "关林站 · 二等站",
+  "stationName": "关林站",
+  "line": "jiaoliu",
+  "hub": "jl-guanlin",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、陇海线 · 二等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 2,
+  "start": 1371,
+  "lines": [
+   "焦柳线",
+   "陇海线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-ruzhou",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "汝州站 · 三等站",
+  "stationName": "汝州站",
+  "line": "jiaoliu",
+  "hub": "jl-ruzhou",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 6 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 984,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-baofeng",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "宝丰站 · 二等站",
+  "stationName": "宝丰站",
+  "line": "jiaoliu",
+  "hub": "jl-baofeng",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 二等站 · 6 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 6,
+  "start": 1021,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-lushan",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "鲁山站 · 三等站",
+  "stationName": "鲁山站",
+  "line": "jiaoliu",
+  "hub": "jl-lushan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 3 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 3,
+  "start": 1046,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-nanzhao",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "南召站 · 三等站",
+  "stationName": "南召站",
+  "line": "jiaoliu",
+  "hub": "jl-nanzhao",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 3 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 3,
+  "start": 1085,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-nanyang",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "南阳站 · 一等站",
+  "stationName": "南阳站",
+  "line": "jiaoliu",
+  "hub": "jl-nanyang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、宁西线 · 一等站 · 14 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 14,
+  "start": 1107,
+  "lines": [
+   "焦柳线",
+   "宁西线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-dengzhou",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "邓州站 · 三等站",
+  "stationName": "邓州站",
+  "line": "jiaoliu",
+  "hub": "jl-dengzhou",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 5 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 5,
+  "start": 1185,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-xiangyangbei",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "襄阳北站 · 特等站",
+  "stationName": "襄阳北站",
+  "line": "jiaoliu",
+  "hub": "jl-xiangyangbei",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、汉丹线、襄渝线 · 特等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 10,
+  "start": 355,
+  "lines": [
+   "焦柳线",
+   "汉丹线",
+   "襄渝线"
+  ],
+  "level": 0,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-xiangyang",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "襄阳站 · 一等站",
+  "stationName": "襄阳站",
+  "line": "jiaoliu",
+  "hub": "jl-xiangyang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、汉丹线、襄渝线 · 一等站 · 13 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 13,
+  "start": 1131,
+  "lines": [
+   "焦柳线",
+   "汉丹线",
+   "襄渝线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-jingmen",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "荆门站 · 二等站",
+  "stationName": "荆门站",
+  "line": "jiaoliu",
+  "hub": "jl-jingmen",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 二等站 · 5 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 5,
+  "start": 1036,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-jingmendong",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "荆门东站 · 三等站",
+  "stationName": "荆门东站",
+  "line": "jiaoliu",
+  "hub": "jl-jingmendong",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-zhijiang",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "枝江站 · 三等站",
+  "stationName": "枝江站",
+  "line": "jiaoliu",
+  "hub": "jl-zhijiang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-zhicheng",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "枝城站 · 三等站",
+  "stationName": "枝城站",
+  "line": "jiaoliu",
+  "hub": "jl-zhicheng",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 2,
+  "start": 949,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-shimenbei",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "石门县北站 · 三等站",
+  "stationName": "石门县北站",
+  "line": "jiaoliu",
+  "hub": "jl-shimenbei",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 5 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 5,
+  "start": 861,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-zhangjiajie",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "张家界站 · 一等站",
+  "stationName": "张家界站",
+  "line": "jiaoliu",
+  "hub": "jl-zhangjiajie",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 一等站 · 4 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 4,
+  "start": 739,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-jishou",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "吉首站 · 二等站",
+  "stationName": "吉首站",
+  "line": "jiaoliu",
+  "hub": "jl-jishou",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 二等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 2,
+  "start": 622,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-huaihua",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "怀化站 · 一等站",
+  "stationName": "怀化站",
+  "line": "jiaoliu",
+  "hub": "jl-huaihua",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、沪昆线 · 一等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 2,
+  "start": 521,
+  "lines": [
+   "焦柳线",
+   "沪昆线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "jl-sanjiang",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "三江县站 · 三等站",
+  "stationName": "三江县站",
+  "line": "jiaoliu",
+  "hub": "jl-sanjiang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-rongan",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "融安站 · 三等站",
+  "stationName": "融安站",
+  "line": "jiaoliu",
+  "hub": "jl-rongan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-rongshui",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "融水站 · 三等站",
+  "stationName": "融水站",
+  "line": "jiaoliu",
+  "hub": "jl-rongshui",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-luoman",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "洛满站 · 三等站",
+  "stationName": "洛满站",
+  "line": "jiaoliu",
+  "hub": "jl-luoman",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-liujiang",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "柳江站 · 三等站",
+  "stationName": "柳江站",
+  "line": "jiaoliu",
+  "hub": "jl-liujiang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "焦柳线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "jl-liuzhou",
+  "kind": "pack",
+  "pack": "jiaoliu",
+  "title": "柳州站 · 一等站",
+  "stationName": "柳州站",
+  "line": "jiaoliu",
+  "hub": "jl-liuzhou",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "焦柳线、湘桂线、黔桂线 · 一等站 · 3 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 3,
+  "start": 555,
+  "lines": [
+   "焦柳线",
+   "湘桂线",
+   "黔桂线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-nanyang",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "南阳站 · 一等站",
+  "stationName": "南阳站",
+  "line": "ningxi",
+  "hub": "nx-nanyang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线、宁西线 · 一等站 · 14 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 14,
+  "start": 1107,
+  "lines": [
+   "宁西线",
+   "宁西线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-xian",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "西安站 · 特等站",
+  "stationName": "西安站",
+  "line": "ningxi",
+  "hub": "nx-xian",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线、陇海线 · 特等站 · 14 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 14,
+  "start": 881,
+  "lines": [
+   "宁西线",
+   "陇海线"
+  ],
+  "level": 0,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-xinfengzhen",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "新丰镇站 · 特等站",
+  "stationName": "新丰镇站",
+  "line": "ningxi",
+  "hub": "nx-xinfengzhen",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线、陇海线 · 特等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 10,
+  "start": 355,
+  "lines": [
+   "宁西线",
+   "陇海线"
+  ],
+  "level": 0,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "nx-weinan",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "渭南站 · 二等站",
+  "stationName": "渭南站",
+  "line": "ningxi",
+  "hub": "nx-weinan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 二等站 · 10 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 10,
+  "start": 1024,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-weinanxi",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "渭南西站 · 三等站",
+  "stationName": "渭南西站",
+  "line": "ningxi",
+  "hub": "nx-weinanxi",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 6 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 928,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-shangluo",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "商洛站 · 二等站",
+  "stationName": "商洛站",
+  "line": "ningxi",
+  "hub": "nx-shangluo",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 二等站 · 3 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 3,
+  "start": 1009,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-danfeng",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "丹凤站 · 三等站",
+  "stationName": "丹凤站",
+  "line": "ningxi",
+  "hub": "nx-danfeng",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 3 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 3,
+  "start": 1040,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-shangnan",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "商南站 · 三等站",
+  "stationName": "商南站",
+  "line": "ningxi",
+  "hub": "nx-shangnan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 3 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 3,
+  "start": 1028,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-nanyangxi",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "南阳西站 · 二等站",
+  "stationName": "南阳西站",
+  "line": "ningxi",
+  "hub": "nx-nanyangxi",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 二等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "nx-zhenping",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "镇平站 · 三等站",
+  "stationName": "镇平站",
+  "line": "ningxi",
+  "hub": "nx-zhenping",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 2,
+  "start": 1191,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-neixiang",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "内乡站 · 三等站",
+  "stationName": "内乡站",
+  "line": "ningxi",
+  "hub": "nx-neixiang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 2,
+  "start": 16554,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-xixia",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "西峡站 · 三等站",
+  "stationName": "西峡站",
+  "line": "ningxi",
+  "hub": "nx-xixia",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 2,
+  "start": 12020,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-tongbai",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "桐柏站 · 三等站",
+  "stationName": "桐柏站",
+  "line": "ningxi",
+  "hub": "nx-tongbai",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 4 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 4,
+  "start": 1155,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-tanghe",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "唐河站 · 三等站",
+  "stationName": "唐河站",
+  "line": "ningxi",
+  "hub": "nx-tanghe",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 7 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 7,
+  "start": 1162,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-xinyang",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "信阳站 · 一等站",
+  "stationName": "信阳站",
+  "line": "ningxi",
+  "hub": "nx-xinyang",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线、京广线 · 一等站 · 14 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 14,
+  "start": 1023,
+  "lines": [
+   "宁西线",
+   "京广线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-luoshan",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "罗山站 · 三等站",
+  "stationName": "罗山站",
+  "line": "ningxi",
+  "hub": "nx-luoshan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 6 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 1047,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-xixian",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "息县站 · 三等站",
+  "stationName": "息县站",
+  "line": "ningxi",
+  "hub": "nx-xixian",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 7 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 7,
+  "start": 1024,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-huangchuan",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "潢川站 · 二等站",
+  "stationName": "潢川站",
+  "line": "ningxi",
+  "hub": "nx-huangchuan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线、京九线 · 二等站 · 9 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 2,
+  "weather": "晴",
+  "trains": 9,
+  "start": 993,
+  "lines": [
+   "宁西线",
+   "京九线"
+  ],
+  "level": 2,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-shangcheng",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "商城站 · 三等站",
+  "stationName": "商城站",
+  "line": "ningxi",
+  "hub": "nx-shangcheng",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 7 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 7,
+  "start": 1130,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-gushi",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "固始站 · 三等站",
+  "stationName": "固始站",
+  "line": "ningxi",
+  "hub": "nx-gushi",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 10 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 10,
+  "start": 951,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-yeji",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "叶集站 · 三等站",
+  "stationName": "叶集站",
+  "line": "ningxi",
+  "hub": "nx-yeji",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 2,
+  "start": 1207,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-luan",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "六安站 · 三等站",
+  "stationName": "六安站",
+  "line": "ningxi",
+  "hub": "nx-luan",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 10 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 10,
+  "start": 981,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-feidong",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "肥东站 · 三等站",
+  "stationName": "肥东站",
+  "line": "ningxi",
+  "hub": "nx-feidong",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 无客运电报码，按货运/编组站运行",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 6,
+  "start": 355,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": false
+ },
+ {
+  "id": "nx-hefei",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "合肥站 · 一等站",
+  "stationName": "合肥站",
+  "line": "ningxi",
+  "hub": "nx-hefei",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线、淮南线、合九线 · 一等站 · 14 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 14,
+  "start": 812,
+  "lines": [
+   "宁西线",
+   "淮南线",
+   "合九线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-quanjiao",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "全椒站 · 三等站",
+  "stationName": "全椒站",
+  "line": "ningxi",
+  "hub": "nx-quanjiao",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线 · 三等站 · 9 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 1,
+  "weather": "晴",
+  "trains": 9,
+  "start": 980,
+  "lines": [
+   "宁西线"
+  ],
+  "level": 3,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ },
+ {
+  "id": "nx-nanjing",
+  "kind": "pack",
+  "pack": "ningxi",
+  "title": "南京站 · 一等站",
+  "stationName": "南京站",
+  "line": "ningxi",
+  "hub": "nx-nanjing",
+  "hubYards": [
+   "main"
+  ],
+  "yard": "main",
+  "brief": "宁西线、京沪线 · 一等站 · 2 列真实车次（12306 2026-11-22）",
+  "terms": [
+   "hub",
+   "track",
+   "task"
+  ],
+  "duration": 600,
+  "difficulty": 3,
+  "weather": "晴",
+  "trains": 2,
+  "start": 832,
+  "lines": [
+   "宁西线",
+   "京沪线"
+  ],
+  "level": 1,
+  "source": "12306 2026-11-22",
+  "passenger": true
+ }
+]

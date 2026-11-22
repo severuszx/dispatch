@@ -1,0 +1,5 @@
+game/desktop/node_modules/
+game/desktop/dist/
+game/desktop/app/
+game/pad/build/
+game/pad/.gradle/

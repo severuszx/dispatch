@@ -75,7 +75,7 @@ class Sim {
     });
   }
 
-  loadData({ network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar }) {
+  loadData({ network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx }) {
     this.network = network;
     this.timetables = { old: timetable, new: timetable2 || timetable };
     this.timetable = timetable;
@@ -85,7 +85,7 @@ class Sim {
     this.glossary = glossary.terms;
     this.ordersData = orders || { orders: {} };
     this.hubData = hub || null;
-    this.hubDatas = { t1: hubt1, bengbu: hub, dc: hubdc, veh: hubveh, mar: hubmar };
+    this.hubDatas = { t1: hubt1, bengbu: hub, dc: hubdc, veh: hubveh, mar: hubmar, ...(hubjl || {}), ...(hubnx || {}) };
   }
 
   setup(scene, mode, realism, sandbox, difficulty, ttVersion) {
@@ -287,11 +287,24 @@ class Sim {
       t.lengthM = task.cars * (t.type === '货' ? 14 : 25);
     }
     if (task.kind === 'turnback' && t.turnback) {
+      const oldTrack = t.trackNo;
       t.no = t.turnback.no || t.no;
       t.destName = t.turnback.dest || t.destName;
       t.dir = -t.dir;
       t.nextSection = t.turnback.section || t.nextSection;
-      this.pushLog(`${t.no} 换向完成，改开 ${t.destName}`);
+      t.turnbackDone = true;
+      if (oldTrack) this.releaseTrack(t);
+      t.trackNo = null;
+      const list = this.tracks.get(t.station) || [];
+      const pick = list.find((tr) => !tr.train && this.trackValid(t, tr));
+      if (pick) {
+        this.assignTrack(t.id, t.station, pick.no);
+        this.pushLog(`${t.no} 换向完成，改开 ${t.destName}，转 ${pick.no} 道`);
+      } else {
+        t.hold = true;
+        this.alarm('换向', `${t.no} 换向后没有可用股道`, 'danger');
+        this.pushLog(`${t.no} 换向完成，但暂无可用股道`);
+      }
     } else {
       this.pushLog(`${t.no} ${task.title}完成`);
     }

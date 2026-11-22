@@ -3,7 +3,7 @@ import { sim } from './sim.js';
 
 export function buildOrderLogPanel(body) {
   const wrap = el('div', 'pane ord-pane');
-  const head = el('div', 'pane-title', '命令记录');
+  const head = el('div', 'pane-title', '行车日志');
   head.append(el('span', 'ord-tag-ro', '只读'));
   head.append(el('span', 'ord-total mono', '0'));
   wrap.append(head);

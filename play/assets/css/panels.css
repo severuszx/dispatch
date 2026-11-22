@@ -52,7 +52,7 @@
 .ev-hist-row .mono{color:var(--text-faint)}
 
 .tr-table{font-size:11px}
-.tr-row{display:grid;grid-template-columns:64px 34px 46px 1fr 38px 46px;gap:4px;padding:3px 4px;border-bottom:1px solid #2c2c2c;align-items:center}
+.tr-row{display:grid;grid-template-columns:60px 42px 58px 44px 44px 36px 42px;gap:4px;padding:3px 4px;border-bottom:1px solid #2c2c2c;align-items:center}
 .tr-row.tr-head{color:var(--text-faint);font-size:10px;border-bottom:1px solid var(--line)}
 .tr-row:not(.tr-head):hover{background:#252525;cursor:pointer}
 .tr-row .tr-no{font-family:var(--mono);color:#c9c4b8}

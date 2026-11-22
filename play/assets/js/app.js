@@ -9,12 +9,12 @@ import { buildOrderLogPanel } from './orders.js';
 import { mountPacks, enabledPackScenes } from './packs.js';
 import { mountTutorial } from './tutorial.js';
 import {
-  buildAlarmPanel, buildEventPanel, buildTrainsPanel, buildTrackGantt,
+  buildAlarmPanel, buildEventPanel, buildTrainsPanel,
   buildScorePanel, buildGlossaryPanel, termShow,
 } from './panels.js';
 import {
-  buildSandboxPanel, buildDepotPanel, buildWorkshopPanel, buildHelpPanel,
-  buildInspectPanel, buildStationPanel, showReview, sandboxState,
+  buildSandboxPanel, buildHelpPanel,
+  buildInspectPanel, showReview, sandboxState,
 } from './panels2.js';
 
 const audio = new AudioEngine();
@@ -24,6 +24,7 @@ let currentMode = 'standard';
 let currentDifficulty = storage('tst-dispatch-difficulty') || 'standard';
 let currentTT = storage('tst-dispatch-tt') || 'old';
 let realism = { ...REALISM_DEFAULT };
+let currentPack = 'base';
 let views = {};
 let inspectId = null;
 let started = false;
@@ -68,17 +69,22 @@ function boot() {
 }
 
 async function loadData() {
-  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar] = await Promise.all([
+  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx, scenes55] = await Promise.all([
     fetchJson('data/network.json'), fetchJson('data/timetable.json'), fetchJson('data/timetable-v2.json'),
     fetchJson('data/events.json'),
     fetchJson('data/glossary.json'), fetchJson('data/scenarios.json'), fetchJson('data/orders.json'),
     fetchJson('data/hub.json'), fetchJson('data/hub-t1.json'), fetchJson('data/hub-dc.json'), fetchJson('data/hub-veh.json'), fetchJson('data/hub-mar.json'),
+    fetchJson('data/hub-jl.json'), fetchJson('data/hub-nx.json'), fetchJson('data/scenes-55.json'),
   ]);
   const packScenes = enabledPackScenes();
-  data = { network, timetable, timetable2, events, glossary, scenarios: scenarios.concat(packScenes), orders, hub, hubt1, hubdc, hubveh, hubmar };
+  data = {
+    network, timetable, timetable2, events, glossary,
+    scenarios: scenarios.concat(packScenes).concat(scenes55),
+    orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx,
+  };
   sim.loadData(data);
   const meta = document.getElementById('bootMeta');
-  if (meta) meta.textContent = `事件库 ${events.count} 条 / 根因 ${events.roots} / 术语 ${glossary.terms.length} / 场景 ${scenarios.length + packScenes.length}`;
+  if (meta) meta.textContent = '06:00 接班 · 本机离线运行';
 }
 
 async function fetchJson(path) {
@@ -99,7 +105,7 @@ function buildBoot() {
   MODES.forEach((m) => {
     const card = el('div', `mode-card ${m.id === currentMode ? 'on' : ''}`);
     const head = el('div', 'mc-head');
-    head.append(el('b', '', m.name), el('span', 'mc-code', m.id.toUpperCase()));
+    head.append(el('b', '', m.name));
     card.append(head, el('p', '', m.desc));
     card.addEventListener('click', () => {
       currentMode = m.id;
@@ -116,6 +122,7 @@ function buildBoot() {
   renderRealism();
   renderDifficulty();
   renderTT();
+  renderPackTabs();
   renderScenes();
   renderBootSandbox();
   renderSaves();
@@ -148,7 +155,7 @@ function renderDifficulty() {
   DIFFICULTIES.forEach((d) => {
     const card = el('div', `diff-card ${d.id === currentDifficulty ? 'on' : ''}`);
     const head = el('div', 'dc-name');
-    head.append(el('b', '', d.name), el('span', '', d.code));
+    head.append(el('b', '', d.name));
     card.append(head, el('p', '', d.desc));
     card.addEventListener('click', () => {
       currentDifficulty = d.id;
@@ -171,7 +178,7 @@ function renderTT() {
   TT_VERSIONS.forEach((v) => {
     const card = el('div', `tt-card ${v.id === currentTT ? 'on' : ''}`);
     const head = el('div', 'tt-name');
-    head.append(el('b', '', v.name), el('span', '', v.code));
+    head.append(el('b', '', v.name));
     card.append(head, el('p', '', v.desc));
     card.addEventListener('click', () => {
       currentTT = v.id;
@@ -194,19 +201,47 @@ function updateRealismLabel() {
   if (v) v.textContent = avg < 0.6 ? '街机' : avg < 1.4 ? '标准' : avg < 2.2 ? '偏拟真' : '拟真';
 }
 
+function renderPackTabs() {
+  const box = document.getElementById('packTabs');
+  if (!box) return;
+  box.innerHTML = '';
+  const counts = {
+    base: data.scenarios.filter((s) => !s.pack).length,
+    jiaoliu: data.scenarios.filter((s) => s.pack === 'jiaoliu').length,
+    ningxi: data.scenarios.filter((s) => s.pack === 'ningxi').length,
+  };
+  const tabs = [
+    ['base', `基础场景 ${counts.base}`],
+    ['jiaoliu', `焦柳线全线 ${counts.jiaoliu}`],
+    ['ningxi', `宁西线全线 ${counts.ningxi}`],
+  ];
+  tabs.forEach(([id, label]) => {
+    const b = el('button', `pack-tab ${currentPack === id ? 'on' : ''}`, label);
+    b.type = 'button';
+    b.addEventListener('click', () => {
+      currentPack = id;
+      renderPackTabs();
+      renderScenes();
+    });
+    box.append(b);
+  });
+}
+
 function renderScenes() {
   const list = document.getElementById('sceneList');
   list.innerHTML = '';
-  const kinds = { tutorial: '教学', story: '剧本', daily: '每日', sandbox: '自定', pack: '扩展', hub: '枢纽' };
+  const kinds = { tutorial: '教学', story: '剧本', daily: '每日', sandbox: '自定', pack: '线路', hub: '枢纽' };
   let scenes = data.scenarios.slice();
   if (currentMode === 'story') scenes = scenes.filter((s) => s.kind === 'story');
   else if (currentMode === 'arcade') scenes = scenes.filter((s) => s.kind === 'tutorial');
+  if (currentPack === 'base') scenes = scenes.filter((s) => !s.pack);
+  else scenes = scenes.filter((s) => s.pack === currentPack);
   scenes.forEach((s) => {
     const cell = el('div', `scene-cell ${currentScene && currentScene.id === s.id ? 'on' : ''}`);
     const line = data.network.lines.find((l) => l.id === s.line);
     const lineName = s.stationName || (s.kind === 'hub' ? hubStationName(s) : (line ? line.name : s.line));
     cell.append(el('span', 'sc-kind', kinds[s.kind] || s.kind));
-    cell.append(el('div', 'sc-line', `${s.id.toUpperCase()} · ${lineName}`));
+    cell.append(el('div', 'sc-line', lineName));
     cell.append(el('b', '', s.title));
     cell.append(el('div', 'sc-meta', `${s.weather} / ${Math.round(s.duration / 60 * 10) / 10}h / 难度 ${s.difficulty} / ${s.trains} 列`));
     cell.addEventListener('click', () => {
@@ -227,6 +262,12 @@ function renderSceneDetail() {
   const line = data.network.lines.find((l) => l.id === currentScene.line);
   const lineName = currentScene.stationName || (currentScene.kind === 'hub' ? hubStationName(currentScene) : (line ? line.name : currentScene.line));
   box.textContent = `${currentScene.title}｜${lineName}｜${currentScene.brief}`;
+  const bsStation = document.getElementById('bsStation');
+  const bsTask = document.getElementById('bsTask');
+  const side = document.getElementById('sceneDetailSide');
+  if (bsStation) bsStation.textContent = lineName;
+  if (bsTask) bsTask.textContent = currentScene.title;
+  if (side) side.textContent = `单站值班 · 车次 ${currentScene.trains} 列 · 计划 ${Math.round(currentScene.duration / 60 * 10) / 10} 小时`;
 }
 
 function renderBootSandbox() {
@@ -265,7 +306,7 @@ function renderSaves() {
   const list = document.getElementById('saveList');
   const saves = storage('tst-dispatch-saves') || [];
   list.innerHTML = '';
-  if (!saves.length) { list.append(el('div', 'hint', '还没有存档。进入席位后点菜单里的“保存”。')); return; }
+  if (!saves.length) { list.append(el('div', 'hint', '还没有存档。进入值班后点菜单里的“保存”。')); return; }
   saves.forEach((s, i) => {
     const row = el('div', 'save-item');
     row.append(el('span', '', `${s.name} · ${s.scene} · ${s.clock}`));
@@ -287,6 +328,19 @@ function bindBoot() {
     });
   });
   document.getElementById('bootGo').addEventListener('click', () => startGame());
+  const updateBtn = document.getElementById('bootUpdate');
+  if (window.dispatchUpdate && updateBtn) {
+    updateBtn.classList.remove('hidden');
+    updateBtn.addEventListener('click', async () => {
+      updateBtn.disabled = true;
+      toast('正在检查更新');
+      const r = await window.dispatchUpdate.check();
+      updateBtn.disabled = false;
+      if (r && r.state === 'dev') toast('开发环境不检查更新');
+      else if (r && r.state === 'latest') toast(`已是最新版本 ${r.current}`);
+      else if (r && r.state === 'error') toast(`检查失败：${r.error}`);
+    });
+  }
   document.getElementById('bootQuit').addEventListener('click', () => {
     document.getElementById('askLayer').classList.add('on');
     document.getElementById('askNo').focus();
@@ -345,8 +399,6 @@ function startGame(presetScene) {
   sim.setup(currentScene, currentMode, realism, storage('tst-dispatch-sandbox') || {}, currentDifficulty, currentTT);
   sim.start();
   buildWindows();
-  if (!isPad) openSide('inspect', '列车动作', 'ACT-1');
-  else if (currentScene.kind !== 'tutorial') openSide('inspect', '点一列车开始', 'ACT-1');
   if (currentScene.kind === 'tutorial') {
     mountTutorial(currentScene, data.glossary.terms, {
       difficulty: currentDifficulty,
@@ -470,21 +522,17 @@ function bindKeys() {
 const WIN_DEFS = [
   { id: 'ctc', code: 'CTC-1', title: '站场图', w: 0.58, h: 0.46, factory: mountCTC },
   { id: 'graph', code: 'GR-2', title: '运行图', w: 0.41, h: 0.46, factory: mountGraph },
-  { id: 'alarms', code: 'AL-3', title: '报警栏', w: 0.24, h: 0.32, factory: (b) => buildAlarmPanel(b) },
-  { id: 'events', code: 'EV-4', title: '事件处置', w: 0.33, h: 0.32, factory: (b) => buildEventPanel(b) },
+  { id: 'alarms', code: 'AL-3', title: '信号报警', w: 0.24, h: 0.32, factory: (b) => buildAlarmPanel(b) },
+  { id: 'events', code: 'EV-4', title: '事故与处置', w: 0.33, h: 0.32, factory: (b) => buildEventPanel(b) },
   { id: 'cmd', code: 'CM-5', title: '调度命令', w: 0.41, h: 0.32, factory: (b) => buildCommandPanel(b), skin: 'paper' },
-  { id: 'trains', code: 'TR-6', title: '列车一览', w: 0.3, h: 0.3, factory: (b) => buildTrainsPanel(b, ctx()) },
-  { id: 'gantt', code: 'GT-7', title: '股道甘特', w: 0.4, h: 0.28, factory: (b) => buildTrackGantt(b) },
+  { id: 'trains', code: 'TR-6', title: '车次簿', w: 0.3, h: 0.3, factory: (b) => buildTrainsPanel(b, ctx()) },
   { id: 'score', code: 'SC-8', title: '评分复盘', w: 0.3, h: 0.34, factory: (b) => buildScorePanel(b, ctx()) },
   { id: 'gloss', code: 'GL-9', title: '术语图鉴', w: 0.32, h: 0.36, factory: (b) => buildGlossaryPanel(b), skin: 'paper' },
   { id: 'inspect', code: 'IN-10', title: '列车详情', w: 0.24, h: 0.3, factory: (b) => buildInspectPanel(b, ctx()) },
-  { id: 'station', code: 'ST-11', title: '车站与股道', w: 0.3, h: 0.3, factory: (b) => buildStationPanel(b) },
   { id: 'radio', code: 'RD-12', title: '调度电话', w: 0.26, h: 0.3, factory: (b) => buildRadioPanel(b) },
-  { id: 'depot', code: 'DP-13', title: '段所状态', w: 0.3, h: 0.3, factory: (b) => buildDepotPanel(b) },
   { id: 'sandbox', code: 'SB-14', title: '沙盒开关', w: 0.34, h: 0.34, factory: (b) => buildSandboxPanel(b, ctx()), skin: 'paper' },
-  { id: 'workshop', code: 'WP-15', title: '创意工坊', w: 0.3, h: 0.3, factory: (b) => buildWorkshopPanel(b, ctx()), skin: 'paper' },
   { id: 'help', code: 'HP-16', title: '值班手册', w: 0.3, h: 0.34, factory: (b) => buildHelpPanel(b), skin: 'paper' },
-  { id: 'orders', code: 'OD-17', title: '命令记录', w: 0.3, h: 0.34, factory: (b) => buildOrderLogPanel(b) },
+  { id: 'orders', code: 'OD-17', title: '行车日志', w: 0.3, h: 0.34, factory: (b) => buildOrderLogPanel(b) },
   { id: 'packs', code: 'PK-18', title: '扩展包', w: 0.34, h: 0.42, factory: (b) => mountPacks(b, ctx()) },
 ];
 
@@ -494,7 +542,8 @@ function buildWindows() {
 
 function openTrain(id) {
   inspectId = id;
-  openSide('inspect', '列车动作', 'ACT-1');
+  const t = sim.getTrain(id);
+  openSide('inspect', t ? `行车凭证 · ${t.no}` : '行车凭证', 'ACT-1');
   if (views.inspectView) views.inspectView.update();
 }
 
@@ -505,7 +554,6 @@ function hideDrawers(except) {
 }
 
 function openWindow(id, pos) {
-  if (id === 'station') { openSide('station', '车站与站场', 'STN-7'); return; }
   if (id === 'graph') closeSide();
   else getWin('graph')?.hide();
   hideDrawers(id);
@@ -530,16 +578,18 @@ function openSide(id, title, code) {
   getWin('graph')?.hide();
   hideDrawers(null);
   const side = document.getElementById('side');
-  document.getElementById('sideCode').textContent = code;
+  const codeEl = document.getElementById('sideCode');
+  if (codeEl) codeEl.textContent = code;
   document.getElementById('sideTitle').textContent = title;
   side.classList.remove('hidden');
-  if (!views.stationMounted && id === 'station') {
-    views.stationMounted = true;
-    buildStationPanel(document.getElementById('sideBody'));
-  }
   if (!views.inspectMounted && id === 'inspect') {
     views.inspectMounted = true;
-    views.inspectView = buildInspectPanel(document.getElementById('sideBody'), ctx());
+    try {
+      views.inspectView = buildInspectPanel(document.getElementById('sideBody'), ctx());
+    } catch (err) {
+      console.error('inspect mount failed', err);
+      views.inspectMounted = false;
+    }
   }
 }
 
@@ -563,6 +613,10 @@ function mountCTC(body) {
     onInspect: (id) => { openTrain(id); },
   });
   views.ctc = view;
+  if (location.search.includes('debug')) {
+    window.__ctc = view;
+    window.__sim = sim;
+  }
   view.setSnapshot(sim.getSnapshot());
   sim.subscribe((s) => view.setSnapshot(s.getSnapshot()));
   const ro = new ResizeObserver(() => { view.resize(); view.draw(); });
@@ -625,11 +679,12 @@ function toggleMenu() {
   if (!pop.classList.contains('hidden')) { pop.classList.add('hidden'); return; }
   pop.innerHTML = '';
   const head = el('div', 'mp-head');
-  head.append(el('span', '', '面板与运行'), el('span', 'mono', 'ESC'));
+  head.append(el('span', '', '其它窗口'), el('span', 'mono', 'Esc'));
   pop.append(head);
   const grid = el('div', 'mp-grid');
-  WIN_DEFS.forEach((d) => {
-    const b = el('button', '', `${d.code} ${d.title}`);
+  const menuIds = currentMode === 'sandbox' ? ['score', 'gloss', 'help', 'packs', 'sandbox'] : ['score', 'gloss', 'help', 'packs'];
+  WIN_DEFS.filter((d) => menuIds.includes(d.id)).forEach((d) => {
+    const b = el('button', '', d.title);
     b.addEventListener('click', () => { openWindow(d.id); pop.classList.add('hidden'); });
     grid.append(b);
   });
@@ -771,31 +826,35 @@ function updateHud() {
   clock.textContent = s.clockText;
   const band = Math.max(1, Math.ceil((s.clock - sim.startClock + 1) / 60));
   document.getElementById('tbDate').textContent = `第 ${band} 班`;
-  document.getElementById('tbPunc').textContent = `${Math.round(s.metrics.punctual || 0)}%`;
-  document.getElementById('tbScore').textContent = `${s.score}`;
+  const atStation = s.trains.filter((t) => t.status === 'station').length;
+  const approach = s.trains.filter((t) => t.status === 'approach' || t.status === 'pending').length;
+  const lateCount = s.trains.filter((t) => t.status !== 'terminated' && t.late > 0).length;
+  document.getElementById('tbPunc').textContent = approach ? `${atStation}/${approach}` : `${atStation}`;
+  document.getElementById('tbScore').textContent = `${lateCount}`;
   const alarms = s.alarms.filter((a) => !a.ack).length;
   document.getElementById('tbAlarm').textContent = `${alarms}`;
-  document.getElementById('tbScene').textContent = s.hub ? s.scene.title : `${s.line.name}｜${s.scene.title}`;
+  const focusName = s.focusStation && s.stations[s.focusStation] ? s.stations[s.focusStation].name : '本站';
+  const sceneStation = s.scene.stationName || '';
+  const sceneTitle = s.scene.title || focusName;
+  document.getElementById('tbScene').textContent = sceneStation && !sceneTitle.includes(sceneStation) ? `${sceneStation} · ${sceneTitle}` : sceneTitle;
   document.getElementById('tbSpeed').textContent = `已运行 ${Math.round(s.clock - sim.startClock)} 分`;
-  const modeName = (MODES.find((m) => m.id === currentMode) || { name: '标准' }).name;
   const diffName = (DIFFICULTIES.find((d) => d.id === currentDifficulty) || { name: '值班员' }).name;
-  document.getElementById('sbSeat').textContent = `席位 01 · 列调 · ${modeName} · ${diffName} · ${currentTT === 'new' ? '2026-11' : '老版'}`;
+  document.getElementById('sbSeat').textContent = `${focusName} · ${diffName} · ${currentTT === 'new' ? '2026-11' : '老版运行图'}`;
   const ctlText = document.getElementById('sbControlText');
   const ctlLabel = document.querySelector('#sbControl .sb-label');
   if (s.hub) {
-    const yards = s.hub.yards || [];
-    const on = yards.filter((id) => sim.isStationControlled(id)).length;
     const waiting = sim.trains.filter((t) => t.status === 'station' && !t.release).length;
     ctlLabel.textContent = '站控';
-    ctlText.textContent = `${on}/${yards.length} 场受控 · 待放行 ${waiting}`;
+    ctlText.textContent = `${sim.isStationControlled(s.focusStation) ? '本站手动放行' : '本站自动放行'} · 待放行 ${waiting} · 晚点≤${s.limits ? s.limits.late : 15} / 站外≤${s.limits ? s.limits.wait : 12}`;
   } else {
     ctlLabel.textContent = '站控';
-    ctlText.textContent = `${sim.control.size}/${sim.stationOrder.length} 站`;
+    ctlText.textContent = `${sim.isStationControlled(s.focusStation) ? '本站手动' : '本站自动'} · 晚点≤${s.limits ? s.limits.late : 15} / 站外≤${s.limits ? s.limits.wait : 12}`;
   }
+  const focusTrains = s.trains.filter((t) => t.station === s.focusStation && t.status !== 'terminated');
   const metaCtc = document.getElementById('metaCtc');
-  if (metaCtc) metaCtc.textContent = s.hub ? `${s.hub.yards.length} 场 · ${s.trains.length} 列` : `${sim.stationOrder.length} 站`;
+  if (metaCtc) metaCtc.textContent = `${focusName} · ${focusTrains.length} 列`;
   const metaGraph = document.getElementById('metaGraph');
-  if (metaGraph) metaGraph.textContent = `${s.hub ? '±60' : '±120'} 分 · ${s.trains.length} 列`;
+  if (metaGraph) metaGraph.textContent = `±60 分 · ${focusTrains.length} 列`;
   const metaAlarms = document.getElementById('metaAlarms');
   if (metaAlarms) metaAlarms.textContent = `${alarms} 未确认`;
   const metaEvents = document.getElementById('metaEvents');
@@ -809,8 +868,13 @@ function updateHud() {
 function onFinish() {
   openWindow('score');
   showReview(views.scoreWin.body, ctx());
-  toast(`本场结束：${sim.finishReason === 'safety' ? '安全底线击穿' : sim.finishReason === 'time' ? '时间到' : '全部终到'}`, sim.finishReason === 'safety' ? 'err' : 'ok');
-  audio.sfx(sim.finishReason === 'safety' ? 'fail' : 'ok');
+  const reasonText = sim.finishReason === 'safety' ? '安全底线击穿'
+    : sim.finishReason === 'time' ? '时间到'
+    : sim.finishReason === 'late' ? '晚点红线击穿'
+    : sim.finishReason === 'blocked' ? '站外停车超时'
+    : '全部终到';
+  toast(`本场结束：${reasonText}`, sim.finishReason === 'safety' || sim.finishReason === 'late' || sim.finishReason === 'blocked' ? 'err' : 'ok');
+  audio.sfx(sim.finishReason === 'safety' || sim.finishReason === 'late' || sim.finishReason === 'blocked' ? 'fail' : 'ok');
 }
 
 function restartScene() {
@@ -926,7 +990,7 @@ function importWorkshop(file) {
       list.unshift({ name: pack.name || pack.scene.title, line: pack.line, at: Date.now(), data: pack });
       storage('tst-dispatch-workshop', list.slice(0, 20));
       currentScene = pack.scene;
-      toast('关卡已导入，点“进入席位”开跑', 'ok');
+      toast('关卡已导入，点“开始值班”开跑', 'ok');
     } catch (e) { toast(`导入失败：${e.message}`, 'err'); }
   };
   reader.readAsText(file);

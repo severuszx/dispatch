@@ -19,7 +19,7 @@ export const termShow = (term) => {
 
 export function buildAlarmPanel(body) {
   const wrap = el('div', 'pane alarm-pane');
-  const head = el('div', 'pane-title', '报警栏');
+  const head = el('div', 'pane-title', '信号报警');
   const count = el('span', 'mono', '0');
   head.append(count);
   wrap.append(head);
@@ -57,7 +57,7 @@ export function buildAlarmPanel(body) {
 
 export function buildEventPanel(body) {
   const wrap = el('div', 'pane evt-pane');
-  const head = el('div', 'pane-title', '事件处置');
+  const head = el('div', 'pane-title', '事故与处置');
   const badge = el('span', 'tag y', '0');
   head.append(badge);
   wrap.append(head);
@@ -122,7 +122,7 @@ export function buildEventPanel(body) {
 
 export function buildTrainsPanel(body, ctx) {
   const wrap = el('div', 'pane trains-pane');
-  const head = el('div', 'pane-title', '列车一览');
+  const head = el('div', 'pane-title', '车次簿');
   head.append(el('span', 'mono', `${sim.trains.length} 列`));
   wrap.append(head);
   const table = el('div', 'tr-table');
@@ -130,14 +130,15 @@ export function buildTrainsPanel(body, ctx) {
   function render() {
     table.innerHTML = '';
     const hdr = el('div', 'tr-row tr-head');
-    ['车次', '等级', '状态', '位置', '股道', '晚点'].forEach((x) => hdr.append(el('span', '', x)));
+    ['车次', '车型', '机车', '路局', '状态', '股道', '晚点'].forEach((x) => hdr.append(el('span', '', x)));
     table.append(hdr);
     sim.trains.slice().sort((a, b) => a.planDep - b.planDep).forEach((t) => {
       const row = el('div', `tr-row ${t.late > 12 ? 'late2' : t.late > 4 ? 'late1' : ''}`);
       row.append(el('span', 'tr-no', t.no));
-      row.append(el('span', '', t.type));
+      row.append(el('span', '', t.model || t.type));
+      row.append(el('span', '', t.loco || '—'));
+      row.append(el('span', '', t.bureau || '—'));
       row.append(el('span', '', t.status === 'running' ? '区间' : t.status === 'station' ? '站内' : t.status === 'waiting' ? (t.holdOutside ? '站外' : '待发') : '终到'));
-      row.append(el('span', '', t.status === 'running' && t.section ? `${sim.stations[t.section.a].name}—${sim.stations[t.section.b].name}` : (t.station ? sim.stations[t.station].name : '—')));
       row.append(el('span', 'mono', t.trackNo ? `${t.trackNo}` : '—'));
       row.append(el('span', 'mono', t.late ? `+${t.late}` : '正点'));
       row.addEventListener('click', () => ctx.inspect(t.id));
