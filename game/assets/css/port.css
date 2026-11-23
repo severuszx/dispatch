@@ -1,0 +1,17 @@
+.port-pane{height:100%}
+.port{padding:12px 14px;color:#d9e4de;font-size:12px}
+.port-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #334039;padding-bottom:8px}
+.port-head b{font-size:15px}.port-head span{font-size:10px;color:#8e9c95;margin-left:8px}
+.port-kpi{display:flex;gap:16px}.port-kpi div{text-align:right}.port-kpi span{display:block;font-size:9px;color:#84928b}.port-kpi b{font-size:15px;color:#d9c28e}
+.port-note{font-size:10px;color:#8f9d96;line-height:1.6;margin:9px 0}
+.port-lines{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.port-line{border:1px solid #303d36;background:#161f1b;padding:8px}
+.port-line.on{border-color:#5e7d6a;background:#18251f}
+.port-line div b{display:block;font-size:12px}.port-line div span{display:block;font-size:9px;color:#84928b;margin-top:2px}
+.port-line em{display:block;font-style:normal;font-size:9px;color:#c9a56b;margin:5px 0}
+.port-line button{border:1px solid #46584e;background:#1e2a25;color:#c4d2cb;font-size:9px;padding:2px 8px;cursor:pointer}
+.port-foot{display:flex;gap:16px;align-items:center;border-top:1px solid #334039;margin-top:10px;padding-top:9px}
+.port-foot div span{display:block;font-size:9px;color:#84928b}.port-foot div b{font-size:14px;color:#d7e2dc}
+.port-foot button{margin-left:auto;border:1px solid #856a3d;background:#272117;color:#e0c08b;font-size:10px;padding:5px 10px;cursor:pointer}
+.port-foot button:disabled{opacity:.4}
+.port-mini{font-size:9px;color:#7e8c85;margin-top:8px}

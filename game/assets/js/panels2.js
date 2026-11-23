@@ -326,6 +326,17 @@ export function buildInspectPanel(body, ctx) {
       const cmd = el('button', 'act-btn act-sub', '调度命令');
       cmd.addEventListener('click', () => { if (ctx.openCommand) ctx.openCommand(t.id); });
       row.append(cmd);
+      const auto = el('button', 'act-btn act-sub', t.autoRelease ? '本列改人工' : '本列自动放行');
+      auto.addEventListener('click', () => { sim.setTrainAutoRelease(t.id, !t.autoRelease); toast(`${t.no} ${t.autoRelease ? '转人工放行' : '转自动放行'}`, 'ok'); render(); });
+      row.append(auto);
+      const hold = el('button', 'act-btn act-sub', t.manualHold ? '解除扣车' : '扣住本列');
+      hold.addEventListener('click', () => {
+        const was = !!t.manualHold;
+        if (was) sim.resumeTrain(t.id); else sim.holdTrain(t.id);
+        toast(`${t.no} ${was ? '已解除扣车' : '已扣车'}`, 'ok');
+        render();
+      });
+      row.append(hold);
       actions.append(row);
     }
 

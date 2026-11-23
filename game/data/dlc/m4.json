@@ -1,0 +1,1 @@
+{"id": "m4", "tier": "mechanic", "name": "恶劣天气", "version": "0.1.0", "hook": "天气到限速到待避的链条", "items": ["雨雪雾风", "限速", "除雪", "防洪"], "dep": "v0.5", "feature": "weather", "bytes": 4126}

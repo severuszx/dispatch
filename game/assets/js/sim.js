@@ -1,5 +1,12 @@
 import { clamp, fmtClock, hash, rnd } from './util.js';
 import { trainSpec, sceneBureau, sceneRoute, trainClass } from './fleet.js';
+import { Interlock } from './interlock.js';
+import { migrateScene, validateScene } from './schema.js';
+import { careerFactor, staffHas } from './career.js';
+import { trackBonus, platformExtra, crewExtra, faultFactor } from './upgrades.js';
+import { contractTrains, tickContracts } from './contracts.js';
+import { modifierFor } from './consequences.js';
+import { activeMod, modTotal } from './mods.js';
 
 const BASE_SECTION_MIN = { qinglan: 28, jiangwan: 12, linhe: 4 };
 const PRIORITY_LABEL = { 1: 'G', 2: 'D', 3: 'Z/T', 4: 'K', 5: '普快', 6: '货', 7: '路用', 8: '救援', 9: '专运' };
@@ -31,6 +38,7 @@ class Sim {
     this.timer = null;
     this.speed = 1;
     this.paused = false;
+    this.interlock = new Interlock();
     this.reset();
   }
 
@@ -48,7 +56,7 @@ class Sim {
     this.activeEvents = [];
     this.eventHistory = [];
     this.log = [];
-    this.conditions = { speedLimits: [], blockSections: [], blockTracks: [], extraDwell: 0, crewStress: 0, phoneBlock: false, localControl: false };
+    this.conditions = { speedLimits: [], blockSections: [], blockTracks: [], extraDwell: 0, crewStress: 0, phoneBlock: false, localControl: false, powerOut: false, commOut: false, tempLimit: 0 };
     this.control = new Set();
     this.focusStation = null;
     this.hubMode = false;
@@ -90,6 +98,7 @@ class Sim {
   }
 
   setup(scene, mode, realism, sandbox, difficulty, ttVersion) {
+    scene = migrateScene(scene);
     this.scene = scene;
     this.mode = mode;
     this.difficulty = difficulty || 'standard';
@@ -98,6 +107,7 @@ class Sim {
     this.realism = { ...REALISM_DEFAULT, ...(realism || {}) };
     this.sandbox = sandbox || {};
     this.reset();
+    if (staffHas('guide')) this.limits.guide = true;
     if (scene.hub && this.hubDatas && this.hubDatas[scene.hub]) return this.setupHub(scene);
     this.weather = scene.weather || '晴';
     const lineId = scene.line;
@@ -110,13 +120,21 @@ class Sim {
     this.control = new Set([this.focusStation]);
     const trains = this.timetable[lineId].slice(0, scene.trains || 10);
     this.trains = trains.map((t) => this.makeTrain(t));
+    const extra = modTotal('extra');
+    if (extra > 0) {
+      const more = this.timetable[lineId].slice(trains.length, trains.length + extra).map((t) => this.makeTrain(t));
+      this.trains.push(...more);
+    }
+    if (!scene.hub) this.trains.push(...contractTrains(lineId).map((t) => this.makeTrain(t)));
     this.metrics.total = this.trains.length;
     for (const st of this.stationOrder) {
       const conf = this.stations[st];
       const list = [];
-      const count = conf.tracks || 1;
+      const bonus = trackBonus(st);
+      const count = (conf.tracks || 1) + bonus;
       const half = Math.ceil(count / 2);
-      for (let i = 1; i <= count; i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null, lenM: i > half ? 650 : 520 });
+      const extraLen = platformExtra(st) ? 300 : 0;
+      for (let i = 1; i <= count; i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null, lenM: (i > half ? 650 : 520) + extraLen, newBuild: i > (conf.tracks || 1) });
       this.tracks.set(st, list);
     }
     for (const t of this.trains) {
@@ -124,8 +142,11 @@ class Sim {
       const ft = this.freeTrack(t.station, 0, t);
       if (ft) { ft.train = t.id; t.trackNo = ft.no; }
     }
+    this.interlock.init(this);
     this.startClock = 360;
     this.limits = { late: scene.lateLimit || 15, wait: scene.waitLimit || 12 };
+    this.limits.wait = Math.max(6, this.limits.wait + careerFactor('crew') + modTotal('wait') + crewExtra(this.focusStation) * 2);
+    this.applyShiftMod();
     this.clock = 360;
     this.eventPool = this.eventsForScene(scene);
     this.nextEventAt = 360 + Math.round((6 + Math.floor(rnd(hash(scene.id))() * 8)) / this.diffFactor());
@@ -172,12 +193,15 @@ class Sim {
       for (let i = 1; i <= count; i += 1) list.push({ no: i, train: null, blocked: false, reserved: false, until: null, lenM: i > half ? 650 : 520 });
       this.tracks.set(id, list);
     });
+    this.interlock.init(this);
     const baseStart = scene.start == null ? 360 : scene.start;
     const firstArr = (this.hub.trains || [])
       .filter((t) => this.stationOrder.includes(t.yard) && t.arr != null)
       .reduce((m, t) => Math.min(m, t.arr), Infinity);
     this.startClock = Math.max(baseStart, Number.isFinite(firstArr) ? firstArr : baseStart);
     this.limits = { late: scene.lateLimit || 15, wait: scene.waitLimit || 12 };
+    this.limits.wait = Math.max(6, this.limits.wait + careerFactor('crew') + modTotal('wait'));
+    this.applyShiftMod();
     this.clock = this.startClock;
     this.trains = (this.hub.trains || [])
       .filter((t) => this.stationOrder.includes(t.yard))
@@ -220,7 +244,10 @@ class Sim {
     const passenger = ['K', 'T', 'Z'].includes(raw.type);
     if (!raw.through && !tasks.length) {
       const add = (kind, title, min) => {
-        tasks.push({ id: `${raw.id}-task-${tasks.length}`, kind, title, min, left: min, state: 'wait' });
+        const cut = kind === 'check' ? careerFactor('platform') - modTotal('board') : kind === 'shunt' || kind === 'load' ? careerFactor('track') : 0;
+        const cut2 = cut - modTotal('task');
+        const real = Math.max(2, min - cut2);
+        tasks.push({ id: `${raw.id}-task-${tasks.length}`, kind, title, min: real, left: real, state: 'wait' });
       };
       if (freight) {
         add('check', '货票核验', 3);
@@ -303,11 +330,18 @@ class Sim {
         this.finishTask(t, task);
       }
       if (this.clock < t.planDep) continue;
+      if (t.manualHold) { t.hold = true; continue; }
       if (t.through) { this.leaveHub(t); continue; }
       if (this.isStationControlled(t.station) && !t.release) {
-        t.hold = true;
-        t.late = Math.max(t.late, this.clock - t.planDep);
-        continue;
+        if (t.autoRelease) {
+          t.release = true;
+          t.hold = false;
+          this.pushLog(`${t.no} 按自动放行计划开车`);
+        } else {
+          t.hold = true;
+          t.late = Math.max(t.late, this.clock - t.planDep);
+          continue;
+        }
       }
       const block = this.departBlock(t);
       if (block) {
@@ -471,6 +505,11 @@ class Sim {
   freeTrack(station, dir = 0, t = null) {
     const list = this.tracks.get(station) || [];
     let free = list.filter((tr) => !tr.train && !tr.blocked && !tr.reserved);
+    if (t && !this.hubMode && this.mechanicPlatform && !t.freight) {
+      const conf = this.stations[station];
+      const plat = free.filter((tr) => this.trackRole(conf, tr.no) === 'platform');
+      if (plat.length) free = plat;
+    }
     if (t && this.hubMode) {
       const conf = this.stations[station];
       free = free.filter((tr) => {
@@ -513,8 +552,10 @@ class Sim {
     this.clock += 1;
     if (this.hubMode) this.tickHub();
     else this.tickTrains();
+    if (this.interlock) this.interlock.sync(this);
     this.tickSections();
     this.tickEvents();
+    this.tickMechanics();
     this.tickFeed();
     this.tickAlarms();
     this.evaluate();
@@ -606,6 +647,15 @@ class Sim {
   }
 
   depart(t) {
+    if (this.mechanicCrew && t.loco && this.locoAt) {
+      const last = this.locoAt[t.loco];
+      if (last != null && this.clock - last < 30) {
+        t.late += 1;
+        this.alarm('机车交路', `${t.no} 与上一趟共用 ${t.loco}，间隔不足 30 分`, 'warn');
+        this.pushLog(`${t.no} 机车 ${t.loco} 未回送，晚 1 分`);
+      }
+      this.locoAt[t.loco] = this.clock;
+    }
     let trackNo = t.trackNo;
     const list = this.tracks.get(t.station) || [];
     if (!trackNo) {
@@ -622,7 +672,8 @@ class Sim {
     const next = t.stops[t.stopIdx + 1].st;
     t.originTrack = trackNo;
     t.departAt = this.clock;
-    t.arriveAt = this.clock + this.sectionMin(t.station, next);
+    const trafficHold = (this.trafficDelay && this.trafficDelay[t.station]) || 0;
+    t.arriveAt = this.clock + this.sectionMin(t.station, next) + trafficHold;
     t.status = 'running';
     t.release = false;
     t.hold = false;
@@ -640,6 +691,10 @@ class Sim {
     const list = this.tracks.get(t.station) || [];
     const tr = list.find((x) => x.no === t.trackNo);
     if (tr && tr.train === t.id) tr.train = null;
+    if (this.interlock && t.routeId) {
+      this.interlock.clear(t.routeId, `${t.no} 出清`);
+      t.routeId = null;
+    }
     t.trackNo = null;
   }
 
@@ -946,8 +1001,123 @@ class Sim {
     return true;
   }
 
-  isStationControlled(id) {
-    return this.control.has(id);
+  requestRoute(trainId, station, trackNo, type = 'receive') {
+    if (!this.interlock) return { ok: false, msg: '联锁模块未加载' };
+    if (this.conditions.powerOut) return { ok: false, msg: '接触网停电，禁止办理进路' };
+    if (this.conditions.commOut) return { ok: false, msg: '通信中断，需现场人工确认' };
+    return this.interlock.request(station, trackNo, type, trainId);
+  }
+
+  applyShiftMod() {
+    const m = activeMod();
+    if (!m || !m.effect) return;
+    if (m.effect.weather) this.weather = m.effect.weather;
+    if (m.effect.limit) this.temporaryLimit = m.effect.limit;
+    if (m.effect.block) {
+      for (const id of this.stationOrder || []) {
+        const tr = (this.tracks.get(id) || []).find((x) => x.no === m.effect.block);
+        if (tr) { tr.blocked = true; tr.until = (this.startClock || this.clock) + 60; }
+      }
+    }
+    if (m.effect.window) this.nextEventAt = Math.max((this.startClock || 360) + 5, (this.nextEventAt || 0) + m.effect.window);
+    if (m.effect.strict) this.realism.orderCheck = 1;
+  }
+
+  tickMechanics() {
+    if (this.mechanicCrew && this.clock % 180 === 0 && this.clock > (this.startClock || 0)) {
+      this.conditions.extraDwell = Math.min(4, (this.conditions.extraDwell || 0) + 1);
+      this.pushLog('乘务叫班，后续办客停站 +1 分');
+    }
+    if (this.mechanicEmergency && (this.metrics.incidents || 0) > 0 && this.clock % 60 === 0) {
+      for (const t of this.trains) {
+        if (t.status === 'station' && t.dwellLeft > 0) t.dwellLeft += 2;
+      }
+      this.pushLog('事故起复占用咽喉，在站列车恢复 +2 分');
+    }
+  }
+
+  tickFaults() {
+    if (!this.interlock || this.difficulty === 'easy') return;
+    if (this.clock < 20 || this.clock % 10 !== 0) return;
+    if (this.clock - (this.lastFaultAt || -99) < 25) return;
+    const base = this.difficulty === 'hard' || this.difficulty === 'expert' ? 0.09 : 0.045;
+    if (Math.random() > base * (1 - careerFactor('signal') + modTotal('fault')) * faultFactor(this.focusStation) * (1 + modifierFor('fault')) * (this.mechanicFaultBoost || 1)) return;
+    const st = this.focusStation;
+    const kinds = ['redband', 'switch', 'signal'];
+    const kind = kinds[Math.floor(Math.random() * kinds.length)];
+    const track = 1 + Math.floor(Math.random() * 2);
+    const r = this.injectFault(st, kind, track);
+    if (r.ok) {
+      this.lastFaultAt = this.clock;
+      this.metrics.incidents = (this.metrics.incidents || 0) + 1;
+    }
+  }
+
+  injectFault(station, kind, trackNo) {
+    if (!this.interlock) return { ok: false, msg: '联锁模块未加载' };
+    return this.interlock.inject(station, kind, trackNo);
+  }
+
+  recoverFault(station, kind, trackNo) {
+    if (!this.interlock) return false;
+    return this.interlock.recover(station, kind, trackNo);
+  }
+
+  setWeather(w) {
+    this.weather = String(w || '晴');
+    const heavy = /暴雨|大雪|大雾|大风/.test(this.weather);
+    this.conditions.extraDwell = heavy ? 2 : this.weather === '小雨' ? 1 : 0;
+    if (heavy && this.stationOrder && this.stationOrder.length > 1) {
+      for (let i = 0; i < this.stationOrder.length - 1; i += 1) {
+        const a = this.stationOrder[i];
+        const b = this.stationOrder[i + 1];
+        if (!this.conditions.speedLimits.some((x) => x.a === a && x.b === b && x.until > this.clock)) {
+          this.conditions.speedLimits.push({ a, b, speed: this.weather === '大雾' ? 25 : 45, until: this.clock + 120 });
+        }
+      }
+    }
+    this.pushLog(`天气转为${this.weather}`);
+    this.emit('condition');
+    return true;
+  }
+
+  setTemporaryLimit(a, b, speed, minutes) {
+    this.conditions.speedLimits.push({ a, b, speed, until: this.clock + Math.max(5, minutes || 30) });
+    this.pushLog(`${a}—${b} 临时限速 ${speed} km/h，${minutes || 30} 分`);
+    this.emit('condition');
+  }
+
+  openConstruction(station, trackNo, minutes) {
+    const list = this.tracks.get(station) || [];
+    const tr = list.find((x) => x.no === trackNo);
+    if (!tr) return { ok: false, msg: '股道不存在' };
+    tr.blocked = true;
+    tr.until = this.clock + Math.max(10, minutes || 60);
+    this.conditions.blockTracks.push({ station, track: trackNo, until: tr.until });
+    this.alarm('施工天窗', `${this.stations[station].name} ${trackNo} 道封锁 ${minutes || 60} 分`, 'warn');
+    this.pushLog(`施工天窗：${this.stations[station].name} ${trackNo} 道封锁`);
+    this.emit('condition');
+    return { ok: true, msg: '天窗已登记' };
+  }
+
+  rescheduleTrain(id, delta) {
+    const t = this.getTrain(id);
+    if (!t) return false;
+    const d = Math.round(delta);
+    t.planDep += d;
+    t.planArr += d;
+    t.dep += d;
+    t.arr += d;
+    for (const stop of t.stops || []) {
+      if (stop.arr != null) stop.arr += d;
+      if (stop.dep != null) stop.dep += d;
+    }
+    for (const p of t.trace || []) p.m += d;
+    t.late = Math.max(0, this.clock - t.planDep);
+    this.decisions.push({ t: this.clock, event: 'regraph', title: '运行图改点', branch: `${t.no} ${d > 0 ? '+' : ''}${d} 分`, risk: '中', train: t.no });
+    this.pushLog(`运行图改点：${t.no} ${d > 0 ? '+' : ''}${d} 分`);
+    this.emit('reschedule');
+    return true;
   }
 
   setStationControl(id, on) {
@@ -957,6 +1127,10 @@ class Sim {
     this.pushLog(`${on ? '接管' : '交回'} ${this.stations[id].name} 站控`);
     this.emit('control');
     return true;
+  }
+
+  isStationControlled(id) {
+    return this.control ? this.control.has(id) : false;
   }
 
   toggleStationControl(id) {
@@ -973,6 +1147,44 @@ class Sim {
     this.emit('control');
   }
 
+  holdTrain(id) {
+    const t = this.getTrain(id);
+    if (!t) return false;
+    t.manualHold = true;
+    t.autoRelease = false;
+    t.release = false;
+    t.hold = true;
+    this.pushLog(`${t.no} 扣车`);
+    this.emit('control');
+    return true;
+  }
+
+  resumeTrain(id) {
+    const t = this.getTrain(id);
+    if (!t) return false;
+    t.manualHold = false;
+    this.pushLog(`${t.no} 恢复运行`);
+    this.emit('control');
+    return true;
+  }
+
+  setTrainAutoRelease(id, on) {
+    const t = this.getTrain(id);
+    if (!t) return false;
+    t.manualHold = false;
+    t.autoRelease = !!on;
+    if (on) {
+      t.release = true;
+      t.hold = false;
+      this.pushLog(`${t.no} 转为自动放行`);
+    } else {
+      t.release = false;
+      this.pushLog(`${t.no} 转回人工放行`);
+    }
+    this.emit('control');
+    return true;
+  }
+
   releaseTrain(id) {
     const t = this.getTrain(id);
     if (!t) return false;
@@ -986,7 +1198,9 @@ class Sim {
     }
     t.release = true;
     t.hold = false;
-    this.pushLog(`${t.no} 放行`);
+    t.manualHold = false;
+    t.autoRelease = false;
+    this.pushLog(`${t.no} 人工放行`);
     this.emit('control');
     return true;
   }
@@ -1150,6 +1364,7 @@ class Sim {
       clock: this.clock, clockText: fmtClock(this.clock), scene: this.scene, mode: this.mode,
       startClock: this.startClock,
       trains: this.trains, tracks: this.tracks, sections: this.sections, alarms: this.alarms,
+      interlock: this.interlock ? this.interlock.snapshot() : null,
       metrics: this.metrics, resources: this.resources, conditions: this.conditions,
       control: [...this.control],
       events: this.activeEvents, decisions: this.decisions, log: this.log,

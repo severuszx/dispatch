@@ -1,0 +1,33 @@
+{
+  "id": "c6",
+  "tier": "line",
+  "name": "东北线",
+  "version": "0.1.0",
+  "hook": "严寒、融雪、冻害",
+  "items": [
+    "哈尔滨",
+    "齐齐哈尔",
+    "融雪",
+    "冻害",
+    "东北专属事件"
+  ],
+  "dep": "v0.7",
+  "feature": "line-dongbei",
+  "bytes": 5347,
+  "scene": {
+    "id": "c6-scene",
+    "kind": "pack",
+    "title": "东北线 · 严寒",
+    "line": "qinglan",
+    "brief": "哈尔滨到齐齐哈尔，融雪、冻害、除冰车都要排进运行线。",
+    "terms": [
+      "融雪",
+      "冻害",
+      "除冰"
+    ],
+    "duration": 360,
+    "difficulty": 3,
+    "weather": "雪",
+    "trains": 10
+  }
+}

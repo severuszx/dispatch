@@ -576,7 +576,7 @@ button { cursor: pointer; }
 .coach-foot .btn { height: 25px; padding: 0 10px; font-size: 10.5px; }
 .coach-target { outline: 1px solid var(--amber) !important; outline-offset: 1px; background-color: #1c1a13 !important; }
 
-.event-modal { position: fixed; inset: 0; z-index: 190; display: flex; align-items: center; justify-content: center; }
+.event-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
 .em-shade { position: absolute; inset: 0; background: rgba(3, 5, 6, .72); }
 .em-card {
   position: relative;
@@ -627,4 +627,15 @@ button { cursor: pointer; }
   .boot-frame { width: 100vw; height: 100vh; border: 0; }
   .boot-main { grid-template-columns: 160px minmax(0, 1fr); }
   .boot-summary { display: none; }
-}
+}.mod-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; border:1px solid var(--line); background:var(--line); }
+.mod-card { background:var(--panel2); border-top:2px solid transparent; padding:10px; cursor:pointer; min-height:70px; }
+.mod-card:hover { background:#191f23; }
+.mod-card.on { border-top-color:var(--amber); background:#1a1c18; }
+.mod-card .mod-name { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.mod-card .mod-name b { font-size:12px; }
+.mod-card .mod-tone { font-family:var(--mono); font-size:9px; color:var(--faint); }
+.mod-card p { color:var(--dim); font-size:10px; line-height:1.6; margin-top:7px; }
+.mod-card.on p { color:#b3ae9e; }
+.mod-card.risk .mod-tone { color:var(--amber); }
+.mod-card.debuff .mod-tone { color:var(--red); }
+.mod-card.buff .mod-tone { color:var(--green); }

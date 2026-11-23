@@ -1,0 +1,33 @@
+{
+  "id": "c2",
+  "tier": "line",
+  "name": "焦柳线",
+  "version": "0.1.0",
+  "hook": "三线交汇与山区限速",
+  "items": [
+    "月山",
+    "襄阳",
+    "张家界",
+    "山区限速",
+    "焦柳专属事件"
+  ],
+  "dep": "v0.5",
+  "feature": "line-jiaoliu",
+  "bytes": 5347,
+  "scene": {
+    "id": "c2-scene",
+    "kind": "pack",
+    "title": "焦柳线 · 山区限速",
+    "line": "qinglan",
+    "brief": "月山到张家界，三线交汇后进山，限速与会让挤在一张图上。",
+    "terms": [
+      "山区限速",
+      "会让",
+      "三线交汇"
+    ],
+    "duration": 360,
+    "difficulty": 3,
+    "weather": "雨",
+    "trains": 12
+  }
+}

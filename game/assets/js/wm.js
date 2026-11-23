@@ -85,6 +85,7 @@ export function createWindow(def) {
   if (!pane) {
     pane = document.createElement('div');
     pane.className = 'drawer-win';
+    if (id === 'admin' || id === 'dlc' || id === 'yard' || id === 'bureau') pane.classList.add('wide-panel');
     pane.dataset.win = id;
     const head = document.createElement('div');
     head.className = 'drawer-head';
@@ -99,7 +100,7 @@ export function createWindow(def) {
     const idx = [...deskEl.querySelectorAll('.drawer-win')].length - 1;
     pane.style.top = `${8 + idx * 10}px`;
     pane.style.right = `${8 + idx * 10}px`;
-    pane.style.height = def.h ? `${Math.min(def.h, deskEl.clientHeight - 20)}px` : '58%';
+    pane.style.height = def.h ? `${Math.min(def.h > 1 ? def.h : deskEl.clientHeight * 0.58, deskEl.clientHeight - 20)}px` : '58%';
     close.addEventListener('click', () => {
       pane.classList.add('hidden');
     });

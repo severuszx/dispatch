@@ -1,0 +1,33 @@
+{
+  "id": "c3",
+  "tier": "line",
+  "name": "宝成线",
+  "version": "0.1.0",
+  "hook": "展线、坡道、单线会让",
+  "items": [
+    "秦岭",
+    "广元",
+    "观音山展线",
+    "坡道起车",
+    "宝成专属事件"
+  ],
+  "dep": "v0.5",
+  "feature": "line-baocheng",
+  "bytes": 5353,
+  "scene": {
+    "id": "c3-scene",
+    "kind": "pack",
+    "title": "宝成线 · 观音山展线",
+    "line": "qinglan",
+    "brief": "秦岭北坡三层展线，坡道起车和单线会让他们互相等。",
+    "terms": [
+      "展线",
+      "坡道起车",
+      "单线会让"
+    ],
+    "duration": 420,
+    "difficulty": 3,
+    "weather": "雾",
+    "trains": 8
+  }
+}

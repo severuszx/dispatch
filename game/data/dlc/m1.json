@@ -1,0 +1,1 @@
+{"id": "m1", "tier": "mechanic", "name": "调车作业", "version": "0.1.0", "hook": "推送、牵出、连挂、摘挂、溜放", "items": ["调车计划", "推送牵出", "连挂摘挂", "溜放"], "dep": "v0.5", "feature": "shunt", "bytes": 4138}

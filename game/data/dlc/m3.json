@@ -1,0 +1,1 @@
+{"id": "m3", "tier": "mechanic", "name": "设备故障与降级", "version": "0.1.0", "hook": "故障改变联锁可用进路", "items": ["红光带", "道岔失表", "信号灭灯", "引导接车"], "dep": "v0.5", "feature": "degrade", "bytes": 4141}
