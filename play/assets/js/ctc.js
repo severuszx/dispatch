@@ -1,10 +1,19 @@
-const COL = {
+const LIGHT = {
   bg: '#f7f8f9', frame: '#dce3e9', grid: '#edf1f4',
   line: '#26313e', lineDim: '#cbd3db', track: '#26313e', idle: '#9aa6b2',
   text: '#18222d', dim: '#536170', faint: '#8b98a5',
   green: '#2e9e6b', amber: '#d5891f', red: '#e84b30', white: '#ffffff',
   train: '#ffffff', trainBox: '#ffffff',
 };
+const DARK = {
+  bg: '#11161a', frame: '#283239', grid: '#192126',
+  line: '#d3dbdc', lineDim: '#35434b', track: '#c6d0d2', idle: '#53636c',
+  text: '#e2e8e6', dim: '#95a3a1', faint: '#60706e',
+  green: '#56b584', amber: '#e0a63b', red: '#f2644d', white: '#ffffff',
+  train: '#f3f1e8', trainBox: '#f3f1e8',
+};
+let COL = { ...LIGHT };
+function syncPalette() { COL = document.body.dataset.theme === 'control' ? DARK : LIGHT; }
 
 function fmt(m) {
   if (typeof m !== 'number') return '';
@@ -103,6 +112,7 @@ export class CTCView {
   }
 
   draw() {
+    syncPalette();
     const ctx = this.ctx;
     ctx.fillStyle = COL.bg;
     ctx.fillRect(0, 0, this.w, this.h);
@@ -122,7 +132,9 @@ export class CTCView {
     this.drawYard(s);
     this.drawLegend();
     const entering = (s.trains || []).some((t) => (t.status === 'station' && t.enterWall && performance.now() - t.enterWall < 1600)
-      || (t.status === 'running' && t.departWall && performance.now() - t.departWall < 6100));
+      || (t.status === 'running' && t.departWall && performance.now() - t.departWall < 6100)
+      || (t.status === 'station' && (t.tasks || []).some((x) => x.kind === 'check' && x.state === 'active'))
+      || (t.status === 'station' && (t.tasks || []).some((x) => x.kind === 'load' && x.state === 'active')));
     if (entering && !this.frame) {
       this.frame = requestAnimationFrame(() => { this.frame = 0; this.draw(); });
     }
@@ -585,6 +597,7 @@ export class CTCView {
 
       lead(throatL, mainY, trackL, ty);
       lead(throatR, mainY, trackR, ty);
+      this.platformBand(ctx, trackL, trackR, ty, role, k);
 
       ctx.save();
       ctx.shadowColor = blocked || reserved ? 'rgba(213,137,31,.55)' : busy ? 'rgba(232,75,48,.35)' : 'transparent';
@@ -627,13 +640,6 @@ export class CTCView {
       ctx.fillStyle = COL.dim;
       ctx.textAlign = 'right';
       ctx.fillText(String(k + 1), trackL - 22, ty - 10);
-      if (role !== 'mixed') {
-        this.font(8, true);
-        ctx.fillStyle = role === 'freight' ? COL.amber : COL.faint;
-        ctx.textAlign = 'right';
-        ctx.fillText(role === 'freight' ? '货场' : '站台', trackR - 4, ty - 10);
-        ctx.textAlign = 'left';
-      }
 
       if (busy) {
         const t = s.trains.find((tt) => tt.id === busy);
@@ -654,6 +660,8 @@ export class CTCView {
           ctx.textAlign = 'left';
         }
       }
+      const tt = busy ? s.trains.find((x) => x.id === busy) : null;
+      if (tt) this.drawBoarding(ctx, s, id, k, ty, trackL, trackR, tt);
       this.hit.push({ type: 'track', station: id, track: k + 1, x: trackL, y: ty - 14, w: trackR - trackL, h: 28 });
     }
 
@@ -688,6 +696,125 @@ export class CTCView {
         this.drawTrainAt(t, throatL - (throatL - entry) * q, downY, false, .9);
       }
     }
+  }
+
+
+  platformBand(ctx, x1, x2, y, role, k) {
+    const w = x2 - x1;
+    if (role === 'platform') {
+      const g = ctx.createLinearGradient(0, y - 12, 0, y + 12);
+      g.addColorStop(0, '#f5f0e2');
+      g.addColorStop(.5, '#ebe4d1');
+      g.addColorStop(1, '#ded5bf');
+      ctx.fillStyle = g;
+      ctx.fillRect(x1, y - 12, w, 24);
+      ctx.strokeStyle = '#c9bd9f';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x1 + .5, y - 11.5, w - 1, 23);
+      ctx.strokeStyle = '#d9b23c';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x1 + 6, y + 8.5);
+      ctx.lineTo(x2 - 6, y + 8.5);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(138,124,96,.28)';
+      ctx.lineWidth = 1;
+      for (let x = x1 + 14; x < x2 - 8; x += 28) {
+        ctx.beginPath();
+        ctx.moveTo(x, y - 10);
+        ctx.lineTo(x, y + 5);
+        ctx.stroke();
+      }
+      const bob = Math.sin(performance.now() / 900 + k) * 1.2;
+      for (let i = 0; i < 5; i += 1) {
+        const px = x1 + 26 + i * Math.max(24, w / 9);
+        if (px > x2 - 10) break;
+        ctx.fillStyle = i % 2 ? '#47536a' : '#6a5748';
+        ctx.beginPath();
+        ctx.arc(px, y - 13 + bob, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(px - 1.7, y - 11 + bob, 3.4, 6);
+      }
+      this.font(8, true);
+      const label = `${k + 1} 站台`;
+      const tw = ctx.measureText(label).width + 12;
+      ctx.fillStyle = '#2f6b4f';
+      ctx.fillRect(x1 + 4, y - 24, tw, 13);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x1 + 10, y - 17.5);
+    } else if (role === 'freight') {
+      ctx.fillStyle = '#ded9cb';
+      ctx.fillRect(x1, y - 12, w, 24);
+      ctx.strokeStyle = '#b5aa91';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x1 + .5, y - 11.5, w - 1, 23);
+      ctx.strokeStyle = 'rgba(120,104,76,.42)';
+      for (let x = x1 - 16; x < x2; x += 14) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + 10);
+        ctx.lineTo(x + 16, y - 10);
+        ctx.stroke();
+      }
+      const boxes = Math.max(3, Math.min(7, Math.round(w / 64)));
+      for (let i = 0; i < boxes; i += 1) {
+        const bx = x1 + 14 + i * ((w - 28) / boxes);
+        const bh = 7 + (i % 3) * 2;
+        ctx.fillStyle = i % 3 === 0 ? '#8c6a43' : i % 3 === 1 ? '#7d8466' : '#a57b4e';
+        ctx.fillRect(bx, y - 10 - bh, 16, bh);
+        ctx.strokeStyle = 'rgba(58,48,34,.4)';
+        ctx.strokeRect(bx + .5, y - 9.5 - bh, 15, bh - 1);
+      }
+      this.font(8, true);
+      const label = `${k + 1} 货位`;
+      const tw = ctx.measureText(label).width + 12;
+      ctx.fillStyle = '#7a5527';
+      ctx.fillRect(x1 + 4, y - 24, tw, 13);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, x1 + 10, y - 17.5);
+    }
+  }
+
+  boardingState(s, id, k, t) {
+    if (!t || t.status !== 'station' || !t.trackNo) return null;
+    const task = (t.tasks || []).find((x) => x.kind === 'check' && x.state === 'active');
+    if (!task) return null;
+    return { task, p: 1 - Math.max(0, task.left) / Math.max(1, task.min) };
+  }
+
+  drawBoarding(ctx, s, id, k, trackY, trackL, trackR, t) {
+    const st = this.boardingState(s, id, k, t);
+    if (!st) return;
+    const p = st.p;
+    const n = 6;
+    const baseY = trackY + 8;
+    const doorX = (trackL + trackR) / 2 - 28;
+    for (let i = 0; i < n; i += 1) {
+      const p2 = Math.max(0, Math.min(1, p * 1.7 - i * 0.09));
+      if (p2 <= 0) continue;
+      const sx = trackL + 24 + i * Math.max(20, (trackR - trackL - 60) / 7);
+      const x = sx + (doorX - sx) * p2;
+      const y = baseY - Math.sin(p2 * Math.PI) * 6 - (i % 3) * 1.5;
+      ctx.fillStyle = i % 2 ? '#3d5474' : '#6d4b3d';
+      ctx.beginPath();
+      ctx.arc(x, y - 7, 1.9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(x - 2, y - 5, 4, 7);
+    }
+    this.font(8, true);
+    const label = `乘降 ${Math.round(p * 100)}%`;
+    const tw = ctx.measureText(label).width + 10;
+    ctx.fillStyle = 'rgba(47,107,79,.92)';
+    ctx.fillRect(trackR - tw - 4, trackY - 38, tw, 13);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, trackR - tw + 1, trackY - 31.5);
+    ctx.strokeStyle = 'rgba(47,107,79,.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc((trackL + trackR) / 2, trackY, 15, 0, Math.PI * 2 * p);
+    ctx.stroke();
   }
 
   drawApproachTag(t, x, y, station, idx) {

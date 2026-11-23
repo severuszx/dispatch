@@ -1,0 +1,35 @@
+{
+  "id": "c1",
+  "tier": "line",
+  "name": "宁西线",
+  "version": "0.1.0",
+  "hook": "南阳折角换向，京广京九交汇",
+  "items": [
+    "南阳",
+    "信阳",
+    "潢川",
+    "固始",
+    "商城",
+    "折角换向",
+    "宁西专属事件"
+  ],
+  "dep": "v0.5",
+  "feature": "line-ningxi",
+  "bytes": 5356,
+  "scene": {
+    "id": "c1-scene",
+    "kind": "pack",
+    "title": "宁西线 · 南阳折角",
+    "line": "qinglan",
+    "brief": "南阳站折角换向，京广与京九方向接续，三方向同时压进咽喉。",
+    "terms": [
+      "折角换向",
+      "接续",
+      "咽喉"
+    ],
+    "duration": 300,
+    "difficulty": 2,
+    "weather": "晴",
+    "trains": 10
+  }
+}

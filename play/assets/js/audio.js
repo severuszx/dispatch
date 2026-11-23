@@ -32,6 +32,10 @@ export class AudioEngine {
     this.musicOn = false;
     this.on = true;
     this.trackId = null;
+    this.bed = [];
+    this.bedTimer = null;
+    this.synth = window.speechSynthesis || null;
+    this.lastVoice = 0;
   }
 
   ensure() {
@@ -124,7 +128,87 @@ export class AudioEngine {
     const track = TRACKS[trackId] || TRACKS.day;
     this.stopAmbience();
     this.ambience(track.room, track.rain);
+    this.detail(trackId);
     this.music(trackId);
+  }
+
+  detail(trackId) {
+    if (!this.ctx || !this.ambBus) return;
+    this.stopDetail();
+    const c = this.ctx;
+    const hum = c.createOscillator();
+    const hg = c.createGain();
+    hum.type = 'sine';
+    hum.frequency.value = 49;
+    hg.gain.value = trackId === 'night' ? 0.008 : 0.005;
+    hum.connect(hg).connect(this.ambBus);
+    hum.start();
+    this.bed.push(hum);
+    const wind = c.createBufferSource();
+    wind.buffer = this.noiseBuf;
+    wind.loop = true;
+    const flt = c.createBiquadFilter();
+    flt.type = 'bandpass';
+    flt.frequency.value = trackId === 'night' ? 220 : 340;
+    flt.Q.value = 0.28;
+    const wg = c.createGain();
+    wg.gain.value = trackId === 'rain' || trackId === 'typhoon' ? 0.045 : 0.012;
+    wind.connect(flt).connect(wg).connect(this.ambBus);
+    wind.start();
+    this.bed.push(wind);
+    if (trackId !== 'night') {
+      this.bedTimer = setInterval(() => {
+        if (!this.on || !this.ctx) return;
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.noiseBuf;
+        const bp = this.ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 3200;
+        bp.Q.value = 1.2;
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(0.028, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.045);
+        src.connect(bp).connect(g).connect(this.ambBus);
+        src.start();
+        src.stop(this.ctx.currentTime + 0.06);
+      }, 9000 + Math.random() * 9000);
+    }
+  }
+
+  stopDetail() {
+    if (this.bedTimer) clearInterval(this.bedTimer);
+    this.bedTimer = null;
+    this.bed.forEach((x) => { try { x.stop(); } catch (e) {} });
+    this.bed = [];
+  }
+
+  chime() {
+    this.tone(660, 0.18, 0.04);
+    this.tone(880, 0.24, 0.035, 0.22);
+  }
+
+  voice(text) {
+    if (!this.on || !text || !this.synth || !window.SpeechSynthesisUtterance) return;
+    const now = Date.now();
+    if (now - this.lastVoice < 900) return;
+    this.lastVoice = now;
+    try {
+      this.synth.cancel();
+      const u = new SpeechSynthesisUtterance(String(text).slice(0, 90));
+      const voices = this.synth.getVoices();
+      const zh = voices.find((v) => /zh|Chinese|中文/i.test(`${v.lang} ${v.name}`));
+      if (zh) u.voice = zh;
+      u.lang = 'zh-CN';
+      u.rate = 0.88;
+      u.pitch = 0.82;
+      u.volume = 0.72;
+      this.synth.speak(u);
+    } catch (e) {}
+  }
+
+  announce(text) {
+    this.chime();
+    setTimeout(() => this.voice(text), 380);
   }
 
   music(trackId) {
@@ -202,6 +286,7 @@ export class AudioEngine {
 
   stop() {
     this.stopAmbience();
+    this.stopDetail();
     this.stopMusic();
     this.trackId = null;
   }

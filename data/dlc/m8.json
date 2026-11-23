@@ -1,0 +1,1 @@
+{"id": "m8", "tier": "mechanic", "name": "应急指挥", "version": "0.1.0", "hook": "事件处置变成指挥流程", "items": ["事故起复", "救援列车", "多部门联动"], "dep": "v0.7", "feature": "emergency", "bytes": 4135}

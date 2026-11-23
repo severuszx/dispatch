@@ -1,0 +1,337 @@
+[
+  {
+    "id": "c1",
+    "tier": "line",
+    "name": "宁西线",
+    "version": "0.1.0",
+    "hook": "南阳折角换向，京广京九交汇",
+    "items": [
+      "南阳",
+      "信阳",
+      "潢川",
+      "固始",
+      "商城",
+      "折角换向",
+      "宁西专属事件"
+    ],
+    "dep": "v0.5",
+    "feature": "line-ningxi",
+    "bytes": 4156
+  },
+  {
+    "id": "c2",
+    "tier": "line",
+    "name": "焦柳线",
+    "version": "0.1.0",
+    "hook": "三线交汇与山区限速",
+    "items": [
+      "月山",
+      "襄阳",
+      "张家界",
+      "山区限速",
+      "焦柳专属事件"
+    ],
+    "dep": "v0.5",
+    "feature": "line-jiaoliu",
+    "bytes": 4147
+  },
+  {
+    "id": "c3",
+    "tier": "line",
+    "name": "宝成线",
+    "version": "0.1.0",
+    "hook": "展线、坡道、单线会让",
+    "items": [
+      "秦岭",
+      "广元",
+      "观音山展线",
+      "坡道起车",
+      "宝成专属事件"
+    ],
+    "dep": "v0.5",
+    "feature": "line-baocheng",
+    "bytes": 4153
+  },
+  {
+    "id": "c4",
+    "tier": "line",
+    "name": "成昆线",
+    "version": "0.1.0",
+    "hook": "桥隧与地质灾害",
+    "items": [
+      "西昌",
+      "攀枝花",
+      "桥隧",
+      "地质灾害",
+      "成昆专属事件"
+    ],
+    "dep": "v0.6",
+    "feature": "line-chengkun",
+    "bytes": 4147
+  },
+  {
+    "id": "c5",
+    "tier": "line",
+    "name": "京广线北段",
+    "version": "0.1.0",
+    "hook": "高密度与枢纽联控",
+    "items": [
+      "石家庄",
+      "郑州",
+      "高密度追踪",
+      "枢纽联控"
+    ],
+    "dep": "v0.7",
+    "feature": "line-jingguang",
+    "bytes": 4138
+  },
+  {
+    "id": "c6",
+    "tier": "line",
+    "name": "东北线",
+    "version": "0.1.0",
+    "hook": "严寒、融雪、冻害",
+    "items": [
+      "哈尔滨",
+      "齐齐哈尔",
+      "融雪",
+      "冻害",
+      "东北专属事件"
+    ],
+    "dep": "v0.7",
+    "feature": "line-dongbei",
+    "bytes": 4147
+  },
+  {
+    "id": "c7",
+    "tier": "line",
+    "name": "西南线",
+    "version": "0.1.0",
+    "hook": "喀斯特地貌与桥隧",
+    "items": [
+      "柳州",
+      "贵阳",
+      "喀斯特",
+      "桥隧"
+    ],
+    "dep": "v0.8",
+    "feature": "line-xinan",
+    "bytes": 4123
+  },
+  {
+    "id": "c8",
+    "tier": "line",
+    "name": "高原线",
+    "version": "0.1.0",
+    "hook": "高原、冻土、无人区",
+    "items": [
+      "格尔木",
+      "拉萨",
+      "高原",
+      "冻土",
+      "无人区"
+    ],
+    "dep": "v0.9",
+    "feature": "line-gaoyuan",
+    "bytes": 4132
+  },
+  {
+    "id": "e1",
+    "tier": "expansion",
+    "name": "编组站",
+    "version": "0.1.0",
+    "hook": "从接发车变成解编车流",
+    "items": [
+      "四场联动调度视图",
+      "解编计划编辑器",
+      "驼峰自动化三档",
+      "调车机车与禁溜线",
+      "编组站事件池",
+      "襄阳北/郑州北/柳州南场景"
+    ],
+    "dep": "v0.7",
+    "feature": "yard",
+    "bytes": 4239
+  },
+  {
+    "id": "e2",
+    "tier": "expansion",
+    "name": "铁路局",
+    "version": "0.1.0",
+    "hook": "从管一个站到管一张网",
+    "items": [
+      "4–6 站区段拓扑",
+      "车流分配",
+      "跨站资源共享",
+      "区域调度中心",
+      "路局汇总 KPI",
+      "区段级升级树"
+    ],
+    "dep": "v0.6",
+    "feature": "bureau",
+    "bytes": 4199
+  },
+  {
+    "id": "e3",
+    "tier": "expansion",
+    "name": "动车所与高铁站",
+    "version": "0.1.0",
+    "hook": "换一整套车种、作业和时刻",
+    "items": [
+      "动车所",
+      "动车组交路",
+      "一级/二级修",
+      "高铁站台",
+      "动车事件池",
+      "高铁运行图"
+    ],
+    "dep": "v0.8",
+    "feature": "emu",
+    "bytes": 4178
+  },
+  {
+    "id": "e4",
+    "tier": "expansion",
+    "name": "口岸与多式联运",
+    "version": "0.1.0",
+    "hook": "换装、报关、跨境车流",
+    "items": [
+      "口岸站",
+      "三种轨距换装",
+      "报关流程",
+      "跨境合同",
+      "港口联运",
+      "口岸事件池"
+    ],
+    "dep": "v0.9",
+    "feature": "port",
+    "bytes": 4174
+  },
+  {
+    "id": "m1",
+    "tier": "mechanic",
+    "name": "调车作业",
+    "version": "0.1.0",
+    "hook": "推送、牵出、连挂、摘挂、溜放",
+    "items": [
+      "调车计划",
+      "推送牵出",
+      "连挂摘挂",
+      "溜放"
+    ],
+    "dep": "v0.5",
+    "feature": "shunt",
+    "bytes": 4138
+  },
+  {
+    "id": "m2",
+    "tier": "mechanic",
+    "name": "施工天窗",
+    "version": "0.1.0",
+    "hook": "V 型天窗与路料车",
+    "items": [
+      "V 型天窗",
+      "封锁",
+      "路料车",
+      "接触网检修"
+    ],
+    "dep": "v0.5",
+    "feature": "window",
+    "bytes": 4137
+  },
+  {
+    "id": "m3",
+    "tier": "mechanic",
+    "name": "设备故障与降级",
+    "version": "0.1.0",
+    "hook": "故障改变联锁可用进路",
+    "items": [
+      "红光带",
+      "道岔失表",
+      "信号灭灯",
+      "引导接车"
+    ],
+    "dep": "v0.5",
+    "feature": "degrade",
+    "bytes": 4141
+  },
+  {
+    "id": "m4",
+    "tier": "mechanic",
+    "name": "恶劣天气",
+    "version": "0.1.0",
+    "hook": "天气到限速到待避的链条",
+    "items": [
+      "雨雪雾风",
+      "限速",
+      "除雪",
+      "防洪"
+    ],
+    "dep": "v0.5",
+    "feature": "weather",
+    "bytes": 4126
+  },
+  {
+    "id": "m5",
+    "tier": "mechanic",
+    "name": "乘务与机车交路",
+    "version": "0.1.0",
+    "hook": "换挂变成资源调度",
+    "items": [
+      "继乘",
+      "叫班",
+      "超劳",
+      "机车号绑定"
+    ],
+    "dep": "v0.6",
+    "feature": "crew",
+    "bytes": 4129
+  },
+  {
+    "id": "m6",
+    "tier": "mechanic",
+    "name": "客运组织",
+    "version": "0.1.0",
+    "hook": "办客停站变成站台冲突",
+    "items": [
+      "站台分配",
+      "上下客",
+      "检票口",
+      "上水吸污"
+    ],
+    "dep": "v0.6",
+    "feature": "pax",
+    "bytes": 4138
+  },
+  {
+    "id": "m7",
+    "tier": "mechanic",
+    "name": "危险品与超限",
+    "version": "0.1.0",
+    "hook": "特殊货物改变放行优先级",
+    "items": [
+      "隔离",
+      "限速",
+      "专人检查",
+      "应急预案"
+    ],
+    "dep": "v0.6",
+    "feature": "dangerous",
+    "bytes": 4132
+  },
+  {
+    "id": "m8",
+    "tier": "mechanic",
+    "name": "应急指挥",
+    "version": "0.1.0",
+    "hook": "事件处置变成指挥流程",
+    "items": [
+      "事故起复",
+      "救援列车",
+      "多部门联动"
+    ],
+    "dep": "v0.7",
+    "feature": "emergency",
+    "bytes": 4135
+  }
+]

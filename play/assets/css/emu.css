@@ -1,0 +1,17 @@
+.emu-pane{height:100%}
+.emu{padding:12px 14px;color:#d9e4de;font-size:12px}
+.emu-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #334039;padding-bottom:8px}
+.emu-head b{font-size:15px}.emu-head span{font-size:10px;color:#8e9c95;margin-left:8px}
+.emu-kpi{display:flex;gap:16px}.emu-kpi div{text-align:right}.emu-kpi span{display:block;font-size:9px;color:#84928b}.emu-kpi b{font-size:15px;color:#d9c28e}
+.emu-note{font-size:10px;color:#8f9d96;line-height:1.6;margin:9px 0}
+.emu-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.emu-card{border:1px solid #303d36;background:#161f1b;padding:8px}
+.emu-card.due{border-color:#8c6448;background:#211b16}
+.emu-top{display:flex;gap:8px;align-items:baseline}.emu-top b{font-size:13px}.emu-top span{font-size:9px;color:#8c9a93}.emu-top em{margin-left:auto;font-style:normal;font-size:9px;color:#c9a56b}
+.emu-km{display:flex;justify-content:space-between;font-size:9px;color:#93a199;margin:5px 0}
+.emu-bar{height:4px;background:#2a3631}.emu-bar i{display:block;height:100%;background:#719b84}
+.emu-st{font-size:10px;color:#a9b7af;margin:5px 0}
+.emu-card.due .emu-st{color:#dba57e}
+.emu-act{display:flex;gap:5px}.emu-act button{flex:1;border:1px solid #46584e;background:#1e2a25;color:#c4d2cb;font-size:9px;padding:3px 5px;cursor:pointer}
+.emu-act button:disabled{opacity:.35}
+.emu-foot{font-size:9px;color:#7e8c85;margin-top:10px}

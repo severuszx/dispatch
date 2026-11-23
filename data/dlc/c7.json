@@ -1,0 +1,32 @@
+{
+  "id": "c7",
+  "tier": "line",
+  "name": "西南线",
+  "version": "0.1.0",
+  "hook": "喀斯特地貌与桥隧",
+  "items": [
+    "柳州",
+    "贵阳",
+    "喀斯特",
+    "桥隧"
+  ],
+  "dep": "v0.8",
+  "feature": "line-xinan",
+  "bytes": 5323,
+  "scene": {
+    "id": "c7-scene",
+    "kind": "pack",
+    "title": "西南线 · 喀斯特",
+    "line": "qinglan",
+    "brief": "柳州到贵阳，桥隧和喀斯特洼地，雨天后限速来得突然。",
+    "terms": [
+      "喀斯特",
+      "桥隧",
+      "雨后限速"
+    ],
+    "duration": 360,
+    "difficulty": 3,
+    "weather": "雨",
+    "trains": 9
+  }
+}

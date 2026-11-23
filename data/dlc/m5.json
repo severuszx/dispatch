@@ -1,0 +1,1 @@
+{"id": "m5", "tier": "mechanic", "name": "乘务与机车交路", "version": "0.1.0", "hook": "换挂变成资源调度", "items": ["继乘", "叫班", "超劳", "机车号绑定"], "dep": "v0.6", "feature": "crew", "bytes": 4129}

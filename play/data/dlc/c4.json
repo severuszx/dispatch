@@ -1,0 +1,33 @@
+{
+  "id": "c4",
+  "tier": "line",
+  "name": "成昆线",
+  "version": "0.1.0",
+  "hook": "桥隧与地质灾害",
+  "items": [
+    "西昌",
+    "攀枝花",
+    "桥隧",
+    "地质灾害",
+    "成昆专属事件"
+  ],
+  "dep": "v0.6",
+  "feature": "line-chengkun",
+  "bytes": 5347,
+  "scene": {
+    "id": "c4-scene",
+    "kind": "pack",
+    "title": "成昆线 · 桥隧地带",
+    "line": "qinglan",
+    "brief": "西昌到攀枝花，桥隧相连，地质灾害压着运行图。",
+    "terms": [
+      "桥隧",
+      "地质灾害",
+      "限速"
+    ],
+    "duration": 420,
+    "difficulty": 4,
+    "weather": "雨",
+    "trains": 8
+  }
+}

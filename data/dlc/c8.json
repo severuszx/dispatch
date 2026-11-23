@@ -1,0 +1,33 @@
+{
+  "id": "c8",
+  "tier": "line",
+  "name": "高原线",
+  "version": "0.1.0",
+  "hook": "高原、冻土、无人区",
+  "items": [
+    "格尔木",
+    "拉萨",
+    "高原",
+    "冻土",
+    "无人区"
+  ],
+  "dep": "v0.9",
+  "feature": "line-gaoyuan",
+  "bytes": 5332,
+  "scene": {
+    "id": "c8-scene",
+    "kind": "pack",
+    "title": "高原线 · 无人区",
+    "line": "qinglan",
+    "brief": "格尔木到拉萨，高原反应、冻土和无人区救援距离。",
+    "terms": [
+      "高原",
+      "冻土",
+      "无人区"
+    ],
+    "duration": 480,
+    "difficulty": 4,
+    "weather": "晴",
+    "trains": 7
+  }
+}

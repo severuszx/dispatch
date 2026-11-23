@@ -1,0 +1,24 @@
+.yard-pane{height:100%}
+.yard{padding:12px 14px;color:#d9e4de;font-size:12px}
+.yard-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #334039;padding-bottom:8px}
+.yard-head b{font-size:15px}.yard-head span{font-size:10px;color:#8e9c95;margin-left:8px}
+.yard-clock{display:flex;gap:8px;align-items:baseline}.yard-clock b{font-size:16px;color:#d9c28e}
+.yard-tools{display:flex;gap:8px;align-items:center;margin:8px 0 12px;font-size:10px;color:#8d9b94}
+.yard-tools button{border:1px solid #43564b;background:#1d2923;color:#c9d7d0;padding:4px 9px;font-size:10px;cursor:pointer}
+.yard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.yard-col{border:1px solid #303d36;background:#161f1b;min-height:300px;padding:8px}
+.yard-col-head{display:flex;flex-direction:column;gap:2px;border-bottom:1px solid #2b3731;padding-bottom:6px;margin-bottom:7px}
+.yard-col-head b{font-size:12px}.yard-col-head span{font-size:10px;color:#84928b}
+.yard-cut,.yard-pool,.yard-out{display:flex;justify-content:space-between;gap:6px;align-items:center;border-bottom:1px solid #26322c;padding:6px 0}
+.yard-cut b,.yard-pool b,.yard-out b{font-size:11px}.yard-cut span,.yard-pool span,.yard-out span{display:block;font-size:10px;color:#8c9a93}
+.yard-cut em{font-style:normal;font-size:9px;color:#c2876d}
+.yard-cut button,.yard-pool button,.yard-out button{border:1px solid #4b6154;background:#202d26;color:#c6d5ce;font-size:10px;padding:3px 7px;cursor:pointer;white-space:nowrap}
+.yard-cut button:disabled,.yard-pool button:disabled,.yard-out button:disabled{opacity:.4;cursor:default}
+.yard-pool>div{flex:1;min-width:0}
+.yard-bar{height:3px;background:#2b3631;margin-top:4px}.yard-bar i{display:block;height:100%;background:#719b84}
+.yard-empty{font-size:10px;color:#67766f;padding:8px 0}
+.yard-stat{display:flex;justify-content:space-between;border-bottom:1px solid #26322c;padding:6px 0}
+.yard-stat span{font-size:10px;color:#89978f}.yard-stat b{font-size:12px;color:#d9c28e}
+.yard-note{font-size:10px;color:#7c8a83;line-height:1.6;margin-top:9px}
+.yard-keep{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid #3a3326;font-size:9px;color:#d0a873}
+.yard-keep button{border:1px solid #7a623e;background:#2b2418;color:#e0c08b;font-size:9px;padding:2px 6px;cursor:pointer}

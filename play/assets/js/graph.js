@@ -1,9 +1,16 @@
-const C = {
+const LIGHT = {
   bg: '#f7f8f9', grid: '#e8edf1', grid2: '#d9e1e8', axis: '#c6d0d9',
   text: '#18222d', dim: '#536170', faint: '#8b98a5',
   plan: '#8b98a5', now: '#e84b30', evt: '#d5891f',
   run: '#26313e', late: '#b97a18', bad: '#e84b30',
 };
+const DARK = {
+  bg: '#11161a', grid: '#1b2429', grid2: '#273239', axis: '#39474f',
+  text: '#e2e8e6', dim: '#95a3a1', faint: '#60706e',
+  plan: '#73838a', now: '#f2644d', evt: '#e0a63b',
+  run: '#d3dbdc', late: '#e0a63b', bad: '#f2644d',
+};
+let C = { ...LIGHT };
 
 const TYPE_COLOR = { G: '#e84b30', D: '#2d7fa6', Z: '#7b5e8a', T: '#2e9e6b', K: '#536170', 货: '#a5731d', 路用: '#5d7d59', 军运: '#8a5b49' };
 
@@ -18,11 +25,20 @@ export class GraphView {
     this.ctx = canvas.getContext('2d');
     this.snap = null;
     this.onInspect = opts.onInspect || (() => {});
-    this.span = 120;
+    this.span = 90;
+    this.edit = false;
+    this.drag = null;
+    this.conflicts = [];
+    this.hits = [];
     this.resize();
     const ro = new ResizeObserver(() => { this.resize(); this.draw(); });
     ro.observe(canvas.parentElement || canvas);
     canvas.addEventListener('click', (e) => this.click(e));
+    canvas.addEventListener('pointerdown', (e) => this.down(e));
+    canvas.addEventListener('pointermove', (e) => this.move(e));
+    canvas.addEventListener('pointerup', (e) => this.up(e));
+    canvas.addEventListener('pointercancel', (e) => this.up(e));
+    canvas.addEventListener('wheel', (e) => { if (e.shiftKey) return; e.preventDefault(); this.zoom(e.deltaY > 0 ? 15 : -15); }, { passive: false });
   }
 
   resize() {
@@ -41,7 +57,50 @@ export class GraphView {
 
   setSnapshot(snap) {
     this.snap = snap;
+    if (this.edit) this.detect();
     this.draw();
+  }
+
+  setEdit(on) {
+    this.edit = !!on;
+    this.canvas.style.cursor = this.edit ? 'grab' : 'default';
+    this.draw();
+  }
+
+  zoom(delta) {
+    this.span = Math.max(30, Math.min(240, this.span + delta));
+    this.draw();
+  }
+
+  detect() {
+    const s = this.snap;
+    if (!s) return [];
+    const focus = s.focusStation || s.stationOrder[0];
+    const out = [];
+    const rows = (s.trains || []).filter((t) => t.station === focus && t.status !== 'pending' && t.status !== 'terminated' && t.trackNo);
+    const byTrack = {};
+    for (const t of rows) {
+      const a = t.planArr == null ? t.planDep : t.planArr;
+      const b = t.planDep == null ? t.planArr : Math.max(t.planDep, a);
+      (byTrack[t.trackNo] = byTrack[t.trackNo] || []).push({ no: t.no, id: t.id, a, b });
+    }
+    for (const [track, list] of Object.entries(byTrack)) {
+      list.sort((x, y) => x.a - y.a);
+      for (let i = 1; i < list.length; i += 1) {
+        if (list[i].a < list[i - 1].b + 2) out.push({ track: Number(track), a: list[i - 1].no, b: list[i].no, at: list[i].a, gap: list[i].a - list[i - 1].b });
+      }
+    }
+    const running = (s.trains || []).filter((t) => t.status === 'running' && t.section);
+    const dirs = {};
+    for (const t of running) {
+      const key = `${t.section.a}>${t.section.b}`;
+      (dirs[key] = dirs[key] || []).push(t);
+    }
+    for (const [key, list] of Object.entries(dirs)) {
+      if (list.length > 1) out.push({ section: key, a: list[0].no, b: list[1].no, gap: 0 });
+    }
+    this.conflicts = out;
+    return out;
   }
 
   font(size, mono) {
@@ -49,6 +108,7 @@ export class GraphView {
   }
 
   draw() {
+    C = document.body.dataset.theme === 'control' ? DARK : LIGHT;
     const ctx = this.ctx;
     ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, this.w, this.h);
@@ -268,7 +328,7 @@ export class GraphView {
     const tracks = s.tracks.get ? s.tracks.get(focus) : [];
     const padL = 60;
     const padT = 46;
-    const span = 60;
+    const span = this.span;
     const tEnd = s.clock + span * 0.55;
     const tStart = tEnd - span;
     const xOf = (m) => padL + ((m - tStart) / span) * (this.w - padL - 16);
@@ -308,8 +368,10 @@ export class GraphView {
       const color = t.status === 'terminated' ? C.plan : t.late > 12 ? C.bad : t.late > 4 ? C.late : TYPE_COLOR[t.type];
       ctx.fillStyle = color;
       ctx.globalAlpha = t.status === 'terminated' ? 0.35 : 0.85;
-      ctx.fillRect(x1, y - 5, Math.max(2, x2 - x1), 10);
+      const dragX = this.drag && this.drag.id === t.id ? this.drag.moved : 0;
+      ctx.fillRect(x1 + dragX, y - 5, Math.max(2, x2 - x1), 10);
       ctx.globalAlpha = 1;
+      this.hits.push({ id: t.id, x: x1 + dragX, y: y - 8, w: Math.max(10, x2 - x1), h: 16 });
       this.font(9, true);
       ctx.fillStyle = C.bg;
       if (x2 - x1 > 40) ctx.fillText(t.no, x1 + 4, y);
@@ -331,15 +393,64 @@ export class GraphView {
     ctx.beginPath(); ctx.moveTo(nowX, padT - 10); ctx.lineTo(nowX, this.h - 20); ctx.stroke();
     this.font(9, false);
     ctx.fillStyle = C.faint;
-    if (this.w >= 560) ctx.fillText('本站股道占用 · 实线已占用，虚线到计划发车', 12, 12);
+    if (this.w >= 560) ctx.fillText(`本站股道占用 · 窗宽 ${this.span} 分${this.edit ? ' · 拖动车次条改点' : ' · 滚轮缩放'}`, 12, 12);
+    if (this.conflicts && this.conflicts.length) {
+      ctx.fillStyle = C.bad;
+      ctx.fillRect(12, 20, 176, 20);
+      this.font(9, true);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(`冲突 ${this.conflicts.length} 处`, 20, 34);
+      this.conflicts.slice(0, 3).forEach((c, i) => {
+        ctx.fillStyle = C.bad;
+        ctx.fillText(c.section ? `${c.a} / ${c.b} 区间重叠` : `${c.track} 道 ${c.a} 与 ${c.b}`, 196 + i * 128, 34);
+      });
+    }
+    if (this.edit && this.hits.length) {
+      this.font(9, false);
+      ctx.fillStyle = C.dim;
+      ctx.textAlign = 'left';
+      ctx.fillText('编辑中：拖动车次条即可整体平移计划时刻', 12, this.h - 8);
+    }
   }
 
-  click(e) {
-    if (!this.hits) return;
+  hitAt(e) {
     const rect = this.canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
-    const f = this.hits.find((h) => mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h);
+    return (this.hits || []).find((h) => mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h);
+  }
+
+  down(e) {
+    if (!this.edit) return;
+    const f = this.hitAt(e);
+    if (!f) return;
+    const rect = this.canvas.getBoundingClientRect();
+    this.drag = { id: f.id, x: e.clientX - rect.left, origin: e.clientX, moved: 0 };
+    this.canvas.setPointerCapture(e.pointerId);
+    this.canvas.style.cursor = 'grabbing';
+  }
+
+  move(e) {
+    if (!this.drag) return;
+    const rect = this.canvas.getBoundingClientRect();
+    this.drag.moved = e.clientX - this.drag.origin;
+    this.draw();
+  }
+
+  up(e) {
+    if (!this.drag) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const dx = Math.round((e.clientX - this.drag.origin) / Math.max(1, this.w - 76) * this.span);
+    const id = this.drag.id;
+    this.drag = null;
+    this.canvas.style.cursor = this.edit ? 'grab' : 'default';
+    if (Math.abs(dx) >= 1 && this.onReschedule) this.onReschedule(id, dx);
+    this.draw();
+  }
+
+  click(e) {
+    if (this.edit) { this.detect(); return; }
+    const f = this.hitAt(e);
     if (f) this.onInspect(f.id);
   }
 }

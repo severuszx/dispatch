@@ -1,0 +1,32 @@
+{
+  "id": "c5",
+  "tier": "line",
+  "name": "京广线北段",
+  "version": "0.1.0",
+  "hook": "高密度与枢纽联控",
+  "items": [
+    "石家庄",
+    "郑州",
+    "高密度追踪",
+    "枢纽联控"
+  ],
+  "dep": "v0.7",
+  "feature": "line-jingguang",
+  "bytes": 5338,
+  "scene": {
+    "id": "c5-scene",
+    "kind": "pack",
+    "title": "京广线北段 · 高密度",
+    "line": "qinglan",
+    "brief": "石家庄到郑州，三分钟追踪，枢纽联控一处晚全线晚。",
+    "terms": [
+      "高密度追踪",
+      "枢纽联控",
+      "越行"
+    ],
+    "duration": 300,
+    "difficulty": 4,
+    "weather": "晴",
+    "trains": 14
+  }
+}

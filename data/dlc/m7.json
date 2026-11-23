@@ -1,0 +1,1 @@
+{"id": "m7", "tier": "mechanic", "name": "危险品与超限", "version": "0.1.0", "hook": "特殊货物改变放行优先级", "items": ["隔离", "限速", "专人检查", "应急预案"], "dep": "v0.6", "feature": "dangerous", "bytes": 4132}

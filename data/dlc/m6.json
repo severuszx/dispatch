@@ -1,0 +1,1 @@
+{"id": "m6", "tier": "mechanic", "name": "客运组织", "version": "0.1.0", "hook": "办客停站变成站台冲突", "items": ["站台分配", "上下客", "检票口", "上水吸污"], "dep": "v0.6", "feature": "pax", "bytes": 4138}

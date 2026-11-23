@@ -1,0 +1,1 @@
+{"id": "m2", "tier": "mechanic", "name": "施工天窗", "version": "0.1.0", "hook": "V 型天窗与路料车", "items": ["V 型天窗", "封锁", "路料车", "接触网检修"], "dep": "v0.5", "feature": "window", "bytes": 4137}

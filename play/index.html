@@ -4,10 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>调度台</title>
-<link rel="stylesheet" href="assets/css/app.css?v=0.4.3p">
-<link rel="stylesheet" href="assets/css/wm.css?v=0.4.3p">
-<link rel="stylesheet" href="assets/css/panels.css?v=0.4.3p">
-<link rel="stylesheet" href="assets/css/game.css?v=0.4.3p">
+<link rel="stylesheet" href="assets/css/app.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/wm.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/panels.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/game.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/ops.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/admin.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/dlc.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/yard.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/bureau.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/emu.css?v=0.5.7p">
+<link rel="stylesheet" href="assets/css/port.css?v=0.5.7p">
 </head>
 <body>
 
@@ -21,7 +28,7 @@
       </div>
       <div class="bb-meta">
         <span id="bootMeta" class="mono"></span>
-        <span class="bb-ver mono">v0.4.3</span>
+        <span class="bb-ver mono">v0.5.7</span>
       </div>
     </header>
     <div class="boot-main">
@@ -51,6 +58,10 @@
           <div class="sec">
             <h2>难度 <span class="sec-hint">影响提示、术语与事件密度</span></h2>
             <div class="diff-list" id="diffList"></div>
+          </div>
+          <div class="sec">
+            <h2>本班词条 <span class="sec-hint">每天一组，开班后生效</span></h2>
+            <div class="mod-list" id="modList"></div>
           </div>
           <div class="sec">
             <h2>车次方案 <span class="sec-hint">只看本站与本站相关车次</span></h2>
@@ -99,6 +110,14 @@
             <div id="saveList" class="save-list"></div>
           </div>
           <div class="sec">
+            <h2>跨设备存档码</h2>
+            <div class="row-btns">
+              <button id="archExport" class="btn">生成存档码</button>
+              <button id="archImport" class="btn">粘贴导入</button>
+            </div>
+            <div class="hint">存档码包含经营档案、本地班次与工坊场景，换电脑复制粘贴即可继续。</div>
+          </div>
+          <div class="sec">
             <h2>创意工坊</h2>
             <div class="row-btns">
               <button id="wpImport" class="btn">导入</button>
@@ -116,7 +135,10 @@
         <div class="bs-row"><span>岗位</span><b class="mono">值班员</b></div>
         <div class="bs-row"><span>难度</span><b id="bsDiff">值班员</b></div>
         <div class="bs-row"><span>车次方案</span><b id="bsTT">老版车次</b></div>
-        <div class="bs-row"><span>版本</span><b class="mono">0.4.3</b></div>
+        <div class="bs-row"><span>本班词条</span><b id="bsMod">常规班</b></div>
+        <div class="bs-row"><span>岗位等级</span><b id="bsRank">学员</b></div>
+        <div class="bs-row"><span>可用资金</span><b id="bsMoney" class="mono">¥ 1200</b></div>
+        <div class="bs-row"><span>版本</span><b class="mono">0.5.7</b></div>
         <div class="bs-note" id="sceneDetailSide"></div>
         <div class="bs-note pad-note">为 Pad 横屏设计，手机打开可能显示不全。</div>
       </aside>
@@ -129,6 +151,20 @@
         <button class="btn btn-primary" id="bootGo">开始值班</button>
       </div>
     </footer>
+  </div>
+</div>
+
+<div id="archLayer" class="ask-layer">
+  <div class="ask-card arch-card" role="dialog" aria-modal="true">
+    <div class="ask-kicker mono">存档码</div>
+    <h3>跨设备继续值班</h3>
+    <p>存档码包含经营档案、班次存档与工坊场景。生成后复制到另一台设备导入。</p>
+    <textarea id="archCode" class="arch-code" spellcheck="false" placeholder="在这里粘贴存档码"></textarea>
+    <div class="ask-actions">
+      <button id="archDoExport" class="btn">生成并复制</button>
+      <button id="archDoImport" class="btn btn-primary">导入</button>
+      <button id="archClose" class="btn">关闭</button>
+    </div>
   </div>
 </div>
 
@@ -178,11 +214,21 @@
   <div class="shell">
       <nav class="rail" id="rail">
       <div class="rail-group">
+        <div class="rail-label">经营</div>
+        <button data-panel="admin">车站经营</button>
+        <button data-panel="ops">调度中心</button>
+        <button data-panel="bureau">区域调度</button>
+        <button data-panel="yard">编组站四场</button>
+        <button data-panel="emu">动车所</button>
+        <button data-panel="port">口岸站</button>
+        <button data-panel="dlc">资源附加包</button>
+      </div>
+      <div class="rail-group">
         <div class="rail-label">行车</div>
         <button data-panel="ctc" class="on">站场图</button>
         <button data-panel="graph">运行图</button>
         <button data-panel="trains">车次簿</button>
-      </div>
+              </div>
       <div class="rail-group">
         <div class="rail-label">调度</div>
         <button data-panel="alarms">信号报警</button>
@@ -191,7 +237,7 @@
         <button data-panel="orders">行车日志</button>
         <button data-panel="radio">调度电话</button>
       </div>
-      <div class="rail-foot mono">v0.4.3</div>
+      <div class="rail-foot mono">v0.5.7</div>
     </nav>
 
     <main class="workspace" id="desk">
@@ -251,7 +297,7 @@
 </div>
 <div id="toast" class="toast hidden"></div>
 
-<script type="module" src="assets/js/app.js?v=0.4.3p"></script>
+<script type="module" src="assets/js/app.js?v=0.5.7p"></script>
 </body>
 </html>
 
