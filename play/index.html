@@ -3,37 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>调度台</title>
-<link rel="stylesheet" href="assets/css/app.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/wm.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/panels.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/game.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/ops.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/admin.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/dlc.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/yard.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/bureau.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/emu.css?v=0.5.7p">
-<link rel="stylesheet" href="assets/css/port.css?v=0.5.7p">
+<title>调度台 · v0.5.8</title>
+<link rel="stylesheet" href="https://aka.doubaocdn.com/s/mHwtOUts2H">
 </head>
 <body>
 
-<div id="boot" class="boot">
+<div id="modeGate" class="mode-gate">
+  <div class="mg-shell">
+    <header class="mg-bar">
+      <div class="mg-brand"><span class="brand-mark">调</span><b>调度台</b><span>DISPATCH DESK</span></div>
+      <div class="mg-meta"><span class="mono">v0.5.8</span><span>单机 · 本地存档</span></div>
+    </header>
+    <div class="mg-head">
+      <span class="mg-kicker mono">选择进入方式</span>
+      <h1>今天你管哪一层</h1>
+      <p>值班台管这一班的接发车，站长台管四个站怎么活下去。两套模式只共用四站与三区段的线路底账，存档与数值完全分开。</p>
+    </div>
+    <div class="mg-grid">
+      <button class="mg-card" type="button" data-gm="dispatch">
+        <div class="mg-card-top"><span class="mg-no mono">01 / SHIFT</span><span class="mg-tag">单班</span></div>
+        <h2>值班调度</h2>
+        <p class="mg-desc">坐进车站控制室，盯站场图和运行图。接车、排进路、放行、处置事故，下班看本班复盘。</p>
+        <ul class="mg-list">
+          <li><span class="mono">A</span>本站股道与信号</li>
+          <li><span class="mono">B</span>事件、命令与电话</li>
+          <li><span class="mono">C</span>班末评分与复盘</li>
+        </ul>
+        <span class="mg-go">进入值班台 <i>→</i></span>
+      </button>
+      <button class="mg-card" data-gm="manage" type="button">
+        <div class="mg-card-top"><span class="mg-no mono">02 / STATION</span><span class="mg-tag">长期</span></div>
+        <h2>经营管理</h2>
+        <p class="mg-desc">以站长身份管四站三区段。扩股道、招人、签合同、分车流、定政策，日结和整改会逼着你做取舍。</p>
+        <ul class="mg-list">
+          <li><span class="mono">A</span>四站资产与设施</li>
+          <li><span class="mono">B</span>人员、合同与账本</li>
+          <li><span class="mono">C</span>区段车流与周评级</li>
+        </ul>
+        <span class="mg-go">进入站长台 <i>→</i></span>
+      </button>
+    </div>
+    <footer class="mg-foot"><span class="mono">本地运行 · 不上传存档</span><span>车次与时刻为示意运行图</span></footer>
+  </div>
+</div>
+
+<div id="boot" class="boot hidden">
   <div class="boot-frame">
     <header class="boot-bar">
       <div class="bb-brand">
         <span class="brand-mark">调</span>
         <b>调度台</b>
-        <span>双线中间站 · 行车值班台</span>
+        <span id="bootRole">双线中间站 · 行车值班台</span>
       </div>
       <div class="bb-meta">
         <span id="bootMeta" class="mono"></span>
-        <span class="bb-ver mono">v0.5.7</span>
+        <span class="bb-ver mono">v0.5.8</span>
       </div>
     </header>
     <div class="boot-main">
       <aside class="boot-nav">
-        <div class="bn-label">值班准备</div>
+        <div class="bn-label" id="bootNavLabel">值班准备</div>
         <nav id="bootTabs">
           <button data-btab="mode" class="on"><span class="mono">01</span>值班强度</button>
           <button data-btab="scene"><span class="mono">02</span>选择车站</button>
@@ -48,8 +77,8 @@
       <section class="boot-stage">
         <div class="boot-pane on" id="paneMode">
           <div class="stage-head">
-            <h1>开班准备</h1>
-            <p>先定值班强度、岗位和车次。开班后，本站接车、放行和处置都由你一人负责。</p>
+            <h1 id="bootModeTitle">开班准备</h1>
+            <p id="bootModeDesc">先定值班强度、岗位和车次。开班后，本站接车、放行和处置都由你一人负责。</p>
           </div>
           <div class="sec">
             <h2>值班强度</h2>
@@ -129,16 +158,16 @@
         </div>
       </section>
       <aside class="boot-summary">
-        <div class="bs-label">本次值班</div>
+        <div class="bs-label" id="bootSummaryLabel">本次值班</div>
         <div class="bs-row"><span>值班站</span><b id="bsStation">实训站</b></div>
         <div class="bs-row"><span>本班任务</span><b id="bsTask">认识调度台</b></div>
-        <div class="bs-row"><span>岗位</span><b class="mono">值班员</b></div>
+        <div class="bs-row"><span>岗位</span><b class="mono" id="bsRole">值班员</b></div>
         <div class="bs-row"><span>难度</span><b id="bsDiff">值班员</b></div>
         <div class="bs-row"><span>车次方案</span><b id="bsTT">老版车次</b></div>
         <div class="bs-row"><span>本班词条</span><b id="bsMod">常规班</b></div>
         <div class="bs-row"><span>岗位等级</span><b id="bsRank">学员</b></div>
         <div class="bs-row"><span>可用资金</span><b id="bsMoney" class="mono">¥ 1200</b></div>
-        <div class="bs-row"><span>版本</span><b class="mono">0.5.7</b></div>
+        <div class="bs-row"><span>版本</span><b class="mono">0.5.8</b></div>
         <div class="bs-note" id="sceneDetailSide"></div>
         <div class="bs-note pad-note">为 Pad 横屏设计，手机打开可能显示不全。</div>
       </aside>
@@ -186,11 +215,11 @@
       <span class="brand-mark">调</span>
       <div class="brand-text">
         <b>调度台</b>
-        <span class="mono">行车值班台</span>
+        <span class="mono" id="tbRole">行车值班台</span>
       </div>
     </div>
     <div class="scene-block">
-      <span class="tb-label">值班站</span>
+      <span class="tb-label" id="tbStationLabel">值班站</span>
       <b id="tbScene">—</b>
     </div>
     <div class="clock-block">
@@ -204,6 +233,7 @@
       <div class="metric alarm"><span>报警</span><b class="mono" id="tbAlarm">0</b></div>
     </div>
     <div class="topbar-actions">
+      <button class="tool-btn next-btn" id="btnNext">待办 <b id="tbNextCount" class="mono">0</b></button>
       <button class="tool-btn" id="btnPause">暂停</button>
       <button class="tool-btn" id="btnSpeed">×1</button>
       <button class="tool-btn" id="btnAudio">声音</button>
@@ -213,7 +243,7 @@
 
   <div class="shell">
       <nav class="rail" id="rail">
-      <div class="rail-group">
+      <div class="rail-group" data-scope="manage">
         <div class="rail-label">经营</div>
         <button data-panel="admin">车站经营</button>
         <button data-panel="ops">调度中心</button>
@@ -223,13 +253,13 @@
         <button data-panel="port">口岸站</button>
         <button data-panel="dlc">资源附加包</button>
       </div>
-      <div class="rail-group">
+      <div class="rail-group" data-scope="dispatch">
         <div class="rail-label">行车</div>
         <button data-panel="ctc" class="on">站场图</button>
         <button data-panel="graph">运行图</button>
         <button data-panel="trains">车次簿</button>
               </div>
-      <div class="rail-group">
+      <div class="rail-group" data-scope="dispatch">
         <div class="rail-label">调度</div>
         <button data-panel="alarms">信号报警</button>
         <button data-panel="events">事故与事件</button>
@@ -237,7 +267,7 @@
         <button data-panel="orders">行车日志</button>
         <button data-panel="radio">调度电话</button>
       </div>
-      <div class="rail-foot mono">v0.5.7</div>
+      <div class="rail-foot mono">v0.5.8</div>
     </nav>
 
     <main class="workspace" id="desk">
@@ -256,9 +286,11 @@
     <aside class="side hidden" id="side">
       <div class="side-head">
         <b id="sideTitle">列车动作</b>
+        <button id="sideBoardBtn" class="side-board-btn hidden">待办</button>
         <button id="sideClose" title="关闭">×</button>
       </div>
       <div class="side-body" id="sideBody"></div>
+      <div class="side-body side-next hidden" id="sideNext"></div>
     </aside>
   </div>
 
@@ -297,8 +329,6 @@
 </div>
 <div id="toast" class="toast hidden"></div>
 
-<script type="module" src="assets/js/app.js?v=0.5.7p"></script>
+<script src="https://aka.doubaocdn.com/s/ilg2bZlJeF"></script>
 </body>
 </html>
-
-
