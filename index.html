@@ -22,7 +22,7 @@
       <a href="#download">下载</a>
       <a href="#log">日志</a>
     </nav>
-    <span class="build">v0.4.3 / win · pad · web</span>
+    <span class="build">v0.5.7 / web · source</span>
   </div>
 </header>
 
@@ -30,18 +30,18 @@
 
   <div class="wrap hero">
     <h1>调度台</h1>
-    <p class="lede">一个单机的铁路行车调度模拟。新版改为在一个车站内部同时控制多个站场：普速场、货运场、货场、客整场、调车场、机务折返段各走各的计划，共用一条站内走行线。也可以单独开动车段、车辆段、编组站和货运站。</p>
+    <p class="lede">一个单机的铁路经营与调度模拟。你从值班员做起，值完一班就日结，用收入扩股道、招人、签合同、定政策；四站三区段的车流互相挤压，编组站、动车所、口岸站各自有作业。0.5.7 源码与网页版已更新。</p>
     <div class="facts">
-      <div><b>908</b>事件</div>
-      <div><b>364</b>根因</div>
-      <div><b>26</b>场景</div>
-      <div><b>5</b>枢纽关</div>
-      <div><b>2</b>车次方案</div>
+      <div><b>2724</b>事件</div>
+      <div><b>4</b>站</div>
+      <div><b>3</b>区段</div>
+      <div><b>20</b>扩展包</div>
+      <div><b>1000</b>设施</div>
     </div>
     <div class="actions">
       <a class="btn primary" href="play/index.html">开始值班 <span class="k">网页版</span></a>
-      <a class="btn" href="#download">下载桌面端 <span class="k">Windows x64</span></a>
-      <span class="btn">源码仓库 <span class="k">待同步</span></span>
+      <span class="btn">桌面包待重打 <span class="k">先玩网页版</span></span>
+      <a class="btn" href="https://github.com/severuszx/dispatch">源码仓库 <span class="k">0.5.7</span></a>
     </div>
 
     <figure class="shot">
@@ -72,10 +72,10 @@
       </div>
       <table style="margin-top:22px">
         <tr><th>项目</th><th>状态</th><th>说明</th></tr>
-        <tr><td>网页版</td><td><span class="status ok">可运行</span></td><td>原生 ES modules，无构建；Chrome / Edge 直接打开。</td></tr>
-        <tr><td>Windows 桌面端</td><td><span class="status ok">可运行</span></td><td>Electron 壳，内置本地服务，断网可用；自绘图标。</td></tr>
-        <tr><td>Pad 横屏端</td><td><span class="status ok">已构建</span></td><td>横屏锁定，启动先提示为 Pad 设计；APK 已验签，未实机试装。</td></tr>
-        <tr><td>扩展包</td><td><span class="status ok">已接入</span></td><td>内置三包可安装、启用、载入；支持导入 .json 与 .zip。</td></tr>
+        <tr><td>网页版</td><td><span class="status ok">0.5.7 可运行</span></td><td>原生 ES modules，无构建；Chrome / Edge 直接打开。</td></tr>
+        <tr><td>Windows 桌面端</td><td><span class="status wip">包待重打</span></td><td>0.5.7 源码已提交；当前可下载的仍是 0.4.3 旧包。</td></tr>
+        <tr><td>Pad 横屏端</td><td><span class="status wip">旧包</span></td><td>当前 APK 仍是 0.4.3，0.5.7 未重打。</td></tr>
+        <tr><td>扩展包</td><td><span class="status ok">20 包</span></td><td>4 个 Expansion、8 条线路包、8 个机制包；云端与本地镜像可装。</td></tr>
       </table>
     </div>
   </section>
@@ -169,7 +169,7 @@
   <section id="packs">
     <div class="wrap">
       <h2><span class="no">05</span>扩展包</h2>
-      <p class="sub">游戏内的线路标签按需从官网下载资源包，安装包里不再预装 55 站车次。首次点“焦柳线/宁西线”会拉取对应包，同一会话内复用；扩展包窗口仍支持导入本地文件。v0.4.3 包含焦柳线 30 站、宁西线 26 站。</p>
+      <p class="sub">线路包和机制包从官网按需下载，安装包里不预装。0.5.7 的 8 条线路包各有独立场景，e1—e4 各自带编组站、区域调度、动车所、口岸站；装完可停用或卸载。</p>
       <figure class="shot">
         <img src="shots/packs.png" alt="A 版扩展包浮窗：内置包列表，每行写清作者、场景、列车数与天气，右侧安装按钮">
         <figcaption><span>扩展包浮窗 · 安装 / 启用 / 载入</span><span>游戏内实拍</span></figcaption>
@@ -192,34 +192,34 @@
   <section id="download">
     <div class="wrap">
       <h2><span class="no">06</span>下载</h2>
-      <p class="sub">桌面端是解压即用的目录版，不写注册表。Pad 端为横屏 APK，安装时需允许未知来源。</p>
+      <p class="sub">0.5.7 源码和网页版已更新；桌面与 Pad 安装包还没重打，不要拿 0.4.3 旧包当新版。</p>
       <div class="dl">
         <div class="item">
-          <h3>Windows 桌面端</h3>
-          <div class="meta">v0.4.3 · x64 · 目录版 · 约 151 MiB</div>
-          <p>内置运行库与本地服务，断网可用。解压后运行 <code>调度台.exe</code>。</p>
-          <a class="btn primary" href="https://github.com/severuszx/dispatch/releases/download/v0.4.3/dispatch-0.4.3-win64.zip">下载 zip</a>
+          <h3>网页版</h3>
+          <div class="meta">v0.5.7 · 无构建 · 需 Chrome / Edge</div>
+          <p>直接打开即玩。四站经营、编组站、动车所、口岸站和 20 个扩展包都已接入。</p>
+          <a class="btn primary" href="play/index.html">打开网页版</a>
         </div>
         <div class="item">
-          <h3>网页版</h3>
-          <div class="meta">v0.4.3 · 无构建 · 需 Chrome / Edge</div>
-          <p>直接打开即玩。存档在浏览器本地，清缓存会丢进度。</p>
-          <a class="btn" href="play/index.html">打开网页版</a>
+          <h3>Windows 桌面端</h3>
+          <div class="meta">v0.5.7 源码 · 安装包待重打</div>
+          <p>0.5.7 还没生成新的目录版 Zip。当前 Releases 里只有 0.4.3 旧包，先不推荐下载。</p>
+          <a class="btn" href="https://github.com/severuszx/dispatch/releases/tag/v0.4.3">查看旧版 0.4.3</a>
         </div>
         <div class="item">
           <h3>Pad 横屏端</h3>
-          <div class="meta">v0.4.3 · Android 8.0+ · 0.49 MB · versionCode 7</div>
-          <p>为 16:10 / 4:3 横屏排版，启动屏注明「为 Pad 设计，手机可能显示不全」。内置资源与本地服务，断网可用。</p>
-          <a class="btn primary" href="https://github.com/severuszx/dispatch/releases/download/v0.4.3/dispatch-0.4.3-pad.apk?v=7">下载 apk</a>
+          <div class="meta">v0.4.3 · 旧包 · 0.5.7 未重打</div>
+          <p>现有 APK 仍是 0.4.3，不含经营层和 0.5.7 扩展包。等新版重打后再装。</p>
+          <a class="btn" href="https://github.com/severuszx/dispatch/releases/tag/v0.4.3">查看旧版 APK</a>
         </div>
         <div class="item">
           <h3>源码</h3>
-          <div class="meta">前端原生 ES modules · data 由脚本生成</div>
-          <p>数据生成脚本、桌面壳、Pad 壳都在仓库里。主数据由 <code>tools/gen-data.mjs</code> 重跑。</p>
+          <div class="meta">v0.5.7 · 前端原生 ES modules · data 由脚本生成</div>
+          <p>四站数据、20 个 DLC 清单、桌面壳、Pad 壳都在仓库里。主数据由 <code>tools/gen-data.mjs</code> 重跑。</p>
           <a class="btn" href="https://github.com/severuszx/dispatch">打开仓库</a>
         </div>
       </div>
-      <p style="margin-top:16px;color:var(--faint);font-size:12px">校验和与版本号随包附在 <code>SHA256SUMS.txt</code>。首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。</p>
+      <p style="margin-top:16px;color:var(--faint);font-size:12px">0.5.7 的网页版已上线；<code>latest.json</code> 仍指向 0.4.3，等新安装包生成后再改自动更新清单。首次运行旧包如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。</p>
     </div>
   </section>
 
@@ -227,6 +227,14 @@
     <div class="wrap">
       <h2><span class="no">07</span>开发日志</h2>
       <div class="log">
+        <div class="entry">
+          <div class="date">2026-11-23 · v0.5.7</div>
+          <p>四站 1,000 项设施清册与单项修理；e3 动车所一二级修与可用率；e4 口岸三条换装线、报关厅与跨班压车；8 条线路包各带独立场景；e1 编组站补驼峰禁溜线；m1 调车计划改成计划—牵出—推送三段，m5 绑定机车号，m6 客运站台优先，m8 事故联合处置。运价重平衡后百班沙盒平均净利约 2,300，周评级 A/A/A/B。</p>
+        </div>
+        <div class="entry">
+          <div class="date">2026-11-23 · v0.5.2—0.5.6</div>
+          <p>三区段车流分配与跨班积压、21 班周结评级与三选一政策、3 班整改、编组站四场、区域调度、人员疲劳与休班培训、合同履约、事件库运行期扩到 2,724 条。</p>
+        </div>
         <div class="entry">
           <div class="date">2026-11-22 · v0.4.3</div>
           <p>55 站资源包改为云端按需下载，桌面与 Pad 安装包不再携带；站场图补上接车、换线、发车、出清的连续移动，跨站通过车自动选线通过；车种增加轨道检测车、检修车、工程车，客运站分出独立货场股道，货运车带装卸作业，程序化背景音乐随天气与场景切换。</p>
@@ -246,11 +254,11 @@
       </div>
       <h3>已知问题</h3>
       <ul>
-        <li>焦柳、宁西两线车次取 12306 2026-11-22 当日实际停站；月山、沁阳、留庄、洛阳北、洛阳东、襄阳北、荆门东、枝江、三江县、融安、融水、洛满、柳江、新丰镇、南阳西、肥东 16 个无客运电报码车站用货运/编组车次。</li>
-        <li>PC 默认常开右侧列车动作栏，其它面板从左侧 rail 以互斥浮窗打开；Pad 默认只显示站场图和底部任务卡。</li>
-        <li>H1—H5 的接管、交回、逐列放行已跑通；H5 已跑满 300 分到结束并弹出评分复盘，H4 只验证进入与弹窗。枢纽关的报警传播与评分仍复用线路关逻辑，未逐场校准。</li>
-        <li>Pad 端 0.4.3 APK 已重新构建并验签，versionCode 5；本轮没有实机试装。</li>
-        <li>音效已换底噪和短促操作音，但还没有逐条试听。</li>
+        <li>0.5.7 的桌面 Zip、Pad APK 还没重打；官网下载区只保留 0.4.3 旧包入口，自动更新清单也仍是 0.4.3。</li>
+        <li>c1—c8 八条线路包已有独立场景标题、车数与天气，但仍共用青岚站底图，不是八套独立站场。</li>
+        <li>e3 动车组交路、e4 报关单据与跨境合同、m1 完整调车进路、m5 机车号绑定、m6 站台冲突、m8 多部门联动目前只接基础数值和界面，未跑完整长班。</li>
+        <li>1,000 项设施目前是静态清册与单项修理，未按班老化，也没有批量检修队。</li>
+        <li>0.5.7 的 m1/m5/m6/m8 只通过语法检查和面板进入，未做完整场景回归。</li>
       </ul>
     </div>
   </section>
@@ -259,9 +267,9 @@
 
 <footer>
   <div class="wrap">
-    <p>调度台 · 单机铁路调度模拟 · v0.4.3</p>
+    <p>调度台 · 单机铁路经营与调度模拟 · v0.5.7</p>
     <p>时刻表为按线路里程与区段速度推算的示意运行图，不代表任何官方时刻；线路、车站、车次仅用于模拟。</p>
-    <p class="mono">build 2026-11-22 · engine es-modules · desktop electron · data 908/364/40/26</p>
+    <p class="mono">build 2026-11-23 · engine es-modules · desktop electron · data 2724/4/3/20</p>
   </div>
 </footer>
 
