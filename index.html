@@ -2,279 +2,209 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>调度台 · 铁路行车调度模拟</title>
-<meta name="description" content="单线半自动闭塞、双线自动闭塞与编组站的行车调度模拟。离线单机，事件推演、命令校验与复盘。">
-<link rel="icon" href="assets/icon.png">
-<link rel="stylesheet" href="assets/site.css">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>调度台 · 铁路经营与调度模拟</title>
+<meta name="description" content="单机铁路经营与调度模拟。值班调度管接发车，经营管理管四站资产、人员、合同与车流。">
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="assets/site.css?v=0.5.8site1">
 </head>
 <body>
+<div class="deploy-note">站长台 0.5.8 已上线；值班台 0.5.8 正在替换，当前入口仍为 0.5.7。</div>
 
-<header class="top">
+<header class="site-head">
   <div class="wrap">
-    <a class="brand" href="#top"><img src="assets/icon.png" alt="">调度台 <small>DISPATCH DESK</small></a>
-    <nav>
-      <a href="#overview">概览</a>
-      <a href="#shots">界面</a>
-      <a href="#rules">规则</a>
-      <a href="#scenes">场景</a>
+    <div class="brand">
+      <span class="brand-mark">调</span>
+      <div><b>调度台</b><span>DISPATCH DESK</span></div>
+    </div>
+    <nav class="nav">
+      <a href="#modes">模式</a>
+      <a href="#desk">界面</a>
       <a href="#packs">扩展包</a>
       <a href="#download">下载</a>
       <a href="#log">日志</a>
+      <a href="https://github.com/severuszx/dispatch">源码</a>
     </nav>
-    <span class="build">v0.5.7 / web · source</span>
+    <div class="head-meta"><span>0.5.8 / WEB</span><span class="head-ver">单机</span></div>
   </div>
 </header>
 
-<main id="top">
-
+<main>
   <div class="wrap hero">
-    <h1>调度台</h1>
-    <p class="lede">一个单机的铁路经营与调度模拟。你从值班员做起，值完一班就日结，用收入扩股道、招人、签合同、定政策；四站三区段的车流互相挤压，编组站、动车所、口岸站各自有作业。0.5.7 源码与网页版已更新。</p>
-    <div class="facts">
-      <div><b>2724</b>事件</div>
-      <div><b>4</b>站</div>
-      <div><b>3</b>区段</div>
-      <div><b>20</b>扩展包</div>
-      <div><b>1000</b>设施</div>
+    <div>
+      <div class="kicker">RAILWAY OPERATIONS / SINGLE PLAYER</div>
+      <h1>调度台<em>从值班员，到站长</em></h1>
+      <p class="lede">四站三区段，两个入口。值班调度盯这一班的接发车、进路、命令和事故处置；经营管理盯四个站怎么扩、怎么招人、怎么签合同、怎么分车流。只共用四站与三区段的线路底账，两套模式不互读存档。</p>
+      <div class="actions">
+        <a class="btn primary" href="play/manage/index.html">进入站长台 <span class="mono">v0.5.8</span></a>
+        <a class="btn" href="play/index.html">值班台 0.5.7</a>
+        <a class="btn" href="https://github.com/severuszx/dispatch">GitHub</a>
+      </div>
+      <div class="facts">
+        <div><b>4</b><span>站</span></div>
+        <div><b>3</b><span>区段</span></div>
+        <div><b>20</b><span>扩展包</span></div>
+        <div><b>2724</b><span>事件</span></div>
+        <div><b>1000</b><span>设施</span></div>
+      </div>
     </div>
-    <div class="actions">
-      <a class="btn primary" href="play/index.html">开始值班 <span class="k">网页版</span></a>
-      <span class="btn">桌面包待重打 <span class="k">先玩网页版</span></span>
-      <a class="btn" href="https://github.com/severuszx/dispatch">源码仓库 <span class="k">0.5.7</span></a>
+    <div class="shot-frame">
+      <div class="shot-top"><span>值班调度 / 蚌埠站 普速场</span><span>CTC-1</span></div>
+      <img src="https://aka.doubaocdn.com/s/OmhM3uZPlv" alt="调度台站场图：四股道、上下行正线与列车动作卡">
+      <div class="shot-cap"><span>站场图 · 四股道 · 上下行正线</span><span>1440 × 900</span></div>
     </div>
-
-    <figure class="shot">
-      <img src="shots/desk-hub.png" alt="调度台极简线路图工作台：白底、橙红占用线，蚌埠站六个站场同时显示，右侧是列车动作卡">
-      <figcaption><span>工作台 · 蚌埠站枢纽 · 6 个场同时控制</span><span>1440 × 900</span></figcaption>
-    </figure>
   </div>
 
-  <section id="overview">
-    <div class="wrap">
-      <h2><span class="no">01</span>概览</h2>
-      <p class="sub">三条线路，三种闭塞方式；五个枢纽关，覆盖综合站、货运站、动车段、车辆段与编组站，一个车站内部多个场同时控制。</p>
-      <div class="cols">
-        <div class="box">
-          <h3>它是什么</h3>
-          <p>以车站值班员与列车调度员的视角，处理一个班次内多条股道、多个站场的运行调整。线路关按区间排队，枢纽关按场分片：每个场有自己的股道、作业和待放行列车，共用站内走行线。</p>
-          <p>事件不是随机弹窗。每个根因有触发条件、传播路径和处置窗口，处置晚了会向下游车站与后续车次扩散。</p>
-        </div>
-        <div class="box">
-          <h3>它不是什么</h3>
-          <ul>
-            <li>不是 12306：时刻表是按里程推算的示意运行图，不是官方时刻。</li>
-            <li>不是联机游戏：没有账号、排行榜、内购。</li>
-            <li>不是纯沙盒：标准与拟真模式下命令会校验，复盘会记录每个决策点。</li>
-            <li>不是教学动画：教学模式只是收起计时与扣分，流程仍然要自己走。</li>
-          </ul>
-        </div>
-      </div>
-      <table style="margin-top:22px">
-        <tr><th>项目</th><th>状态</th><th>说明</th></tr>
-        <tr><td>网页版</td><td><span class="status ok">0.5.7 可运行</span></td><td>原生 ES modules，无构建；Chrome / Edge 直接打开。</td></tr>
-        <tr><td>Windows 桌面端</td><td><span class="status wip">包待重打</span></td><td>0.5.7 源码已提交；当前可下载的仍是 0.4.3 旧包。</td></tr>
-        <tr><td>Pad 横屏端</td><td><span class="status wip">旧包</span></td><td>当前 APK 仍是 0.4.3，0.5.7 未重打。</td></tr>
-        <tr><td>扩展包</td><td><span class="status ok">20 包</span></td><td>4 个 Expansion、8 条线路包、8 个机制包；云端与本地镜像可装。</td></tr>
-      </table>
+  <section class="wrap section" id="modes">
+    <div class="sec-head">
+      <div class="sec-title"><span class="sec-no">01</span><h2>两套入口</h2></div>
+      <p>开局先选，不是同一个界面换个名字</p>
     </div>
-  </section>
-
-  <section id="shots">
-    <div class="wrap">
-      <h2><span class="no">02</span>界面</h2>
-      <p class="sub">极简线路图：白底、浅灰分区、1px 细边，占用与警报只用橙红。PC 是键鼠台，站场图始终配一张右侧列车动作卡，默认空态提示“选一列车”；Pad 是单任务卡，点车后底部大卡片接管整块视线，一次只处理一列车。</p>
-      <figure class="shot">
-        <img src="shots/boot-032.png" alt="调度台启动屏：运行模式、难度、车次方案、场景、规则开关、真实度与存档">
-        <figcaption><span>启动屏 · 模式 / 难度 / 车次方案</span><span>1440 × 900</span></figcaption>
-      </figure>
-      <figure class="shot">
-        <img src="shots/hub-crop.png" alt="A 版多场站场图：白底橙红，普速场、货运场、货场、客整场、调车场、机务折返段各自独立的股道与占用">
-        <figcaption><span>多场站图 · 每个场独立股道与放行状态</span><span>游戏内实拍</span></figcaption>
-      </figure>
-      <div class="cols" style="margin-top:22px">
-        <div class="box">
-          <h3>多场同时控制</h3>
-          <p>一个站六个场排在同一张图上：普速场 8 道、货运场 6 道、货场 3 道、客整场 3 道、调车场 4 道、机务折返段 2 道。每个场单独接管、单独交回，pending 列车按场放行。</p>
-        </div>
-        <div class="box">
-          <h3>事件与教程</h3>
-          <p>特殊事件按现实时间推进：首件约 90 秒，之后 5 分钟一件，同时只留一件待处置。弹窗给出代码、等级、剩余时间、车次位置、无线电原话和四条分支；处置后弹结果卡，写清选了什么、风险高低、各指标增减与传播链。货运场、客运场、编组站、段所各用自己的事件池。教程从“你不需要懂铁路”开始，第一关只有一座实训站、4 条股道、3 列车。</p>
-        </div>
+    <div class="modes">
+      <div class="mode">
+        <div class="mode-top"><span>01 / SHIFT</span><em>单班</em></div>
+        <h3>值班调度</h3>
+        <p>接车、排进路、放行、处置异常。站场图和运行图是主界面，右侧常开列车动作卡。下班出评分和复盘。</p>
+        <ul>
+          <li><span>A</span>本站股道、信号与联锁</li>
+          <li><span>B</span>调度命令、电话与事件处置</li>
+          <li><span>C</span>晚点、准点率和班末评分</li>
+        </ul>
+        <a href="play/index.html">进入值班台 →</a>
+      </div>
+      <div class="mode manage">
+        <div class="mode-top"><span>02 / STATION</span><em>长期</em></div>
+        <h3>经营管理</h3>
+        <p>以站长身份看四站。扩股道、招人、签合同、修设施、分车流、选周政策。每班日结，亏损和整改会逼着做取舍。</p>
+        <ul>
+          <li><span>A</span>四站总览、资产与 1000 项设施</li>
+          <li><span>B</span>人员疲劳、合同、账本与政策</li>
+          <li><span>C</span>三区段车流与跨站积压</li>
+        </ul>
+        <a href="play/manage/index.html">进入站长台 →</a>
       </div>
     </div>
   </section>
 
-  <section id="rules">
-    <div class="wrap">
-      <h2><span class="no">03</span>规则与数据</h2>
-      <p class="sub">规则不是装饰。命令类型、受令者、区间、时限都会参与校验。</p>
-      <div class="cols">
-        <div>
-          <h3>线路</h3>
-          <table>
-            <tr><th>线路</th><th>车站 / 公里</th><th>闭塞</th></tr>
-            <tr><td>宝成线</td><td class="num">宝鸡 0 · 秦岭 45 · 凤县 108 · 略阳 200</td><td>单线半自动</td></tr>
-            <tr><td>京广高铁</td><td class="num">许昌东 0 · 漯河西 55 · 驻马店西 120 · 信阳东 210</td><td>双线自动</td></tr>
-            <tr><td>襄阳北</td><td class="num">线路关 · 12 股道</td><td>站内调车</td></tr>
-            <tr><td>蚌埠站</td><td class="num">6 个场 · 25 列作业</td><td>综合枢纽</td></tr>
-            <tr><td>蚌埠东</td><td class="num">3 个场 · 18 列作业</td><td>货运站</td></tr>
-            <tr><td>动车段</td><td class="num">检查库 6 · 存车线 8 · 洗车线 2 · 临修线 2</td><td>动车检修</td></tr>
-            <tr><td>车辆段</td><td class="num">段修库 6 · 存车线 8 · 洗车线 2 · 临修线 2</td><td>客车整备</td></tr>
-            <tr><td>襄阳北编组站</td><td class="num">到达 6 · 编组 12 · 出发 6 · 折返 2</td><td>驼峰解体</td></tr>
-          </table>
-        </div>
-        <div>
-          <h3>模式</h3>
-          <table>
-            <tr><th>模式</th><th>差别</th></tr>
-            <tr><td>教学</td><td>提示全开，不计分，先走一遍流程。</td></tr>
-            <tr><td>标准</td><td>默认规章，命令需校验，复盘记录决策点。</td></tr>
-            <tr><td>拟真</td><td>非常站控、电话闭塞、乘务超劳全开，无白话提示。</td></tr>
-            <tr><td>剧本</td><td>七章连续值班，上一章处置影响下一章开局。</td></tr>
-            <tr><td>自定</td><td>规则、车次、天气自定，可导出为关卡。</td></tr>
-          </table>
+  <section class="wrap section" id="desk">
+    <div class="sec-head">
+      <div class="sec-title"><span class="sec-no">02</span><h2>实际界面</h2></div>
+      <p>截的是 0.5.8 当前网页版</p>
+    </div>
+    <div class="mode-gallery">
+      <div class="shot-frame">
+        <div class="shot-top"><span>经营管理 / 四站总览</span><span>AD-21</span></div>
+        <img src="https://aka.doubaocdn.com/s/LgMGxxUAjb" alt="经营管理界面：四站负荷、每日动作、合同与扩张">
+        <div class="shot-cap"><span>站长台 · 四站卡片与待决策</span><span>1440 × 900</span></div>
+      </div>
+      <div class="shot-frame">
+        <div class="shot-top"><span>选择进入方式</span><span>MODE</span></div>
+        <img src="https://aka.doubaocdn.com/s/neTD25rvPV" alt="调度台模式选择页：值班调度与经营管理">
+        <div class="shot-cap"><span>开局模式页</span><span>1440 × 900</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section" id="packs">
+    <div class="sec-head">
+      <div class="sec-title"><span class="sec-no">03</span><h2>扩展包</h2></div>
+      <p>20 个包，网页版按需拉取</p>
+    </div>
+    <div class="packs">
+      <div class="pack-group">
+        <div class="pack-head"><span>线路包 / 8</span><span>C1—C8</span></div>
+        <div class="pack-list">
+          <div class="pack-item"><span class="pid">C1</span><b>宁西线</b><span>南阳折角换向</span></div>
+          <div class="pack-item"><span class="pid">C2</span><b>焦柳线</b><span>三线交汇、山区限速</span></div>
+          <div class="pack-item"><span class="pid">C3</span><b>宝成线</b><span>观音山展线、坡道起车</span></div>
+          <div class="pack-item"><span class="pid">C4</span><b>成昆线</b><span>桥隧与地质灾害</span></div>
+          <div class="pack-item"><span class="pid">C5</span><b>京广线北段</b><span>高密度追踪与枢纽联控</span></div>
+          <div class="pack-item"><span class="pid">C6</span><b>东北线</b><span>严寒、融雪、冻害</span></div>
+          <div class="pack-item"><span class="pid">C7</span><b>西南线</b><span>喀斯特地貌与桥隧</span></div>
+          <div class="pack-item"><span class="pid">C8</span><b>高原线</b><span>高原、冻土、无人区</span></div>
         </div>
       </div>
-      <h3>车次方案</h3>
-      <p>启动屏可选「老版车次」或「新版车次 · 2026-11 调图」。新版增加 4 列/线、改号并压缩停站，仍然只是示意运行图；两套方案共用同一套事件库与站场数据，切换后立刻按新时刻铺图。</p>
-      <h3>难度</h3>
-      <p>见习 / 值班员 / 调度长 / 总调度。难度同时改三样：事件间隔、处置时限、术语解释。见习不弹术语卡，总调度直接把处置窗口压短。</p>
-      <h3>校验点</h3>
-      <ul>
-        <li><b>命令要素</b>：类型、受令者、车次、区间、时限、命令号；缺项或错配会退回。</li>
-        <li><b>区间占用</b>：单线区间同一时刻只允许一个方向；封锁与限速按分钟计时。</li>
-        <li><b>进路与股道</b>：接车股道必须空闲且信号开放；占用股道不能重复排进路。</li>
-        <li><b>乘务与超劳</b>：连续值乘超过阈值会触发换班事件，处理不及时会扩大晚点。</li>
-        <li><b>复盘</b>：每个命令、每次放行、每个未处置事件都进记录，按决策点回放。</li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="scenes">
-    <div class="wrap">
-      <h2><span class="no">04</span>场景</h2>
-      <p class="sub">26 个内置场景，覆盖单线、双线、编组站、综合枢纽、动车段、车辆段与货运站。每个场景有独立的种子与事件序列。</p>
-      <table>
-        <tr><th>编号</th><th>场景</th><th>线路 / 车站</th><th>要点</th></tr>
-        <tr><td class="num">T1–T11</td><td>教学与标准</td><td>宝成线 / 京广高铁 / 襄阳北</td><td>认识调度台、会车、红光带、调度命令、车辆段出所、沙盒开关。</td></tr>
-        <tr><td class="num">S1–S7</td><td>剧本</td><td>三线</td><td>七章连续值班，跨班次保留处置后果。</td></tr>
-        <tr><td class="num">D1–D3</td><td>每日</td><td>三线</td><td>雨夜宝成、枢纽爆仓、冻雨，每天换种子。</td></tr>
-        <tr><td class="num">H1–H5</td><td>枢纽</td><td>蚌埠站 / 蚌埠东 / 动车段 / 车辆段 / 襄阳北编组站</td><td>六场综合枢纽、三场货运站、四场动车段、四场车辆段、四场编组站，多个场同时接管与放行。</td></tr>
-      </table>
-      <p style="margin-top:14px;color:var(--faint);font-size:12px">场景列表会读取本地存档与工坊；换机器不继承进度。</p>
-    </div>
-  </section>
-
-  <section id="packs">
-    <div class="wrap">
-      <h2><span class="no">05</span>扩展包</h2>
-      <p class="sub">线路包和机制包从官网按需下载，安装包里不预装。0.5.7 的 8 条线路包各有独立场景，e1—e4 各自带编组站、区域调度、动车所、口岸站；装完可停用或卸载。</p>
-      <figure class="shot">
-        <img src="shots/packs.png" alt="A 版扩展包浮窗：内置包列表，每行写清作者、场景、列车数与天气，右侧安装按钮">
-        <figcaption><span>扩展包浮窗 · 安装 / 启用 / 载入</span><span>游戏内实拍</span></figcaption>
-      </figure>
-      <div class="cols" style="margin-top:20px">
-        <div class="box">
-          <h3>包的内容</h3>
-          <p><code>pack.json</code> 描述一个场景：<code>id</code>、<code>name</code>、<code>version</code>、<code>author</code>，加 <code>scene</code>。场景里写线路（青岚 / 江湾 / 临河之一）、简要说明、用到的术语、时长、难度、天气与列车数。</p>
-          <p>包不携带线路表、车次表与事件库，这些仍来自主数据；包只挑选参数，保证不同包之间的站场图与运行图口径一致。</p>
+      <div class="pack-group">
+        <div class="pack-head"><span>扩展 / 4</span><span>E1—E4</span></div>
+        <div class="pack-list">
+          <div class="pack-item"><span class="pid">E1</span><b>编组站</b><span>四场联动、驼峰、禁溜线</span></div>
+          <div class="pack-item"><span class="pid">E2</span><b>铁路局</b><span>区域调度与跨站资源</span></div>
+          <div class="pack-item"><span class="pid">E3</span><b>动车所与高铁站</b><span>动车组交路、一二级修</span></div>
+          <div class="pack-item"><span class="pid">E4</span><b>口岸与多式联运</b><span>三种轨距换装、报关</span></div>
         </div>
-        <div class="box">
-          <h3>导入</h3>
-          <p>导入支持单个 <code>.json</code>，也支持 <code>.zip</code>（根目录或一层子目录里有 <code>pack.json</code> 即可）。校验 id、名称、版本、线路与列车数，不合格的包不会进列表。</p>
-          <p>安装记录与启用状态存在浏览器 / 应用本地存储，不写系统目录。导入的包只在本机生效，不联网上报。</p>
+        <div class="pack-head" style="border-top:1px solid var(--line2)"><span>机制 / 8</span><span>M1—M8</span></div>
+        <div class="pack-list">
+          <div class="pack-item"><span class="pid">M1</span><b>调车作业</b><span>计划、牵出、推送</span></div>
+          <div class="pack-item"><span class="pid">M2</span><b>施工天窗</b><span>封锁与路料车</span></div>
+          <div class="pack-item"><span class="pid">M3</span><b>设备故障</b><span>红光带、道岔失表</span></div>
+          <div class="pack-item"><span class="pid">M4</span><b>恶劣天气</b><span>限速、除雪、防洪</span></div>
+          <div class="pack-item"><span class="pid">M5</span><b>乘务与机车交路</b><span>继乘、叫班、超劳</span></div>
+          <div class="pack-item"><span class="pid">M6</span><b>客运组织</b><span>站台分配、上下客</span></div>
+          <div class="pack-item"><span class="pid">M7</span><b>危险品与超限</b><span>隔离、限速、专人检查</span></div>
+          <div class="pack-item"><span class="pid">M8</span><b>应急指挥</b><span>起复、救援、多部门联动</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="download">
-    <div class="wrap">
-      <h2><span class="no">06</span>下载</h2>
-      <p class="sub">0.5.7 源码和网页版已更新；桌面与 Pad 安装包还没重打，不要拿 0.4.3 旧包当新版。</p>
+  <section class="wrap section" id="download">
+    <div class="sec-head">
+      <div class="sec-title"><span class="sec-no">04</span><h2>下载</h2></div>
+      <p>站长台 0.5.8 可用，值班台仍 0.5.7，安装包还没重打</p>
+    </div>
+    <div class="download-grid">
       <div class="dl">
-        <div class="item">
-          <h3>网页版</h3>
-          <div class="meta">v0.5.7 · 无构建 · 需 Chrome / Edge</div>
-          <p>直接打开即玩。四站经营、编组站、动车所、口岸站和 20 个扩展包都已接入。</p>
-          <a class="btn primary" href="play/index.html">打开网页版</a>
-        </div>
-        <div class="item">
-          <h3>Windows 桌面端</h3>
-          <div class="meta">v0.5.7 源码 · 安装包待重打</div>
-          <p>0.5.7 还没生成新的目录版 Zip。当前 Releases 里只有 0.4.3 旧包，先不推荐下载。</p>
-          <a class="btn" href="https://github.com/severuszx/dispatch/releases/tag/v0.4.3">查看旧版 0.4.3</a>
-        </div>
-        <div class="item">
-          <h3>Pad 横屏端</h3>
-          <div class="meta">v0.4.3 · 旧包 · 0.5.7 未重打</div>
-          <p>现有 APK 仍是 0.4.3，不含经营层和 0.5.7 扩展包。等新版重打后再装。</p>
-          <a class="btn" href="https://github.com/severuszx/dispatch/releases/tag/v0.4.3">查看旧版 APK</a>
-        </div>
-        <div class="item">
-          <h3>源码</h3>
-          <div class="meta">v0.5.7 · 前端原生 ES modules · data 由脚本生成</div>
-          <p>四站数据、20 个 DLC 清单、桌面壳、Pad 壳都在仓库里。主数据由 <code>tools/gen-data.mjs</code> 重跑。</p>
-          <a class="btn" href="https://github.com/severuszx/dispatch">打开仓库</a>
-        </div>
+        <div class="dno">WEB / 0.5.8</div>
+        <h3>网页版</h3>
+        <div class="meta">无构建 · Chrome / Edge</div>
+        <p>直接开。经营档案、扩展包和存档都在浏览器本地，清缓存会丢进度。</p>
+        <a href="play/manage/index.html">打开站长台</a>
       </div>
-      <p style="margin-top:16px;color:var(--faint);font-size:12px">0.5.7 的网页版已上线；<code>latest.json</code> 仍指向 0.4.3，等新安装包生成后再改自动更新清单。首次运行旧包如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。</p>
+      <div class="dl">
+        <div class="dno">OFFLINE / ZIP</div>
+        <h3>离线网页包</h3>
+        <div class="meta">0.5.8 · 440 KB · 解压即用</div>
+        <p>完整四站、独立经营、20 个扩展包。解压后起一个静态服务器打开，不要直接双击 HTML。</p>
+        <a href="https://aka.doubaocdn.com/s/fJUkU5KtbO">下载 0.5.8 Zip</a>
+      </div>
+      <div class="dl">
+        <div class="dno">PAD / PACKAGE</div>
+        <h3>Pad 横屏端</h3>
+        <div class="meta">旧包 0.4.3 · versionCode 7</div>
+        <p>现有 APK 不含 0.5.8 的独立经营与扩展包，等重打后再装。</p>
+        <a class="off" href="https://github.com/severuszx/dispatch/releases/tag/v0.4.3">查看旧版 APK</a>
+      </div>
+      <div class="dl">
+        <div class="dno">SOURCE / 0.5.8</div>
+        <h3>源码</h3>
+        <div class="meta">ES modules · 数据脚本生成</div>
+        <p>四站数据、20 个扩展包清单、桌面壳和 Pad 壳都在仓库里。</p>
+        <a href="https://github.com/severuszx/dispatch">打开仓库</a>
+      </div>
     </div>
+    <div class="note">GitHub Releases 在国内下载慢，这是现状。0.5.8 新包打好后会同时挂一个加速镜像；<span class="mono">latest.json</span> 仍指向 0.4.3，等新包发布再改。</div>
   </section>
 
-  <section id="log">
-    <div class="wrap">
-      <h2><span class="no">07</span>开发日志</h2>
-      <div class="log">
-        <div class="entry">
-          <div class="date">2026-11-23 · v0.5.7</div>
-          <p>四站 1,000 项设施清册与单项修理；e3 动车所一二级修与可用率；e4 口岸三条换装线、报关厅与跨班压车；8 条线路包各带独立场景；e1 编组站补驼峰禁溜线；m1 调车计划改成计划—牵出—推送三段，m5 绑定机车号，m6 客运站台优先，m8 事故联合处置。运价重平衡后百班沙盒平均净利约 2,300，周评级 A/A/A/B。</p>
-        </div>
-        <div class="entry">
-          <div class="date">2026-11-23 · v0.5.2—0.5.6</div>
-          <p>三区段车流分配与跨班积压、21 班周结评级与三选一政策、3 班整改、编组站四场、区域调度、人员疲劳与休班培训、合同履约、事件库运行期扩到 2,724 条。</p>
-        </div>
-        <div class="entry">
-          <div class="date">2026-11-22 · v0.4.3</div>
-          <p>55 站资源包改为云端按需下载，桌面与 Pad 安装包不再携带；站场图补上接车、换线、发车、出清的连续移动，跨站通过车自动选线通过；车种增加轨道检测车、检修车、工程车，客运站分出独立货场股道，货运车带装卸作业，程序化背景音乐随天气与场景切换。</p>
-        </div>
-        <div class="entry">
-          <div class="date">2026-11-22 · v0.3.3</div>
-          <p>整套界面改成手绘纸面游戏风：站场图、运行图、启动屏、教学卡、事件弹窗全部换色重画。PC 改成键鼠台，只留站场图与运行图；Pad 改成单任务卡，一次只处理一列车，底部大按钮。核心操作改为直接点车次牌，右侧弹出“这列车下一步”。特殊事件改现实时间 5 分钟一件，处置后弹结果卡，明确显示选择、风险、指标变化和传播链。教学第一关缩成单站 4 股道 3 列车，并同步改写教程；货运站、客运站、编组站、段所各用自己的事件池。</p>
-        </div>
-        <div class="entry">
-          <div class="date">2026-11-21 · v0.1.0</div>
-          <p>站场图改为缓弯道岔、圆点信号、占用股道整段红线；反向车次区间修复并重跑时刻表；新增只读命令记录窗；桌面端与官网首版。</p>
-        </div>
-        <div class="entry">
-          <div class="date">2026-11-20</div>
-          <p>工作台改为 Win11 桌面外壳，中性灰黑配色；数据换成宝成线、京广高铁、襄阳北，车次换真实车次；命令库扩到 4536 条。</p>
-        </div>
-      </div>
-      <h3>已知问题</h3>
-      <ul>
-        <li>0.5.7 的桌面 Zip、Pad APK 还没重打；官网下载区只保留 0.4.3 旧包入口，自动更新清单也仍是 0.4.3。</li>
-        <li>c1—c8 八条线路包已有独立场景标题、车数与天气，但仍共用青岚站底图，不是八套独立站场。</li>
-        <li>e3 动车组交路、e4 报关单据与跨境合同、m1 完整调车进路、m5 机车号绑定、m6 站台冲突、m8 多部门联动目前只接基础数值和界面，未跑完整长班。</li>
-        <li>1,000 项设施目前是静态清册与单项修理，未按班老化，也没有批量检修队。</li>
-        <li>0.5.7 的 m1/m5/m6/m8 只通过语法检查和面板进入，未做完整场景回归。</li>
-      </ul>
+  <section class="wrap section" id="log">
+    <div class="sec-head">
+      <div class="sec-title"><span class="sec-no">05</span><h2>开发日志</h2></div>
+      <p>只记实际改动和未完成项</p>
     </div>
+    <div class="log-table">
+      <div class="log-row"><time>2026-11-23 / 0.5.8</time><div><b>列车沿股道与咽喉运行</b><p>接车从正线进咽喉、再沿股道停稳；发车从股道经咽喉上正线。原来直接斜穿股道，已改。开局新增值班调度 / 经营管理两个入口，经营模式默认进站长台。音效改成继电器、轨道撞击、制动风、车门铃和站台广播底噪。</p></div></div>
+      <div class="log-row"><time>2026-11-23 / 0.5.5—0.5.6</time><div><b>四站设施、动车所、口岸与线路场景</b><p>四站共 1000 项设施，可逐项修理；E3 动车所一二级修；E4 口岸三条换装线、报关厅；C1—C8 各有独立场景；编组站补驼峰禁溜线；运价重平衡后百班沙盒平均净利约 2300。</p></div></div>
+      <div class="log-row"><time>2026-11-23 / 0.5.2—0.5.4</time><div><b>经营层与四站车流</b><p>三区段车流分配、21 班周结评级、三选一政策、整改、合同、人员疲劳、编组站四场、区域调度、事件库扩到 2724 条。</p></div></div>
+      <div class="log-row"><time>2026-11-22 / 0.4.3</time><div><b>资源包改为云端按需下载</b><p>站场图补接车、换线、发车、出清移动；跨站通过车自动选线；增加轨道检测车、检修车、工程车；客运站分出独立货场股道。</p></div></div>
+    </div>
+    <div class="note">已知未完成：C1—C8 仍共用青岚站底图；E3 动车组交路、E4 报关单据、M1 完整调车进路、M5 机车号绑定、M6 站台冲突、M8 多部门联动只接了基础数值；1000 项设施还没有按班老化；桌面 Zip 与 Pad APK 仍是 0.4.3。</div>
   </section>
-
 </main>
 
-<footer>
+<footer class="site-foot">
   <div class="wrap">
-    <p>调度台 · 单机铁路经营与调度模拟 · v0.5.7</p>
-    <p>时刻表为按线路里程与区段速度推算的示意运行图，不代表任何官方时刻；线路、车站、车次仅用于模拟。</p>
-    <p class="mono">build 2026-11-23 · engine es-modules · desktop electron · data 2724/4/3/20</p>
+    <span>调度台 · 单机铁路经营与调度模拟 · v0.5.8</span>
+    <span>车次与时刻为示意运行图，不代表官方时刻</span>
   </div>
 </footer>
-
 </body>
 </html>
-
-
-
