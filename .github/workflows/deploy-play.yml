@@ -10,14 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: curl -fsSL https://aka.doubaocdn.com/s/9n9gqEHsdI -o /tmp/game.zip
-      - run: curl -fsSL https://aka.doubaocdn.com/s/6W5TWJQU0b -o index.html
-      - run: curl -fsSL https://aka.doubaocdn.com/s/08SBENvdPt -o latest.json
+      - run: curl -fsSL https://aka.doubaocdn.com/s/hYzEba2AYU -o /tmp/game.zip
       - run: rm -rf play/assets play/data play/manage play/packs play/ui-v2 play/index.html
       - run: unzip -q /tmp/game.zip -d play
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add index.html latest.json play
-          git diff --cached --quiet || git commit -m "site: 0.6.19 homepage and play build"
+          git add -A play
+          git diff --cached --quiet || git commit -m "play: sync 0.6.19 web build"
           git push
