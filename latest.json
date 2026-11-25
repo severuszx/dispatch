@@ -1,7 +1,7 @@
 {
-  "version": "0.4.3",
-  "notes": "站场图接车、发车、出清连续动画与信号脉冲；货车三张作业票（货票核验、装卸、摘挂），客车客运乘降；车辆段按车种分色。焦柳 30 站、宁西 26 站云端按需下载。",
-  "url": "https://github.com/severuszx/dispatch/releases/download/v0.4.3/dispatch-0.4.3-win64.zip",
-  "size": 162629906,
-  "sha256": "6352945d8c2ad91e279df1b3edaae89936dbcb74c287a82150e254caeca9012f"
+  "version": "0.6.19",
+  "notes": "值班台切到宝鸡站客运场 6 台 10 线，补岛式站台、股道类型和错位咽喉；站长台全屏大地图加台账抽屉；新增 Android APK 与 Windows 便携包。",
+  "url": "https://aka.doubaocdn.com/s/O8dm922Sli",
+  "size": 158802269,
+  "sha256": "93f0213904192306eb53752514c9a543fa6770c6f85b092c7c812ef7e7e8b91b"
 }
