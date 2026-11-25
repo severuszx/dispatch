@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>调度台</title>
-<link rel="stylesheet" href="assets/css/app.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/wm.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/panels.css?v=0.5.8a">
+<link rel="stylesheet" href="assets/css/app.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/wm.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/panels.css?v=0.6.19a">
 <link rel="stylesheet" href="assets/css/game.css?v=0.6.18">
-<link rel="stylesheet" href="assets/css/ops.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/admin.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/dlc.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/yard.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/bureau.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/emu.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/port.css?v=0.5.8a">
-<link rel="stylesheet" href="assets/css/mode.css?v=0.5.8a">
+<link rel="stylesheet" href="assets/css/ops.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/admin.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/dlc.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/yard.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/bureau.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/emu.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/port.css?v=0.6.19a">
+<link rel="stylesheet" href="assets/css/mode.css?v=0.6.19a">
 </head>
 <body>
 
@@ -23,18 +23,18 @@
   <div class="mg-shell">
     <header class="mg-bar">
       <div class="mg-brand"><span class="brand-mark">调</span><b>调度台</b><span>DISPATCH DESK</span></div>
-      <div class="mg-meta"><span class="mono">v0.5.8</span><span>单机 · 本地存档</span></div>
+      <div class="mg-meta"><span class="mono">v0.6.19</span><span>单机 · 本地存档</span></div>
     </header>
     <div class="mg-head">
       <span class="mg-kicker mono">选择进入方式</span>
       <h1>今天你管哪一层</h1>
-      <p>值班台管这一班的接发车，站长台管四个站怎么活下去。两套模式只共用四站与三区段的线路底账，存档与数值完全分开。</p>
+      <p>值班台管宝鸡站这一班的接发车，站长台管客运场六台十线怎么活下去。两套模式共用宝鸡站底账，存档与数值完全分开。</p>
     </div>
     <div class="mg-grid">
       <button class="mg-card" type="button" data-gm="dispatch">
         <div class="mg-card-top"><span class="mg-no mono">01 / SHIFT</span><span class="mg-tag">单班</span></div>
         <h2>值班调度</h2>
-        <p class="mg-desc">坐进车站控制室，盯站场图和运行图。接车、排进路、放行、处置事故，下班看本班复盘。</p>
+        <p class="mg-desc">走进车站控制室，盯站场图和运行图。接车、排进路、放行、处置事故，下班看本班复盘。</p>
         <ul class="mg-list">
           <li><span class="mono">A</span>本站股道与信号</li>
           <li><span class="mono">B</span>事件、命令与电话</li>
@@ -45,11 +45,11 @@
       <button class="mg-card" data-gm="manage" type="button">
         <div class="mg-card-top"><span class="mg-no mono">02 / STATION</span><span class="mg-tag">长期</span></div>
         <h2>经营管理</h2>
-        <p class="mg-desc">以站长身份管四站三区段。扩股道、招人、签合同、分车流、定政策，日结和整改会逼着你做取舍。</p>
+        <p class="mg-desc">以站长身份管宝鸡站客运场。扩股道、招人、签合同、分车流、定政策，日结和整改会逼着你做取舍。</p>
         <ul class="mg-list">
-          <li><span class="mono">A</span>四站资产与设施</li>
+          <li><span class="mono">A</span>宝鸡站资产与设施</li>
           <li><span class="mono">B</span>人员、合同与账本</li>
-          <li><span class="mono">C</span>区段车流与周评级</li>
+          <li><span class="mono">C</span>客运场车流与周评级</li>
         </ul>
         <span class="mg-go">进入站长台 <i>→</i></span>
       </button>
@@ -68,7 +68,7 @@
       </div>
       <div class="bb-meta">
         <span id="bootMeta" class="mono"></span>
-        <span class="bb-ver mono">v0.5.8</span>
+        <span class="bb-ver mono">v0.6.19</span>
       </div>
     </header>
     <div class="boot-main">
@@ -178,7 +178,7 @@
         <div class="bs-row"><span>本班词条</span><b id="bsMod">常规班</b></div>
         <div class="bs-row"><span>岗位等级</span><b id="bsRank">学员</b></div>
         <div class="bs-row"><span>可用资金</span><b id="bsMoney" class="mono">¥ 1200</b></div>
-        <div class="bs-row"><span>版本</span><b class="mono">0.5.8</b></div>
+        <div class="bs-row"><span>版本</span><b class="mono">0.6.19</b></div>
         <div class="bs-note" id="sceneDetailSide"></div>
         <div class="bs-note pad-note">为 Pad 横屏设计，手机打开可能显示不全。</div>
       </aside>
@@ -278,7 +278,7 @@
         <button data-panel="orders">行车日志</button>
         <button data-panel="radio">调度电话</button>
       </div>
-      <div class="rail-foot mono">v0.5.8</div>
+      <div class="rail-foot mono">v0.6.19</div>
     </nav>
 
     <main class="workspace" id="desk">
@@ -343,5 +343,3 @@
 <script type="module" src="assets/js/app.js?v=0.6.19c"></script>
 </body>
 </html>
-
-
