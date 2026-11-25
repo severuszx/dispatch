@@ -4,12 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>调度台 · 铁路经营与调度模拟</title>
-<meta name="description" content="单机铁路经营与调度模拟。值班调度管接发车，经营管理管四站资产、人员、合同与车流。">
+<meta name="description" content="单机铁路经营与调度模拟。值班调度在宝鸡站六台十线接发车，经营管理管客运场资产、人员、合同与车流。">
 <link rel="icon" href="favicon.ico">
-<link rel="stylesheet" href="assets/site.css?v=0.5.8site1">
+<link rel="stylesheet" href="assets/site.css?v=0.6.19site1">
 </head>
 <body>
-<div class="deploy-note">站长台 0.5.8 已上线；值班台仍为 0.5.7。</div>
 
 <header class="site-head">
   <div class="wrap">
@@ -25,7 +24,7 @@
       <a href="#log">日志</a>
       <a href="https://github.com/severuszx/dispatch">源码</a>
     </nav>
-    <div class="head-meta"><span>0.5.8 / WEB</span><span class="head-ver">单机</span></div>
+    <div class="head-meta"><span>0.6.19 / WEB</span><span class="head-ver">单机</span></div>
   </div>
 </header>
 
@@ -34,24 +33,24 @@
     <div>
       <div class="kicker">RAILWAY OPERATIONS / SINGLE PLAYER</div>
       <h1>调度台<em>从值班员，到站长</em></h1>
-      <p class="lede">四站三区段，两个入口。值班调度盯这一班的接发车、进路、命令和事故处置；经营管理盯四个站怎么扩、怎么招人、怎么签合同、怎么分车流。只共用四站与三区段的线路底账，两套模式不互读存档。</p>
+      <p class="lede">宝鸡站六台十线，两个入口。值班调度盯这一班的接发车、进路、命令和事故处置；经营管理盯客运场怎么扩、怎么招人、怎么签合同、怎么分车流。值班台和经营台是两套界面，共用宝鸡站底账，存档不互读。</p>
       <div class="actions">
-        <a class="btn primary" href="play/manage/index.html">进入站长台 <span class="mono">v0.5.8</span></a>
-        <a class="btn" href="play/index.html">值班台 0.5.7</a>
+        <a class="btn primary" href="play/index.html">进入网页版 <span class="mono">v0.6.19</span></a>
+        <a class="btn" href="#modes">看两套模式</a>
         <a class="btn" href="https://github.com/severuszx/dispatch">GitHub</a>
       </div>
       <div class="facts">
-        <div><b>4</b><span>站</span></div>
-        <div><b>3</b><span>区段</span></div>
+        <div><b>6</b><span>站台</span></div>
+        <div><b>10</b><span>股道</span></div>
         <div><b>20</b><span>扩展包</span></div>
         <div><b>2724</b><span>事件</span></div>
         <div><b>1000</b><span>设施</span></div>
       </div>
     </div>
     <div class="shot-frame">
-      <div class="shot-top"><span>值班调度 / 蚌埠站 普速场</span><span>CTC-1</span></div>
-      <img src="https://aka.doubaocdn.com/s/OmhM3uZPlv" alt="调度台站场图：四股道、上下行正线与列车动作卡">
-      <div class="shot-cap"><span>站场图 · 四股道 · 上下行正线</span><span>1440 × 900</span></div>
+      <div class="shot-top"><span>值班调度 / 宝鸡站 客运场</span><span>CTC-1</span></div>
+      <img src="shots/dispatch-058.png" alt="调度台站场图：宝鸡站客运场股道与上下行正线">
+      <div class="shot-cap"><span>站场图 · 六台十线 · 上下行正线</span><span>1440 × 900</span></div>
     </div>
   </div>
 
@@ -64,7 +63,7 @@
       <div class="mode">
         <div class="mode-top"><span>01 / SHIFT</span><em>单班</em></div>
         <h3>值班调度</h3>
-        <p>接车、排进路、放行、处置异常。站场图和运行图是主界面，右侧常开列车动作卡。下班出评分和复盘。</p>
+        <p>接车、排进路、放行、处置异常。宝鸡站六台十线站场图和运行图是主界面，右侧常开列车动作卡。下班出评分和复盘。</p>
         <ul>
           <li><span>A</span>本站股道、信号与联锁</li>
           <li><span>B</span>调度命令、电话与事件处置</li>
@@ -75,11 +74,11 @@
       <div class="mode manage">
         <div class="mode-top"><span>02 / STATION</span><em>长期</em></div>
         <h3>经营管理</h3>
-        <p>以站长身份看四站。扩股道、招人、签合同、修设施、分车流、选周政策。每班日结，亏损和整改会逼着做取舍。</p>
+        <p>以站长身份看客运场。扩股道、招人、签合同、修设施、分车流、选周政策。每班日结，亏损和整改会逼着做取舍。</p>
         <ul>
-          <li><span>A</span>四站总览、资产与 1000 项设施</li>
+          <li><span>A</span>宝鸡站总览、资产与 1000 项设施</li>
           <li><span>B</span>人员疲劳、合同、账本与政策</li>
-          <li><span>C</span>三区段车流与跨站积压</li>
+          <li><span>C</span>客运场车流与跨站积压</li>
         </ul>
         <a href="play/manage/index.html">进入站长台 →</a>
       </div>
@@ -89,17 +88,17 @@
   <section class="wrap section" id="desk">
     <div class="sec-head">
       <div class="sec-title"><span class="sec-no">02</span><h2>实际界面</h2></div>
-      <p>截的是 0.5.8 当前网页版</p>
+      <p>截的是 0.6.19 当前网页版</p>
     </div>
     <div class="mode-gallery">
       <div class="shot-frame">
-        <div class="shot-top"><span>经营管理 / 四站总览</span><span>AD-21</span></div>
-        <img src="https://aka.doubaocdn.com/s/LgMGxxUAjb" alt="经营管理界面：四站负荷、每日动作、合同与扩张">
-        <div class="shot-cap"><span>站长台 · 四站卡片与待决策</span><span>1440 × 900</span></div>
+        <div class="shot-top"><span>经营管理 / 宝鸡站总览</span><span>AD-21</span></div>
+        <img src="shots/manage-058.png" alt="经营管理界面：宝鸡站负荷、每日动作、合同与扩张">
+        <div class="shot-cap"><span>站长台 · 宝鸡站卡片与待决策</span><span>1440 × 900</span></div>
       </div>
       <div class="shot-frame">
         <div class="shot-top"><span>选择进入方式</span><span>MODE</span></div>
-        <img src="https://aka.doubaocdn.com/s/neTD25rvPV" alt="调度台模式选择页：值班调度与经营管理">
+        <img src="shots/mode-058.png" alt="调度台模式选择页：值班调度与经营管理">
         <div class="shot-cap"><span>开局模式页</span><span>1440 × 900</span></div>
       </div>
     </div>
@@ -150,39 +149,46 @@
   <section class="wrap section" id="download">
     <div class="sec-head">
       <div class="sec-title"><span class="sec-no">04</span><h2>下载</h2></div>
-      <p>站长台 0.5.8 可用，值班台仍 0.5.7，安装包还没重打</p>
+      <p>网页、APK、Windows 包都是 0.6.19</p>
     </div>
     <div class="download-grid">
       <div class="dl">
-        <div class="dno">WEB / 0.5.8</div>
+        <div class="dno">WEB / 0.6.19</div>
         <h3>网页版</h3>
         <div class="meta">无构建 · Chrome / Edge</div>
         <p>直接开。经营档案、扩展包和存档都在浏览器本地，清缓存会丢进度。</p>
-        <a href="play/manage/index.html">打开站长台</a>
+        <a href="play/index.html">打开网页版</a>
       </div>
       <div class="dl">
         <div class="dno">OFFLINE / ZIP</div>
         <h3>离线网页包</h3>
-        <div class="meta">0.5.8 · 490 KB · 解压即用</div>
-        <p>完整四站、独立经营、20 个扩展包。解压后起一个静态服务器打开，不要直接双击 HTML。</p>
-        <a href="https://aka.doubaocdn.com/s/54NhUaM7v6">下载 0.5.8 Zip</a>
+        <div class="meta">0.6.19 · 477 KB · 解压即用</div>
+        <p>完整游戏、独立经营、20 个扩展包。解压后起一个静态服务器打开，不要直接双击 HTML。</p>
+        <a href="https://aka.doubaocdn.com/s/9n9gqEHsdI">下载 0.6.19 Zip</a>
       </div>
       <div class="dl">
-        <div class="dno">PAD / PACKAGE</div>
-        <h3>Pad 横屏端</h3>
-        <div class="meta">旧包 0.4.3 · versionCode 7</div>
-        <p>现有 APK 不含 0.5.8 的独立经营与扩展包，等重打后再装。</p>
-        <a class="off" href="https://github.com/severuszx/dispatch/releases/tag/v0.4.3">查看旧版 APK</a>
+        <div class="dno">ANDROID / APK</div>
+        <h3>Android 横屏端</h3>
+        <div class="meta">0.6.19 · 482 KB · 已签名</div>
+        <p>WebView 内置资源服务，不依赖外网；安装后横屏进入游戏。</p>
+        <a href="https://aka.doubaocdn.com/s/UfTaHZy1E0">下载 0.6.19 APK</a>
       </div>
       <div class="dl">
-        <div class="dno">SOURCE / 0.5.8</div>
+        <div class="dno">WINDOWS / ZIP</div>
+        <h3>Windows 便携版</h3>
+        <div class="meta">0.6.19 · 152 MB · 免安装</div>
+        <p>Electron 打包，解压后点 <span class="mono">调度台.exe</span>，不要只拷 exe。</p>
+        <a href="https://aka.doubaocdn.com/s/O8dm922Sli">下载 0.6.19 Windows 包</a>
+      </div>
+      <div class="dl">
+        <div class="dno">SOURCE / 0.6.19</div>
         <h3>源码</h3>
         <div class="meta">ES modules · 数据脚本生成</div>
-        <p>四站数据、20 个扩展包清单、桌面壳和 Pad 壳都在仓库里。</p>
+        <p>宝鸡站数据、20 个扩展包清单、桌面壳和 Android 壳都在仓库里。</p>
         <a href="https://github.com/severuszx/dispatch">打开仓库</a>
       </div>
     </div>
-    <div class="note">GitHub Releases 在国内下载慢，这是现状。0.5.8 新包打好后会同时挂一个加速镜像；<span class="mono">latest.json</span> 仍指向 0.4.3，等新包发布再改。</div>
+    <div class="note">0.6.19 安装包走加速镜像；<span class="mono">latest.json</span> 已改为 0.6.19。Windows 包解压后点 <span class="mono">调度台.exe</span>。</div>
   </section>
 
   <section class="wrap section" id="log">
@@ -191,18 +197,19 @@
       <p>只记实际改动和未完成项</p>
     </div>
     <div class="log-table">
+      <div class="log-row"><time>2026-11-25 / 0.6.19</time><div><b>宝鸡站六台十线、全屏站长台和安装包</b><p>值班台默认场景改到宝鸡站客运场，10 股道、6 个站台，补岛式站台、股道类型和错位咽喉；站长台改成全屏大地图加台账抽屉；补 Android APK 与 Windows Electron 包。</p></div></div>
       <div class="log-row"><time>2026-11-23 / 0.5.8</time><div><b>列车沿股道与咽喉运行</b><p>接车从正线进咽喉、再沿股道停稳；发车从股道经咽喉上正线。原来直接斜穿股道，已改。开局新增值班调度 / 经营管理两个入口，经营模式默认进站长台。音效改成继电器、轨道撞击、制动风、车门铃和站台广播底噪。</p></div></div>
       <div class="log-row"><time>2026-11-23 / 0.5.5—0.5.6</time><div><b>四站设施、动车所、口岸与线路场景</b><p>四站共 1000 项设施，可逐项修理；E3 动车所一二级修；E4 口岸三条换装线、报关厅；C1—C8 各有独立场景；编组站补驼峰禁溜线；运价重平衡后百班沙盒平均净利约 2300。</p></div></div>
       <div class="log-row"><time>2026-11-23 / 0.5.2—0.5.4</time><div><b>经营层与四站车流</b><p>三区段车流分配、21 班周结评级、三选一政策、整改、合同、人员疲劳、编组站四场、区域调度、事件库扩到 2724 条。</p></div></div>
       <div class="log-row"><time>2026-11-22 / 0.4.3</time><div><b>资源包改为云端按需下载</b><p>站场图补接车、换线、发车、出清移动；跨站通过车自动选线；增加轨道检测车、检修车、工程车；客运站分出独立货场股道。</p></div></div>
     </div>
-    <div class="note">已知未完成：C1—C8 仍共用青岚站底图；E3 动车组交路、E4 报关单据、M1 完整调车进路、M5 机车号绑定、M6 站台冲突、M8 多部门联动只接了基础数值；1000 项设施还没有按班老化；桌面 Zip 与 Pad APK 仍是 0.4.3。</div>
+    <div class="note">已知未完成：值班台列车仍显示车次牌，没换成站场图那套完整车辆轮廓；APK 未在真机安装启动，Windows 包未在 Windows 实机启动；1000 项设施还没有按班老化。</div>
   </section>
 </main>
 
 <footer class="site-foot">
   <div class="wrap">
-    <span>调度台 · 单机铁路经营与调度模拟 · v0.5.8</span>
+    <span>调度台 · 单机铁路经营与调度模拟 · v0.6.19</span>
     <span>车次与时刻为示意运行图，不代表官方时刻</span>
   </div>
 </footer>
