@@ -26,14 +26,34 @@ const THROAT = 30;
 const PAD_L = 90;
 const PAD_R = 80;
 
+function pointAlong(points, p) {
+  const segs = [];
+  let total = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const a = points[i - 1];
+    const b = points[i];
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    segs.push({ a, b, len, at: total });
+    total += len;
+  }
+  const d = Math.max(0, Math.min(1, p)) * total;
+  for (const s of segs) {
+    if (d <= s.at + s.len || s === segs[segs.length - 1]) {
+      const q = s.len ? Math.max(0, Math.min(1, (d - s.at) / s.len)) : 0;
+      return { x: s.a[0] + (s.b[0] - s.a[0]) * q, y: s.a[1] + (s.b[1] - s.a[1]) * q };
+    }
+  }
+  const last = points[points.length - 1];
+  return { x: last[0], y: last[1] };
+}
+
 function trackRole(conf, no) {
   if (!conf) return 'mixed';
   const n = Number(conf.tracks) || 0;
-  if (Array.isArray(conf.platform) || Array.isArray(conf.freight)) {
-    if (Array.isArray(conf.platform) && conf.platform.includes(no)) return 'platform';
-    if (Array.isArray(conf.freight) && conf.freight.includes(no)) return 'freight';
-    return 'mixed';
-  }
+  const plats = Array.isArray(conf.platform) ? conf.platform : Array.isArray(conf.platforms) ? conf.platforms : null;
+  if (conf.id === 'qinglan' || (plats && plats.length >= 2 && n >= 8)) return 'platform';
+  if (Array.isArray(conf.freight)) return conf.freight.includes(no) ? 'freight' : 'mixed';
+  if (plats && plats.length && no <= n) return 'platform';
   const p = Number(conf.platform) || 0;
   const f = Number(conf.freight) || 0;
   if (n >= 6) {
@@ -528,6 +548,7 @@ export class CTCView {
     const ySlot = (k) => Math.round(yTop + k * gap);
     const upY = ySlot(half);
     const downY = double ? ySlot(half + 1) : upY;
+    const island = Array.isArray(conf.platforms) && conf.platforms.length >= 2 && n >= 8;
     const narrow = this.w < 620;
     const left = narrow ? 40 : 66;
     const right = this.w - left;
@@ -550,10 +571,16 @@ export class CTCView {
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(entry, y); ctx.lineTo(exit, y); ctx.stroke();
     };
-    const lead = (x1, y1, x2, y2) => {
+    const lead = (x1, y1, x2, y2, k, sign) => {
+      const sx = x1 + sign * (k - half) * 11;
       ctx.strokeStyle = '#8a958d';
       ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(sx, y1);
+      ctx.bezierCurveTo(sx + sign * 18, y1, x2 - sign * 24, y2, x2, y2);
+      ctx.stroke();
+      ctx.fillStyle = '#4f5b53';
+      ctx.beginPath(); ctx.arc(sx, y1, 2.4, 0, Math.PI * 2); ctx.fill();
     };
 
     main(upY);
@@ -595,9 +622,9 @@ export class CTCView {
       const role = trackRole(conf, k + 1);
       const mainY = double ? (k < half ? upY : downY) : upY;
 
-      lead(throatL, mainY, trackL, ty);
-      lead(throatR, mainY, trackR, ty);
-      this.platformBand(ctx, trackL, trackR, ty, role, k);
+      lead(throatL, mainY, trackL, ty, k, 1);
+      lead(throatR, mainY, trackR, ty, k, -1);
+      if (!island) this.platformBand(ctx, trackL, trackR, ty, role, k);
 
       ctx.save();
       ctx.shadowColor = blocked || reserved ? 'rgba(213,137,31,.55)' : busy ? 'rgba(232,75,48,.35)' : 'transparent';
@@ -639,16 +666,21 @@ export class CTCView {
       this.font(10, true);
       ctx.fillStyle = COL.dim;
       ctx.textAlign = 'right';
-      ctx.fillText(String(k + 1), trackL - 22, ty - 10);
+      const tag = role === 'platform' ? (k < 2 ? '正线' : '到发') : role === 'freight' ? '货物' : '混线';
+      ctx.fillText(`${k + 1} ${tag}`, trackL - 22, ty - 10);
 
       if (busy) {
         const t = s.trains.find((tt) => tt.id === busy);
         if (t && t.status === 'station') {
-          const p = t.enterWall ? Math.max(0, Math.min(1, (performance.now() - t.enterWall) / 1500)) : 1;
+          const p = t.enterWall ? Math.max(0, Math.min(1, (performance.now() - t.enterWall) / 2400)) : 1;
           if (p < 1) {
-            const fromX = t.dir > 0 ? throatL : throatR;
+            const center = (trackL + trackR) / 2;
             const fromY = double ? (t.dir > 0 ? upY : downY) : upY;
-            this.drawTrainAt(t, fromX + ((trackL + trackR) / 2 - fromX) * p, fromY + (ty - fromY) * p, false, .9);
+            const path = t.dir > 0
+              ? [[throatL, fromY], [trackL, ty], [center, ty]]
+              : [[throatR, fromY], [trackR, ty], [center, ty]];
+            const pos = pointAlong(path, p);
+            this.drawTrainAt(t, pos.x, pos.y, false, .9);
           } else {
             this.drawTrainAt(t, (trackL + trackR) / 2, ty, true, 1);
           }
@@ -665,6 +697,8 @@ export class CTCView {
       this.hit.push({ type: 'track', station: id, track: k + 1, x: trackL, y: ty - 14, w: trackR - trackL, h: 28 });
     }
 
+    if (island) this.drawPlatformIslands(ctx, trackL, trackR, n, ySlot, slotFor);
+
     const upApproach = approach.filter((t) => t.dir > 0);
     const downApproach = approach.filter((t) => t.dir < 0);
     upApproach.forEach((t) => {
@@ -677,27 +711,64 @@ export class CTCView {
     });
     for (const t of s.trains || []) {
       if (t.status !== 'running' || !t.section) continue;
-      const p = t.departWall ? Math.max(0, Math.min(1, (performance.now() - t.departWall) / 6000)) : Math.max(0, Math.min(1, t.progress || 0));
+      const p = t.departWall ? Math.max(0, Math.min(1, (performance.now() - t.departWall) / 7200)) : Math.max(0, Math.min(1, t.progress || 0));
       const fromTrack = (t.originTrack || 0) > 0 ? ySlot(slotFor((t.originTrack || 1) - 1)) : (t.dir > 0 ? upY : downY);
       const center = (trackL + trackR) / 2;
-      if (t.dir > 0) {
-        if (p < .36) {
-          const q = p / .36;
-          this.drawTrainAt(t, center + (throatR - center) * q, fromTrack + (upY - fromTrack) * q, false, .9);
-        } else {
-          const q = (p - .36) / .64;
-          this.drawTrainAt(t, throatR + (exit - throatR) * q, upY, false, .9);
-        }
-      } else if (p < .36) {
-        const q = p / .36;
-        this.drawTrainAt(t, center + (throatL - center) * q, fromTrack + (downY - fromTrack) * q, false, .9);
-      } else {
-        const q = (p - .36) / .64;
-        this.drawTrainAt(t, throatL - (throatL - entry) * q, downY, false, .9);
-      }
+      const path = t.dir > 0
+        ? [[center, fromTrack], [trackR, fromTrack], [throatR, upY], [exit, upY]]
+        : [[center, fromTrack], [trackL, fromTrack], [throatL, downY], [entry, downY]];
+      const pos = pointAlong(path, p);
+      this.drawTrainAt(t, pos.x, pos.y, false, .9);
     }
   }
 
+
+  drawPlatformIslands(ctx, trackL, trackR, n, ySlot, slotFor) {
+    const pairs = [];
+    for (let i = 2; i < n; i += 2) pairs.push([i, i + 1]);
+    for (const [a, b] of pairs) {
+      const ya = ySlot(slotFor(a - 1));
+      const yb = ySlot(slotFor(b - 1));
+      const cy = Math.round((ya + yb) / 2);
+      const top = cy - 9;
+      const bottom = cy + 9;
+      if (yb - ya < 24) continue;
+      ctx.fillStyle = '#e7dfcd';
+      ctx.fillRect(trackL + 6, top, trackR - trackL - 12, bottom - top);
+      ctx.strokeStyle = '#c4b69b';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(trackL + 6.5, top + .5, trackR - trackL - 13, bottom - top - 1);
+      ctx.strokeStyle = '#d9b23c';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(trackL + 12, top + 3); ctx.lineTo(trackR - 12, top + 3); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(trackL + 12, bottom - 3); ctx.lineTo(trackR - 12, bottom - 3); ctx.stroke();
+      this.font(8, true);
+      const label = `${Math.ceil(a / 2)}台 ${a}/${b}道`;
+      const tw = ctx.measureText(label).width + 10;
+      ctx.fillStyle = '#2f6b4f';
+      ctx.fillRect(trackL + 10, top - 14, tw, 13);
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, trackL + 15, top - 7.5);
+    }
+    const y1 = ySlot(slotFor(0));
+    const yn = ySlot(slotFor(n - 1));
+    ctx.fillStyle = '#e7dfcd';
+    ctx.fillRect(trackL + 6, y1 - 16, trackR - trackL - 12, 8);
+    ctx.strokeStyle = '#d9b23c';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(trackL + 12, y1 - 8); ctx.lineTo(trackR - 12, y1 - 8); ctx.stroke();
+    this.font(8, true);
+    ctx.fillStyle = '#2f6b4f';
+    ctx.textAlign = 'left';
+    ctx.fillText('1台 1道', trackL + 14, y1 - 18);
+    ctx.fillStyle = '#e7dfcd';
+    ctx.fillRect(trackL + 6, yn + 8, trackR - trackL - 12, 8);
+    ctx.strokeStyle = '#d9b23c';
+    ctx.beginPath(); ctx.moveTo(trackL + 12, yn + 8); ctx.lineTo(trackR - 12, yn + 8); ctx.stroke();
+    ctx.fillStyle = '#2f6b4f';
+    ctx.fillText(`${Math.ceil(n / 2)}台 ${n}道`, trackL + 14, yn + 24);
+  }
 
   platformBand(ctx, x1, x2, y, role, k) {
     const w = x2 - x1;

@@ -92,6 +92,7 @@ function advance() {
   }
   STATIONS.forEach((d) => {
     const s = st(d.id);
+    const g = groupsOf(d.id);
     GROUPS.forEach((x) => { s.groups[x.id] = clamp(s.groups[x.id] - (0.7 + Math.random() * 0.9) * (state.policy && state.policy.id === 'maint' ? 0.5 : 1), 20, 100); });
     if (s.build) {
       s.build.left -= 1;
@@ -128,3 +129,4 @@ function advance() {
   else if (state.event) openEvent();
   else toast(`第 ${state.day - 1} 日结：净利 ${fm(net)} · 准点 ${p.punc}%`);
 }
+

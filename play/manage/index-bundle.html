@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>调度台 · 站长台</title>
+<link rel="stylesheet" href="https://aka.doubaocdn.com/s/uTPUouMNoC">
+</head>
+<body data-theme="control">
+<header class="m-top">
+  <div class="m-brand"><span class="m-mark">调</span><b>调度台</b><span class="m-sub mono">站长台 / STATION DESK</span></div>
+  <div class="m-metrics">
+    <div><span>日</span><b class="mono" id="mDay">1</b></div>
+    <div><span>现金</span><b class="mono" id="mCash">¥300,000</b></div>
+    <div><span>声誉</span><b class="mono" id="mRep">50</b></div>
+    <div><span>上级</span><b class="mono" id="mSup">70</b></div>
+    <div><span>动作</span><b class="mono" id="mActs">2/2</b></div>
+  </div>
+  <div class="m-actions"><button id="mSave">保存</button><button id="mBack">返回入口</button></div>
+</header>
+
+<div class="m-shell">
+  <nav class="m-nav" id="mNav">
+    <div class="m-nav-label">经营</div>
+    <button data-tab="overview" class="on">总览</button>
+    <button data-tab="station">车站</button>
+    <button data-tab="assets">资产设施</button>
+    <button data-tab="staff">人员</button>
+    <button data-tab="contracts">合同</button>
+    <button data-tab="traffic">车流</button>
+    <button data-tab="finance">财务</button>
+    <button data-tab="policy">政策</button>
+    <button data-tab="save">存档与云</button>
+    <div class="m-nav-foot mono">v0.5.8 / manage_v1</div>
+  </nav>
+
+  <main class="m-main">
+    <section class="m-map-wrap"><div id="mMap" class="m-map"></div></section>
+    <section class="m-page" id="mPage"></section>
+  </main>
+
+  <aside class="m-inspector" id="mInspector"></aside>
+</div>
+
+<footer class="m-foot">
+  <div class="m-todo" id="mTodo">今天没有必须处理的事。</div>
+  <div class="m-advance"><span id="mForecast" class="mono">预计净利 —</span><button id="mNext" class="m-primary">推进一天</button></div>
+</footer>
+
+<div id="mModal" class="m-modal hidden">
+  <div class="m-modal-shade"></div>
+  <div class="m-modal-card">
+    <div id="mModalKicker" class="m-modal-kicker mono">事件</div>
+    <h3 id="mModalTitle"></h3>
+    <div id="mModalBody"></div>
+    <div id="mModalActions" class="m-modal-actions"></div>
+  </div>
+</div>
+
+<div id="mToast" class="m-toast hidden"></div>
+<script src="https://aka.doubaocdn.com/s/xFwFUAxM7z"></script>
+
+</body>
+</html>

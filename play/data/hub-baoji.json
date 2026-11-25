@@ -1,0 +1,193 @@
+{
+ "station": {
+  "id": "baoji",
+  "name": "宝鸡站",
+  "code": "BJY",
+  "line": "宝成线 · 陇海线"
+ },
+ "yards": [
+  {
+   "id": "main",
+   "name": "客运场",
+   "type": "一等客运站",
+   "tracks": 10,
+   "platform": 6,
+   "freight": 0,
+   "note": "6 台 10 线，1 道基本站台，2—9 道岛式站台，10 道尽头式；西咽喉接宝成正线，东咽喉引存车、货场与机务折返段",
+   "platforms": [
+    {
+     "type": "基本",
+     "faces": 1,
+     "lenM": 550
+    },
+    {
+     "type": "岛式",
+     "faces": 2,
+     "lenM": 520
+    },
+    {
+     "type": "岛式",
+     "faces": 2,
+     "lenM": 520
+    },
+    {
+     "type": "岛式",
+     "faces": 2,
+     "lenM": 520
+    },
+    {
+     "type": "岛式",
+     "faces": 2,
+     "lenM": 520
+    },
+    {
+     "type": "尽头式",
+     "faces": 1,
+     "lenM": 480
+    }
+   ]
+  }
+ ],
+ "trains": [
+  {
+   "id": "bj-01",
+   "no": "K101",
+   "type": "K",
+   "yard": "main",
+   "arr": null,
+   "dep": 372,
+   "coaches": 16,
+   "priority": 4,
+   "crew": 1,
+   "dir": 1,
+   "model": "25G",
+   "loco": "HXD3D"
+  },
+  {
+   "id": "bj-02",
+   "no": "K102",
+   "type": "K",
+   "yard": "main",
+   "arr": 366,
+   "dep": 384,
+   "coaches": 16,
+   "priority": 4,
+   "crew": 1,
+   "dir": 0,
+   "model": "25G",
+   "loco": "HXD3D"
+  },
+  {
+   "id": "bj-03",
+   "no": "K105",
+   "type": "K",
+   "yard": "main",
+   "arr": 390,
+   "dep": 405,
+   "coaches": 14,
+   "priority": 4,
+   "crew": 1,
+   "dir": 1,
+   "model": "25B",
+   "loco": "HXD3D"
+  },
+  {
+   "id": "bj-04",
+   "no": "K109",
+   "type": "K",
+   "yard": "main",
+   "arr": 420,
+   "dep": 436,
+   "coaches": 15,
+   "priority": 4,
+   "crew": 1,
+   "dir": 0,
+   "model": "25G",
+   "loco": "HXD3D"
+  },
+  {
+   "id": "bj-05",
+   "no": "货1",
+   "type": "货",
+   "yard": "main",
+   "arr": 378,
+   "dep": 400,
+   "coaches": 24,
+   "priority": 6,
+   "crew": 1,
+   "dir": 0,
+   "model": "C70",
+   "loco": "HXD3C"
+  },
+  {
+   "id": "bj-06",
+   "no": "货2",
+   "type": "货",
+   "yard": "main",
+   "arr": 402,
+   "dep": 425,
+   "coaches": 22,
+   "priority": 6,
+   "crew": 1,
+   "dir": 1,
+   "model": "X6K",
+   "loco": "HXD3C"
+  },
+  {
+   "id": "bj-07",
+   "no": "T21",
+   "type": "T",
+   "yard": "main",
+   "arr": 408,
+   "dep": 414,
+   "coaches": 12,
+   "priority": 3,
+   "crew": 1,
+   "dir": 1,
+   "model": "25T",
+   "loco": "SS7E"
+  },
+  {
+   "id": "bj-08",
+   "no": "T22",
+   "type": "T",
+   "yard": "main",
+   "arr": 438,
+   "dep": 446,
+   "coaches": 12,
+   "priority": 3,
+   "crew": 1,
+   "dir": 0,
+   "model": "25T",
+   "loco": "SS7E"
+  },
+  {
+   "id": "bj-09",
+   "no": "检1",
+   "type": "检",
+   "yard": "main",
+   "arr": 450,
+   "dep": 470,
+   "coaches": 6,
+   "priority": 5,
+   "crew": 1,
+   "dir": 0,
+   "model": "25G",
+   "loco": "DF7G"
+  },
+  {
+   "id": "bj-10",
+   "no": "调1",
+   "type": "调",
+   "yard": "main",
+   "arr": 432,
+   "dep": 452,
+   "coaches": 8,
+   "priority": 5,
+   "crew": 1,
+   "dir": 1,
+   "model": "25B",
+   "loco": "DF7G"
+  }
+ ]
+}

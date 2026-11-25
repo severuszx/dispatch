@@ -139,3 +139,43 @@ button { font: inherit; color: inherit; }
   .m-foot { height: 46px; }
   .m-todo { display: none; }
 }
+
+.m-top { height: 52px; gap: 14px; }
+.m-brand { min-width: 210px; }
+.m-metrics div { min-width: 92px; padding: 7px 12px 0; }
+.m-metrics b { font-size: 15px; }
+.m-shell { height: calc(100% - 90px); }
+.m-nav { width: 124px; }
+.m-nav button { height: 31px; font-size: 10px; }
+.m-main { position: relative; display: block; overflow: hidden; background: #20211b; }
+.m-map-wrap { position: fixed; left: 124px; right: 0; top: 52px; height: calc(100vh - 90px); height: calc(100dvh - 90px); bottom: auto; background: #20211b; z-index: 4; }
+.m-map-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; display: block; border: 0; background: #20211b; }
+.m-map-cover { position: absolute; top: 12px; left: 12px; z-index: 8; pointer-events: none; display: flex; flex-direction: column; gap: 5px; transition: opacity .18s; }
+.m-map-name { background: rgba(20,22,18,.82); border: 1px solid #5a5847; padding: 7px 11px 6px; color: #f1ecdc; }
+.m-map-name b { font: 700 15px "Noto Serif SC", "Microsoft YaHei UI", serif; letter-spacing: .1em; }
+.m-map-name span { display: block; margin-top: 3px; font: 10px "Roboto Mono", Consolas, monospace; color: #aaa58f; }
+.m-map-stats { align-self: flex-start; background: rgba(20,22,18,.74); border-left: 2px solid #b08a43; padding: 5px 10px; color: #d6cbb0; }
+.m-map-stats b { font: 15px "Roboto Mono", Consolas, monospace; color: #f1ecdc; }
+.m-map-stats span { display: block; margin-top: 1px; font: 9px "Roboto Mono", Consolas, monospace; color: #aaa58f; }
+.m-drawer-toggle { position: fixed; left: 136px; bottom: 50px; z-index: 12; height: 27px; padding: 0 12px; border: 1px solid #7b7355; background: rgba(25,27,20,.9); color: #d9d0b6; font: 10px "Roboto Mono", Consolas, monospace; letter-spacing: .08em; }
+.m-drawer-toggle:hover { border-color: #b08a43; color: #f1ecdc; }
+.m-drawer-close { display: none; position: fixed; left: 568px; top: 64px; z-index: 22; width: 26px; height: 26px; border: 1px solid #5a5847; background: rgba(20,22,18,.94); color: #cfc5a8; font: 14px/1 sans-serif; }
+.m-page { position: fixed; left: 136px; top: 64px; bottom: 46px; width: min(420px, 34vw); z-index: 20; padding: 14px 16px; background: #0e1418; border: 1px solid #3a474d; box-shadow: 0 16px 48px rgba(0,0,0,.34); transform: translateX(-120vw); transition: transform .22s ease; overflow: auto; }
+.m-page.open { transform: none; }
+.m-main.drawer-open .m-drawer-close { display: block; }
+.m-main.drawer-open .m-drawer-toggle, .m-main.drawer-open .m-map-cover { opacity: 0; pointer-events: none; }
+.m-page-head { margin-bottom: 10px; padding-bottom: 6px; }
+.m-page-head h2 { font-size: 16px; letter-spacing: 1.5px; }
+.m-page-head span { font-size: 9px; }
+.m-inspector { display: none; }
+.m-foot { height: 38px; }
+@media (max-width: 900px) {
+  .m-shell { height: calc(100% - 102px); }
+  .m-nav { width: 92px; }
+  .m-map-wrap { left: 92px; top: 128px; height: calc(100vh - 174px) !important; bottom: auto; }
+  .m-page { position: fixed; left: 102px; top: 136px; bottom: 54px; width: min(300px, calc(100vw - 112px)); }
+  .m-drawer-close { left: auto; right: 8px; top: 136px; }
+  .m-drawer-toggle { left: 102px; bottom: 56px; }
+  .m-map-name b { font-size: 12px; }
+  .m-map-name span { font-size: 8px; }
+}

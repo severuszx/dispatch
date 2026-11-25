@@ -105,3 +105,4 @@ function renderAll() {
   renderInspector(p);
   renderFoot(p);
 }
+

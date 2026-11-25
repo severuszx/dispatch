@@ -129,7 +129,6 @@ export class AudioEngine {
     this.stopAmbience();
     this.ambience(track.room, track.rain);
     this.detail(trackId);
-    this.music(trackId);
   }
 
   detail(trackId) {
@@ -159,20 +158,20 @@ export class AudioEngine {
     if (trackId !== 'night') {
       this.bedTimer = setInterval(() => {
         if (!this.on || !this.ctx) return;
-        const src = this.ctx.createBufferSource();
-        src.buffer = this.noiseBuf;
-        const bp = this.ctx.createBiquadFilter();
-        bp.type = 'bandpass';
-        bp.frequency.value = 3200;
-        bp.Q.value = 1.2;
-        const g = this.ctx.createGain();
-        g.gain.setValueAtTime(0.028, this.ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.045);
-        src.connect(bp).connect(g).connect(this.ambBus);
-        src.start();
-        src.stop(this.ctx.currentTime + 0.06);
-      }, 9000 + Math.random() * 9000);
+        const r = Math.random();
+        if (r < .52) this.relay(0.45);
+        else if (r < .86) this.clack(0.2, 0.28);
+        else this.chime();
+      }, 12000 + Math.random() * 14000);
     }
+    const hum2 = c.createOscillator();
+    const hg2 = c.createGain();
+    hum2.type = 'triangle';
+    hum2.frequency.value = 100;
+    hg2.gain.value = 0.004;
+    hum2.connect(hg2).connect(this.ambBus);
+    hum2.start();
+    this.bed.push(hum2);
   }
 
   stopDetail() {
@@ -180,6 +179,74 @@ export class AudioEngine {
     this.bedTimer = null;
     this.bed.forEach((x) => { try { x.stop(); } catch (e) {} });
     this.bed = [];
+  }
+
+  burst(dur, gain, type, freq, q = 0.8, delay = 0) {
+    if (!this.on) return;
+    const c = this.ensure();
+    if (!c || !this.noiseBuf) return;
+    const t = c.currentTime + delay;
+    const src = c.createBufferSource();
+    src.buffer = this.noiseBuf;
+    const flt = c.createBiquadFilter();
+    flt.type = type;
+    flt.frequency.value = freq;
+    flt.Q.value = q;
+    const g = c.createGain();
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(flt).connect(g).connect(this.sfxBus);
+    src.start(t);
+    src.stop(t + dur + 0.01);
+  }
+
+  relay(level = 1) {
+    this.burst(0.026, 0.026 * level, 'highpass', 2400, 0.7);
+    this.tone(180, 0.028, 0.018 * level, 0, 'square');
+  }
+
+  clack(level = 1, delay = 0) {
+    this.burst(0.05, 0.05 * level, 'bandpass', 760, 1.1, delay);
+    this.burst(0.08, 0.022 * level, 'lowpass', 210, 0.6, delay + 0.012);
+    this.tone(92, 0.1, 0.018 * level, delay, 'triangle');
+  }
+
+  brake(level = 1) {
+    this.burst(0.9, 0.055 * level, 'highpass', 2800, 0.45);
+    this.burst(0.5, 0.03 * level, 'bandpass', 900, 0.7, 0.22);
+    for (let i = 0; i < 3; i += 1) this.tone(150 - i * 14, 0.09, 0.012 * level, i * 0.11, 'triangle');
+  }
+
+  horn(level = 1) {
+    this.tone(196, 0.55, 0.035 * level, 0, 'sawtooth');
+    this.tone(294, 0.55, 0.025 * level, 0, 'triangle');
+    this.tone(196, 0.35, 0.03 * level, 0.62, 'sawtooth');
+    this.tone(294, 0.35, 0.02 * level, 0.62, 'triangle');
+  }
+
+  doorChime() {
+    this.tone(784, 0.22, 0.032);
+    this.tone(587, 0.3, 0.03, 0.28);
+  }
+
+  printer() {
+    this.burst(0.09, 0.035, 'highpass', 1900, 0.7);
+    this.burst(0.07, 0.03, 'bandpass', 1100, 0.9, 0.11);
+    this.tone(420, 0.05, 0.014, 0.2, 'square');
+  }
+
+  trainArrive(t) {
+    this.brake(1);
+    this.clack(0.8, 0.2);
+    this.clack(0.55, 0.55);
+    if (t && /G|D|Z|T/.test(String(t.type))) setTimeout(() => this.doorChime(), 620);
+  }
+
+  trainDepart(t) {
+    this.brake(0.55);
+    this.clack(0.85, 0.02);
+    this.clack(0.6, 0.32);
+    if (t && /G|D|Z|T/.test(String(t.type))) setTimeout(() => this.horn(0.55), 900);
   }
 
   chime() {
@@ -329,33 +396,47 @@ export class AudioEngine {
     if (!this.on) return;
     switch (kind) {
       case 'click':
-        this.tick(0.03);
-        this.tone(640, 0.022, 0.025);
+        this.relay(0.7);
         break;
       case 'order':
-        this.tick(0.05);
-        this.tone(700, 0.07, 0.05);
-        this.tone(940, 0.09, 0.04, 0.09);
+        this.printer();
+        this.burst(0.12, 0.03, 'bandpass', 1500, 1.2, 0.02);
+        this.tone(720, 0.06, 0.04, 0.24, 'square');
         break;
       case 'ok':
-        this.tone(620, 0.1, 0.05);
-        this.tone(860, 0.14, 0.04, 0.11);
+        this.tone(620, 0.1, 0.035);
+        this.tone(880, 0.16, 0.03, 0.12);
+        this.burst(0.18, 0.018, 'bandpass', 1400, 0.8, 0.1);
         break;
       case 'err':
-        this.tone(300, 0.16, 0.06, 0, 'triangle');
-        this.tone(230, 0.2, 0.05, 0.13, 'triangle');
+        this.tone(310, 0.16, 0.05, 0, 'square');
+        this.tone(230, 0.24, 0.045, 0.16, 'square');
         break;
       case 'alarm':
-        this.tone(520, 0.12, 0.045, 0, 'triangle');
-        this.tone(410, 0.14, 0.04, 0.16, 'triangle');
+        this.tone(840, 0.18, 0.05, 0, 'triangle');
+        this.tone(630, 0.2, 0.045, 0.26, 'triangle');
+        this.tone(840, 0.18, 0.04, 0.55, 'triangle');
         break;
       case 'phone':
-        this.tone(780, 0.09, 0.04);
-        this.tone(780, 0.09, 0.04, 0.16);
+        this.tone(760, 0.12, 0.04);
+        this.tone(760, 0.12, 0.04, 0.24);
+        this.burst(0.06, 0.02, 'highpass', 2600, 0.8, 0.5);
         break;
       case 'fail':
-        this.tone(220, 0.28, 0.07, 0, 'triangle');
-        this.tone(160, 0.4, 0.06, 0.24, 'triangle');
+        this.tone(180, 0.35, 0.06, 0, 'triangle');
+        this.tone(120, 0.5, 0.05, 0.3, 'triangle');
+        break;
+      case 'clack':
+        this.clack(1);
+        break;
+      case 'brake':
+        this.brake(1);
+        break;
+      case 'horn':
+        this.horn(1);
+        break;
+      case 'door':
+        this.doorChime();
         break;
       default:
         this.tick(0.03);

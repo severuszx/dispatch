@@ -1,0 +1,43 @@
+.topo { position: relative; width: 100%; height: 100%; overflow: hidden; background: #f5f1e4; border: 1px solid #1f201b; }
+.topo-view { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; }
+.topo-view.dragging { cursor: grabbing; }
+.topo-canvas { position: absolute; left: 0; top: 0; width: 3600px; height: 1500px; transform-origin: 0 0; }
+.topo-canvas svg { display: block; width: 3600px; height: 1500px; }
+.topo-canvas[data-lod="far"] .lod-mid { display: none; }
+.topo-locators { position: absolute; top: 10px; right: 10px; z-index: 4; display: flex; flex-direction: column; gap: 3px; }
+.topo-locators button { min-width: 100px; padding: 5px 8px; border: 1px solid #4d4d42; background: #fbf7e9; color: #22231d; font-size: 10px; text-align: left; }
+.topo-locators button:hover { background: #fff; }
+.topo-locators button.on { background: #22231d; color: #f5f1e4; }
+.topo-zoom { position: absolute; right: 10px; bottom: 10px; z-index: 4; display: flex; gap: 3px; }
+.topo-zoom button { width: 28px; height: 26px; border: 1px solid #4d4d42; background: #fbf7e9; font: 12px "Roboto Mono", monospace; }
+.topo-scale { position: absolute; left: 10px; bottom: 10px; z-index: 4; padding: 3px 6px; border: 1px solid #7d7968; background: rgba(251,247,233,.85); font: 9px "Roboto Mono", monospace; color: #4e4c40; }
+.topo-hint { position: absolute; left: 10px; top: 10px; z-index: 4; padding: 3px 7px; border: 1px solid #7d7968; background: rgba(251,247,233,.85); font-size: 9px; color: #4e4c40; }
+.t-name { font-family: "Noto Serif SC", serif; font-size: 22px; fill: #22231d; }
+.t-label { font-family: "Noto Sans SC", sans-serif; font-size: 11px; fill: #33342c; }
+.t-small { font-family: "Roboto Mono", monospace; font-size: 9px; fill: #5b594b; }
+.t-yard { font-family: "Noto Serif SC", serif; font-size: 26px; fill: #3b3c33; }
+.t-fac { font-family: "Noto Sans SC", sans-serif; font-size: 16px; fill: #3c3b31; font-weight: 700; }
+.t-fac-s { font-family: "Noto Sans SC", sans-serif; font-size: 12px; fill: #4c4a3c; }
+.t-index { font-family: "Roboto Mono", monospace; font-size: 12px; fill: #22231d; font-weight: 700; }
+.t-platform { font-family: "Noto Sans SC", sans-serif; font-size: 10px; fill: #4c4b3f; }
+.t-signal { font-family: "Roboto Mono", monospace; font-size: 8px; fill: #4c4b3f; }
+.t-route { font-family: "Noto Sans SC", sans-serif; font-size: 9px; fill: #8a6417; }
+.t-emg { font-family: "Noto Sans SC", sans-serif; font-size: 9px; fill: #8d2c22; font-weight: 700; }
+@media (max-width: 860px) {
+  .topo-locators { top: 6px; left: 6px; right: 6px; flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+  .topo-locators button { min-width: max-content; padding: 4px 6px; font-size: 9px; }
+  .topo-hint, .topo-scale { display: none; }
+}
+.topo-legend { position: absolute; left: 10px; bottom: 36px; z-index: 4; max-width: 330px; display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 6px 8px; border: 1px solid #7d7968; background: rgba(251,247,233,.92); font-size: 9px; color: #4e4c40; pointer-events: none; }
+.topo-legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.lg { display: inline-block; width: 18px; height: 2px; background: #22231d; }
+.lg-main { height: 4px; }
+.lg-arr { height: 2px; background: #22231d; }
+.lg-bc { height: 3px; background: #41443b; }
+.lg-yard { height: 2px; background: #7d7662; }
+.lg-x { width: 18px; height: 7px; background: none; border-top: 1px solid #22231d; border-right: 1px solid #22231d; transform: skewX(-24deg); }
+.lg-emg { height: 2px; background: repeating-linear-gradient(90deg, #8d2c22 0 4px, transparent 4px 7px); }
+.topo-locators button.alarm::after { content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 5px; border-radius: 50%; background: #8d2c22; vertical-align: 1px; }
+.topo-canvas[data-lod="far"] .lod-mid, .topo-canvas[data-lod="far"] .lod-near { display: none; }
+.topo-canvas[data-lod="mid"] .lod-near { display: none; }
+@media (max-width: 860px) { .topo-legend { display: none; } }

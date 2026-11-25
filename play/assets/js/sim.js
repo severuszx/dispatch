@@ -78,13 +78,13 @@ class Sim {
 
   subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
 
-  emit(evt = 'tick') {
+  emit(evt = 'tick', arg = null) {
     this.listeners.forEach((fn) => {
-      try { fn(this, evt); } catch (e) { }
+      try { fn(this, evt, arg); } catch (e) { }
     });
   }
 
-  loadData({ network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl, hubnx }) {
+  loadData({ network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubbaoji, hubjl, hubnx }) {
     this.network = network;
     this.timetables = { old: timetable, new: timetable2 || timetable };
     this.timetable = timetable;
@@ -94,7 +94,7 @@ class Sim {
     this.glossary = glossary.terms;
     this.ordersData = orders || { orders: {} };
     this.hubData = hub || null;
-    this.hubDatas = { t1: hubt1, bengbu: hub, dc: hubdc, veh: hubveh, mar: hubmar, ...(hubjl || {}), ...(hubnx || {}) };
+    this.hubDatas = { t1: hubt1, bengbu: hub, dc: hubdc, veh: hubveh, mar: hubmar, baoji: hubbaoji, ...(hubjl || {}), ...(hubnx || {}) };
   }
 
   setup(scene, mode, realism, sandbox, difficulty, ttVersion) {
@@ -144,13 +144,13 @@ class Sim {
     }
     this.interlock.init(this);
     this.startClock = 360;
-    this.limits = { late: scene.lateLimit || 15, wait: scene.waitLimit || 12 };
+    this.limits = { late: scene.lateLimit || 90, wait: scene.waitLimit || 45 };
     this.limits.wait = Math.max(6, this.limits.wait + careerFactor('crew') + modTotal('wait') + crewExtra(this.focusStation) * 2);
     this.applyShiftMod();
     this.clock = 360;
     this.eventPool = this.eventsForScene(scene);
     this.nextEventAt = 360 + Math.round((6 + Math.floor(rnd(hash(scene.id))() * 8)) / this.diffFactor());
-    this.nextEventReal = Date.now() + 90000;
+    this.nextEventReal = Date.now() + 70000;
     this.orderPool = (this.ordersData.orders && this.ordersData.orders[lineId]) || [];
     this.orderCursor = Math.floor(rnd(hash(scene.id + 'o'))() * Math.max(1, this.orderPool.length));
     this.nextOrderAt = 362;
@@ -199,7 +199,7 @@ class Sim {
       .filter((t) => this.stationOrder.includes(t.yard) && t.arr != null)
       .reduce((m, t) => Math.min(m, t.arr), Infinity);
     this.startClock = Math.max(baseStart, Number.isFinite(firstArr) ? firstArr : baseStart);
-    this.limits = { late: scene.lateLimit || 15, wait: scene.waitLimit || 12 };
+    this.limits = { late: scene.lateLimit || 90, wait: scene.waitLimit || 45 };
     this.limits.wait = Math.max(6, this.limits.wait + careerFactor('crew') + modTotal('wait'));
     this.applyShiftMod();
     this.clock = this.startClock;
@@ -217,7 +217,7 @@ class Sim {
     this.eventPool = this.eventsForScene(scene);
     this.eventCursor = 0;
     this.nextEventAt = this.startClock + Math.round((6 + Math.floor(rnd(hash(scene.id))() * 8)) / this.diffFactor());
-    this.nextEventReal = Date.now() + 90000;
+    this.nextEventReal = Date.now() + 70000;
     this.orderPool = [];
     this.running = true;
     this.finished = false;
@@ -312,6 +312,7 @@ class Sim {
           t.holdOutside = 0;
           t.reserved = false;
           this.pushLog(`${t.no} 接入 ${this.stations[t.station].name} ${tr.no} 道`);
+          this.emit('arrive', t);
           continue;
         }
         if (!t.holdOutside) {
@@ -433,6 +434,7 @@ class Sim {
     t.late = Math.max(t.late, this.clock - t.planDep);
     this.releaseTrack(t);
     this.pushLog(`${t.no} ${this.stations[t.station].name} 发车，进入 ${t.nextSection || '下一区间'}`);
+    this.emit('depart', t);
   }
 
   makeTrain(t) {
@@ -800,7 +802,7 @@ class Sim {
     if (Date.now() < this.nextEventReal) return;
     if (this.activeEvents.length >= 1) { this.nextEventReal = Date.now() + 5000; return; }
     this.triggerEvent();
-    this.nextEventReal = Date.now() + 300000;
+    this.nextEventReal = Date.now() + Math.round(240000 / this.diffFactor());
   }
 
   eventsForScene(scene) {

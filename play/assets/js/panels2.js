@@ -1,5 +1,6 @@
 import { el, on, fmtClock, storage, toast, escapeHtml } from './util.js';
 import { sim } from './sim.js';
+import { consistSVG } from './vehicles.js';
 
 const SANDBOX_GROUPS = [
   { id: 'L0', name: '基础设施', items: ['股道开放', '股道封锁', '股道预留', '借道货物线', '站台类型', '闭塞方式', '列控等级'] },
@@ -161,7 +162,7 @@ export function buildHelpPanel(body) {
       <li>顶不住再用热备或救援，底牌有限。</li>
     </ol></div>
     <div class="help-sec"><h4>快捷键</h4><p class="mono">空格 暂停 · 1/2/3 倍速 · G 运行图 · C 命令 · E 事件 · A 报警 · T 术语</p></div>
-    <div class="help-sec"><h4>失败条件</h4><p>正面冲突、追尾、脱轨直接结束；关键列车晚点超阈值、到发线全满、救援无法开出也可能判负。</p></div>`;
+    <div class="help-sec"><h4>失败条件</h4><p>正面冲突、追尾、脱轨直接结束；晚点超过 90 分、站外停车超过 45 分、安全值归零才判负；一般晚点只扣分和罚款。</p></div>`;
   body.append(wrap);
   return { update() {} };
 }
@@ -171,11 +172,12 @@ export function buildInspectPanel(body, ctx) {
   const kicker = el('div', 'act-kicker', '本务列车');
   const title = el('div', 'act-title', '选一列车');
   const route = el('div', 'act-route', '');
+  const consist = el('div', 'act-consist', '');
   const facts = el('div', 'act-facts', '');
   const note = el('div', 'act-note', '');
   const actions = el('div', 'act-actions');
   const tracksBox = el('div', 'act-tracks');
-  wrap.append(kicker, title, route, facts, note, actions, tracksBox);
+  wrap.append(kicker, title, route, consist, facts, note, actions, tracksBox);
   let showTracks = false;
   const fm = (v) => (typeof v === 'number' ? fmtClock(v) : '—');
 
@@ -220,6 +222,7 @@ export function buildInspectPanel(body, ctx) {
     if (!t) {
       title.innerHTML = '<b>选一列车</b>';
       route.innerHTML = '';
+      consist.innerHTML = '';
       facts.innerHTML = '';
       note.textContent = '在站场图上点一列车，或点站外的待接标签。';
       wrap.classList.remove('is-running');
@@ -235,6 +238,7 @@ export function buildInspectPanel(body, ctx) {
     const tr = list.find((x) => x.no === t.trackNo);
     const isApron = t.status === 'approach' || t.status === 'pending';
     wrap.classList.toggle('is-running', t.status === 'running');
+    consist.innerHTML = consistSVG(t.model, t.loco, t.coaches, t.dir);
     title.innerHTML = `<b>${escapeHtml(t.no)}</b><span class="act-chip">${escapeHtml(t.trainClass || t.model || t.type || '列车')}</span><span class="act-dir">${t.dir > 0 ? '上行' : '下行'}</span>`;
     route.innerHTML = `<div class="act-route-leg"><small>始发</small><b>${escapeHtml(t.originName || '—')}</b></div><span class="act-route-arrow">→</span><div class="act-route-leg is-here"><small>本站</small><b>${escapeHtml(stationName)}</b></div><span class="act-route-arrow">→</span><div class="act-route-leg"><small>终到</small><b>${escapeHtml(t.destName || '—')}</b></div>`;
     const stateText = isApron ? (t.reserved ? `已预留 ${t.trackNo} 道` : '站外待接') : t.release ? '已放行' : t.hold ? `晚 ${t.late} 分` : '在站';

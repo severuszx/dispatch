@@ -1,7 +1,7 @@
 import { el, on, fmtClock, toast, storage, clamp, escapeHtml } from './util.js';
 import { initWM, createWindow, getWin } from './wm.js';
 import { sim, MODES, REALISM_DEFAULT } from './sim.js';
-import { CTCView } from './ctc.js';
+import { CTCView } from './ctc.js?v=0.6.19c';
 import { GraphView } from './graph.js';
 import { AudioEngine, trackForScene, TRACK_NAMES } from './audio.js';
 import { buildCommandPanel, buildRadioPanel, prefillCommand } from './cmd.js';
@@ -45,6 +45,7 @@ let currentDifficulty = storage('tst-dispatch-difficulty') || 'standard';
 let currentTT = storage('tst-dispatch-tt') || 'old';
 let realism = { ...REALISM_DEFAULT };
 let currentPack = 'base';
+let currentGameMode = storage('tst-dispatch-game-mode') || '';
 const PACK_BASE = 'https://severuszx.github.io/dispatch/data/packs/';
 let baseScenarios = [];
 const packCache = { jiaoliu: null, ningxi: null };
@@ -89,6 +90,7 @@ const DIFFICULTIES = [
 ];
 
 function boot() {
+  bindModeGate();
   document.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button, .pack-tab, .scene-cell, .mode-card, .act-tr, .diff-card, .tt-card')) {
       audio.sfx('click');
@@ -97,17 +99,64 @@ function boot() {
   loadData().then(() => {
     buildBoot();
     bindBoot();
+    applyBootMode();
   }).catch((e) => {
     document.getElementById('bootMeta').textContent = `数据加载失败：${e.message}`;
   });
 }
 
+function bindModeGate() {
+  const gate = document.getElementById('modeGate');
+  if (!gate) return;
+  gate.querySelectorAll('.mg-card').forEach((card) => {
+    card.addEventListener('click', () => pickGameMode(card.dataset.gm));
+  });
+}
+
+function pickGameMode(mode) {
+  if (mode === 'manage') {
+    location.href = 'manage/index.html';
+    return;
+  }
+  currentGameMode = 'dispatch';
+  storage('tst-dispatch-game-mode', currentGameMode);
+  document.body.dataset.gameMode = currentGameMode;
+  document.getElementById('modeGate').classList.add('hidden');
+  document.getElementById('boot').classList.remove('hidden');
+  applyBootMode();
+}
+
+function applyBootMode() {
+  const manage = currentGameMode === 'manage';
+  const role = document.getElementById('bootRole');
+  if (role) role.textContent = manage ? '四站经营 · 站长台' : '双线中间站 · 行车值班台';
+  const nav = document.getElementById('bootNavLabel');
+  if (nav) nav.textContent = manage ? '经营准备' : '值班准备';
+  const title = document.getElementById('bootModeTitle');
+  if (title) title.textContent = manage ? '站长台开班' : '开班准备';
+  const desc = document.getElementById('bootModeDesc');
+  if (desc) desc.textContent = manage ? '先选一个站进场，再看资产、人员和车流。班次照跑，目标是把四站养活。' : '先定值班强度、岗位和车次。开班后，本站接车、放行和处置都由你一人负责。';
+  const label = document.getElementById('bootSummaryLabel');
+  if (label) label.textContent = manage ? '本次经营' : '本次值班';
+  const bsRole = document.getElementById('bsRole');
+  if (bsRole) bsRole.textContent = manage ? '站长' : '值班员';
+  const go = document.getElementById('bootGo');
+  if (go) go.textContent = manage ? '进入站长台' : '开始值班';
+  const tabs = document.getElementById('bootTabs');
+  if (tabs) {
+    tabs.querySelectorAll('button').forEach((b) => {
+      if (b.dataset.btab === 'sandbox' || b.dataset.btab === 'realism') b.classList.toggle('hidden', manage);
+    });
+    if (manage) setBootTab('scene');
+  }
+}
+
 async function loadData() {
-  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar] = await Promise.all([
+  const [network, timetable, timetable2, events, glossary, scenarios, orders, hub, hubt1, hubdc, hubveh, hubmar, hubbaoji] = await Promise.all([
     fetchJson('data/network.json'), fetchJson('data/timetable.json'), fetchJson('data/timetable-v2.json'),
     fetchJson('data/events.json'),
     fetchJson('data/glossary.json'), fetchJson('data/scenarios.json'), fetchJson('data/orders.json'),
-    fetchJson('data/hub.json'), fetchJson('data/hub-t1.json'), fetchJson('data/hub-dc.json'), fetchJson('data/hub-veh.json'), fetchJson('data/hub-mar.json'),
+    fetchJson('data/hub.json'), fetchJson('data/hub-t1.json'), fetchJson('data/hub-dc.json'), fetchJson('data/hub-veh.json'), fetchJson('data/hub-mar.json'), fetchJson('data/hub-baoji.json'),
   ]);
   const packScenes = enabledPackScenes();
   if (events && Array.isArray(events.events)) {
@@ -118,7 +167,7 @@ async function loadData() {
   data = {
     network, timetable, timetable2, events, glossary,
     scenarios: baseScenarios.slice(),
-    orders, hub, hubt1, hubdc, hubveh, hubmar, hubjl: {}, hubnx: {},
+    orders, hub, hubt1, hubdc, hubveh, hubmar, hubbaoji, hubjl: {}, hubnx: {},
   };
   sim.loadData(data);
   const meta = document.getElementById('bootMeta');
@@ -395,7 +444,7 @@ function renderSceneDetail() {
   const side = document.getElementById('sceneDetailSide');
   if (bsStation) bsStation.textContent = lineName;
   if (bsTask) bsTask.textContent = currentScene.title;
-  if (side) side.textContent = `单站值班 · 车次 ${currentScene.trains} 列 · 计划 ${Math.round(currentScene.duration / 60 * 10) / 10} 小时`;
+  if (side) side.textContent = `${currentGameMode === 'manage' ? '经营管理' : '单站值班'} · 车次 ${currentScene.trains} 列 · 计划 ${Math.round(currentScene.duration / 60 * 10) / 10} 小时`;
 }
 
 function renderBootSandbox() {
@@ -539,6 +588,12 @@ function setBootTab(name) {
 
 function startGame(presetScene) {
   if (presetScene) currentScene = presetScene;
+  if (currentGameMode === 'manage') {
+    if (currentMode === 'arcade') currentMode = 'standard';
+    if (currentScene && currentScene.kind === 'tutorial') {
+      currentScene = data.scenarios.find((s) => s.kind === 'hub') || data.scenarios.find((s) => s.kind === 'story') || currentScene;
+    }
+  }
   if (currentMode === 'arcade' && currentScene && currentScene.kind !== 'tutorial') {
     currentScene = data.scenarios.find((s) => s.kind === 'tutorial') || currentScene;
   }
@@ -547,6 +602,11 @@ function startGame(presetScene) {
   audio.play(trackForScene(currentScene, currentMode), {});
   document.getElementById('boot').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
+  document.body.dataset.gameMode = currentGameMode || 'dispatch';
+  const role = document.getElementById('tbRole');
+  if (role) role.textContent = currentGameMode === 'manage' ? '站长经营台' : '行车值班台';
+  const stLabel = document.getElementById('tbStationLabel');
+  if (stLabel) stLabel.textContent = currentGameMode === 'manage' ? '经营站' : '值班站';
   initDesk();
   sim.onTerm = (term) => {
     if (currentDifficulty === 'easy') return;
@@ -569,16 +629,18 @@ function startGame(presetScene) {
   started = true;
   updateHud();
   sim.subscribe(() => updateHud());
-  sim.subscribe((s, evt) => {
+  sim.subscribe((s, evt, arg) => {
     if (evt === 'finish') onFinish();
+    if (evt === 'arrive' && arg) audio.trainArrive(arg);
+    if (evt === 'depart' && arg) audio.trainDepart(arg);
     if (evt === 'event') {
       const inst = sim.activeEvents[0];
       if (inst && !modalInst) { showEventModal(inst); audio.announce(`${inst.title}。请处置。`); }
       audio.sfx('alarm');
     }
   });
-  toast(`${currentScene.title} 开班。${currentScene.brief}`, 'ok');
-  audio.announce(`${currentScene.title}，开班。`);
+  toast(`${currentScene.title} ${currentGameMode === 'manage' ? '进入站长台' : '开班'}。${currentScene.brief}`, 'ok');
+  audio.announce(`${currentScene.title}，${currentGameMode === 'manage' ? '经营开始' : '开班'}。`);
 }
 
 function loadPackScene(scene) {
@@ -613,6 +675,7 @@ function bindRail() {
     });
   });
   on(document.getElementById('sideClose'), 'click', closeSide);
+  on(document.getElementById('sideBoardBtn'), 'click', () => showNextBoard());
 }
 
 function bindEventModal() {
@@ -640,6 +703,7 @@ function bindEventModal() {
 }
 
 function bindTopbar() {
+  on(document.getElementById('btnNext'), 'click', () => showNextBoard());
   on(document.getElementById('btnPause'), 'click', () => togglePause());
   on(document.getElementById('btnSpeed'), 'click', () => cycleSpeed());
   on(document.getElementById('graphClose'), 'click', () => {
@@ -731,11 +795,15 @@ const WIN_DEFS = [
 ];
 
 function buildWindows() {
-  openWindow('ctc');
+  openWindow(currentGameMode === 'manage' ? 'admin' : 'ctc');
+  if (currentGameMode !== 'manage') showNextBoard();
 }
 
 function openTrain(id) {
   inspectId = id;
+  document.getElementById('sideNext')?.classList.add('hidden');
+  document.getElementById('sideBody')?.classList.remove('hidden');
+  document.getElementById('sideBoardBtn')?.classList.remove('hidden');
   const t = sim.getTrain(id);
   openSide('inspect', t ? `行车凭证 · ${t.no}` : '行车凭证', 'ACT-1');
   if (views.inspectView) views.inspectView.update();
@@ -786,6 +854,8 @@ function openWindow(id, pos) {
 
 function openSide(id, title, code) {
   getWin('graph')?.hide();
+  document.getElementById('sideNext')?.classList.add('hidden');
+  document.getElementById('sideBody')?.classList.remove('hidden');
   hideDrawers(null);
   const side = document.getElementById('side');
   const codeEl = document.getElementById('sideCode');
@@ -805,6 +875,99 @@ function openSide(id, title, code) {
 
 function closeSide() {
   document.getElementById('side').classList.add('hidden');
+  document.getElementById('sideNext')?.classList.add('hidden');
+  document.getElementById('sideBody')?.classList.remove('hidden');
+}
+
+function nextAction(t, clock) {
+  if (!t || t.status === 'terminated' || t.status === 'running' || t.through) return null;
+  if (t.status === 'approach' || t.status === 'pending') {
+    return { kind: '接车', at: t.planArr ?? clock, note: t.trackNo ? `${t.trackNo} 道已预留` : '未定接车股道' };
+  }
+  if (t.status !== 'station') return null;
+  const task = (t.tasks || []).find((x) => x.state !== 'done');
+  if (task) return { kind: '作业', at: clock, note: `${task.title}${task.left ? ` · 剩 ${task.left} 分` : ''}` };
+  if (t.hold || t.waitForNo) return { kind: '待避', at: clock, note: t.waitForNo ? `等 ${t.waitForNo} 出清` : '扣在站内未放行' };
+  if (t.planDep != null && t.planDep <= clock + 20 && !t.release) {
+    return { kind: '待发', at: t.planDep, note: `${t.trackNo || '—'} 道 · ${t.coaches ? `${t.coaches} 辆` : '待发'}` };
+  }
+  return null;
+}
+
+function nextItems() {
+  if (!sim || !sim.trains) return [];
+  const clock = sim.clock;
+  const focus = sim.focusStation;
+  return sim.trains
+    .filter((t) => t.station === focus)
+    .map((t) => {
+      const act = nextAction(t, clock);
+      return act ? { t, ...act, d: act.at - clock } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 4);
+}
+
+function dueText(d) {
+  const v = Math.round(Math.abs(d));
+  if (d <= 0) return v ? `超 ${v} 分` : '现在';
+  return `${v} 分后`;
+}
+
+function toneOf(d) {
+  if (d <= 0) return 'now';
+  if (d <= 3) return 'warn';
+  return 'plan';
+}
+
+function renderNextBoard() {
+  const box = document.getElementById('sideNext');
+  if (!box || box.classList.contains('hidden')) return;
+  const items = nextItems();
+  const sig = items.map((x) => `${x.t.id}:${x.kind}:${x.at}:${x.note}`).join('|');
+  if (box.dataset.sig === sig) return;
+  box.dataset.sig = sig;
+  if (!items.length) {
+    box.innerHTML = '<div class="nx-empty"><b>当前没有要动手的车</b><span>下一班还有空档。可以看运行图，或者等下一列车进站。</span></div>';
+    return;
+  }
+  const main = items[0];
+  const rest = items.slice(1);
+  const mtone = toneOf(main.d);
+  box.innerHTML = `<div class="nx-head"><span class="mono">NEXT / ${fmtClock(sim.clock)}</span><b>${items.length} 项待办</b></div>
+    <button class="nx-main ${mtone}" data-train="${main.t.id}">
+      <div class="nx-line"><span class="nx-kind">${main.kind}</span><span class="nx-clock mono">${fmtClock(main.at)}</span><em>${dueText(main.d)}</em></div>
+      <b class="nx-no">${escapeHtml(main.t.no)}</b>
+      <div class="nx-note">${escapeHtml(main.note)}</div>
+      <div class="nx-go">处理这班 <i>→</i></div>
+    </button>
+    <div class="nx-sub mono">接下来 20 分</div>
+    ${rest.map((x) => `<button class="nx-row ${toneOf(x.d)}" data-train="${x.t.id}"><b>${escapeHtml(x.t.no)}</b><span>${x.kind}</span><time class="mono">${fmtClock(x.at)}</time><em>${dueText(x.d)}</em></button>`).join('')}`;
+  box.querySelectorAll('[data-train]').forEach((b) => b.addEventListener('click', () => openTrain(b.dataset.train)));
+  updateNextCount(items.length);
+}
+
+function updateNextCount(n) {
+  const el = document.getElementById('tbNextCount');
+  if (el) el.textContent = String(n);
+  const btn = document.getElementById('btnNext');
+  if (btn) btn.classList.toggle('urgent', n > 0);
+}
+
+function showNextBoard() {
+  if (currentGameMode === 'manage') return;
+  const side = document.getElementById('side');
+  const next = document.getElementById('sideNext');
+  const body = document.getElementById('sideBody');
+  if (!side || !next || !body) return;
+  side.classList.remove('hidden');
+  next.classList.remove('hidden');
+  body.classList.add('hidden');
+  document.getElementById('sideTitle').textContent = '下一班';
+  document.getElementById('sideBoardBtn').classList.add('hidden');
+  next.dataset.sig = '';
+  renderNextBoard();
 }
 
 function mountCTC(body) {
@@ -1074,16 +1237,16 @@ function updateHud() {
   document.getElementById('tbScene').textContent = sceneStation && !sceneTitle.includes(sceneStation) ? `${sceneStation} · ${sceneTitle}` : sceneTitle;
   document.getElementById('tbSpeed').textContent = `已运行 ${Math.round(s.clock - sim.startClock)} 分`;
   const diffName = (DIFFICULTIES.find((d) => d.id === currentDifficulty) || { name: '值班员' }).name;
-  document.getElementById('sbSeat').textContent = `${focusName} · ${diffName} · ${currentTT === 'new' ? '2026-11' : '老版运行图'}`;
+  document.getElementById('sbSeat').textContent = `${focusName} · ${currentGameMode === 'manage' ? '站长' : diffName} · ${currentTT === 'new' ? '2026-11' : '老版运行图'}`;
   const ctlText = document.getElementById('sbControlText');
   const ctlLabel = document.querySelector('#sbControl .sb-label');
   if (s.hub) {
     const waiting = sim.trains.filter((t) => t.status === 'station' && !t.release).length;
     ctlLabel.textContent = '站控';
-    ctlText.textContent = `${sim.isStationControlled(s.focusStation) ? '本站手动放行' : '本站自动放行'} · 待放行 ${waiting} · 晚点≤${s.limits ? s.limits.late : 15} / 站外≤${s.limits ? s.limits.wait : 12}`;
+    ctlText.textContent = `${sim.isStationControlled(s.focusStation) ? '本站手动放行' : '本站自动放行'} · 待放行 ${waiting} · 晚点≤${s.limits ? s.limits.late : 90} / 站外≤${s.limits ? s.limits.wait : 45}`;
   } else {
     ctlLabel.textContent = '站控';
-    ctlText.textContent = `${sim.isStationControlled(s.focusStation) ? '本站手动' : '本站自动'} · 晚点≤${s.limits ? s.limits.late : 15} / 站外≤${s.limits ? s.limits.wait : 12}`;
+    ctlText.textContent = `${sim.isStationControlled(s.focusStation) ? '本站手动' : '本站自动'} · 晚点≤${s.limits ? s.limits.late : 90} / 站外≤${s.limits ? s.limits.wait : 45}`;
   }
   const focusTrains = s.trains.filter((t) => t.station === s.focusStation && t.status !== 'terminated');
   const metaCtc = document.getElementById('metaCtc');
@@ -1098,6 +1261,8 @@ function updateHud() {
   if (metaCmd) metaCmd.textContent = s.hub ? '枢纽模式' : '线路模式';
   const metaOrders = document.getElementById('metaOrders');
   if (metaOrders) metaOrders.textContent = `${sim.decisions.length} 条`;
+  updateNextCount(nextItems().length);
+  renderNextBoard();
 }
 
 function onFinish() {

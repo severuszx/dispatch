@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>调度台 · 站长台</title>
+<style>
+:root {
+  --bg: #0a0e11;
+  --panel: #10161a;
+  --panel2: #151d22;
+  --line: #253138;
+  --line2: #34444c;
+  --text: #dce3e0;
+  --dim: #8c9a97;
+  --faint: #5f6d6a;
+  --red: #d4544a;
+  --amber: #d5891f;
+  --green: #5f9e76;
+  --sans: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  --mono: Consolas, "Cascadia Mono", monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font: 13px/1.7 var(--sans); overflow: hidden; }
+button { font: inherit; color: inherit; }
+.mono { font-family: var(--mono); }
+.hidden { display: none !important; }
+
+.m-top { height: 56px; flex: none; display: flex; align-items: center; gap: 24px; padding: 0 16px; background: #0c1114; border-bottom: 1px solid var(--line2); }
+.m-brand { display: flex; align-items: center; gap: 10px; min-width: 280px; }
+.m-mark { width: 26px; height: 26px; background: var(--red); color: #151a1d; display: grid; place-items: center; font-weight: 700; }
+.m-brand b { font-size: 15px; letter-spacing: 2px; }
+.m-sub { color: var(--faint); font-size: 9px; letter-spacing: 1px; }
+.m-metrics { display: flex; align-items: stretch; height: 100%; flex: 1; }
+.m-metrics div { min-width: 110px; padding: 9px 16px 0; border-left: 1px solid #1e292f; }
+.m-metrics span { display: block; color: var(--faint); font: 9px var(--mono); }
+.m-metrics b { display: block; font: 17px var(--mono); margin-top: 1px; }
+.m-actions { display: flex; gap: 6px; }
+.m-actions button { height: 28px; padding: 0 10px; border: 1px solid var(--line2); background: #151d22; font-size: 10px; color: var(--dim); }
+.m-actions button:hover { color: var(--text); border-color: #59696d; }
+
+.m-shell { height: calc(100% - 94px); display: flex; min-height: 0; }
+.m-nav { width: 136px; flex: none; background: #0d1316; border-right: 1px solid var(--line2); overflow: auto; }
+.m-nav-label { color: var(--faint); font: 9px var(--mono); letter-spacing: 1.4px; padding: 12px 12px 7px; }
+.m-nav button { width: 100%; height: 34px; border: 0; border-left: 2px solid transparent; background: transparent; color: var(--dim); text-align: left; padding: 0 12px; font-size: 11px; }
+.m-nav button:hover { background: #151d22; color: var(--text); }
+.m-nav button.on { background: #181d18; border-left-color: var(--amber); color: #efe7d2; }
+.m-nav-foot { margin-top: auto; padding: 14px 12px; color: var(--faint); font-size: 8px; }
+.m-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; background: var(--line2); }
+.m-map-wrap { height: 246px; flex: none; background: var(--panel); overflow: hidden; }
+.m-map { width: 100%; height: 100%; }
+.m-page { flex: 1; min-height: 0; background: var(--panel); overflow: auto; padding: 18px; }
+.m-inspector { width: 288px; flex: none; background: var(--panel); border-left: 1px solid var(--line2); overflow: auto; padding: 14px; }
+
+.m-foot { height: 38px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; background: #0c1114; border-top: 1px solid var(--line2); gap: 16px; }
+.m-todo { color: var(--faint); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-advance { display: flex; align-items: center; gap: 10px; }
+.m-advance span { color: var(--dim); font-size: 10px; }
+.m-primary { height: 28px; padding: 0 18px; border: 1px solid var(--amber); background: var(--amber); color: #171208; font-weight: 600; font-size: 11px; }
+
+.m-page-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line2); padding-bottom: 8px; margin-bottom: 14px; }
+.m-page-head h2 { font-size: 18px; letter-spacing: 2px; font-weight: 600; }
+.m-page-head span { color: var(--faint); font-size: 10px; }
+.m-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line2); border: 1px solid var(--line2); }
+.m-stat { background: var(--panel2); padding: 12px; }
+.m-stat span { color: var(--faint); font-size: 9px; font-family: var(--mono); }
+.m-stat b { display: block; margin-top: 4px; font: 20px var(--mono);}
+.m-stat em { display: block; font-style: normal; margin-top: 2px; color: var(--faint); font-size: 9px; }
+.m-block { margin-top: 16px; }
+.m-block h3 { font-size: 12px; color: var(--dim); letter-spacing: 1px; padding-bottom: 6px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.m-row { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #1b252a; padding: 8px 0; }
+.m-row b { font-size: 12px; }
+.m-row > div > b { display: block; }
+.m-row > div > span { display: block; color: var(--dim); font-size: 10px; margin-top: 2px; }
+.m-row span { color: var(--dim); font-size: 10px; }
+.m-row .mono { margin-left: auto; color: var(--faint); font-size: 9px; }
+.m-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: transparent; border: 1px solid var(--line); }
+.m-list .m-cell { background: var(--panel2); padding: 10px; border: 1px solid var(--line); }
+.m-cell b { display: block; font-size: 12px; }
+.m-cell span { display: block; color: var(--faint); font-size: 9px; margin-top: 2px; }
+.m-btn { height: 25px; padding: 0 9px; border: 1px solid var(--line2); background: #172025; color: var(--dim); font-size: 10px; }
+.m-btn:hover { color: var(--text); border-color: #68797b; }
+.m-btn.warn { border-color: #5a4122; color: #d6a14a; }
+.m-btn.good { border-color: #365841; color: #8dbb9c; }
+.m-btn:disabled { opacity: .35; cursor: default; }
+
+.m-bar { height: 4px; background: #202b31; margin-top: 6px; }
+.m-bar i { display: block; height: 100%; background: var(--green); }
+.m-bar-warn i { background: var(--amber); }
+.m-bar-bad i { background: var(--red); }
+
+.m-map svg { width: 100%; height: 100%; }
+.m-map .map-line { stroke: #3b4a51; stroke-width: 2; }
+.m-map .map-line-hot { stroke: var(--amber); stroke-width: 2; }
+.m-map .map-node { fill: #172127; stroke: #61747a; stroke-width: 1; }
+.m-map .map-node.on { stroke: var(--amber); stroke-width: 2; }
+.m-map text { fill: var(--text); font-family: var(--sans); }
+.m-map .map-sub { fill: var(--faint); font-family: var(--mono); font-size: 9px; }
+.m-map .map-title { font-size: 14px; letter-spacing: 1px; }
+.m-map .map-ratio { font-family: var(--mono); font-size: 9px; }
+.m-map .seg-label { fill: var(--faint); font-family: var(--mono); font-size: 9px; }
+.m-map .seg-bar { fill: #202b31; }
+.m-map .seg-fill { fill: var(--green); }
+.m-map .seg-fill.warn { fill: var(--amber); }
+.m-map .seg-fill.bad { fill: var(--red); }
+
+.m-inspector h3 { font-size: 13px; letter-spacing: 1px; padding-bottom: 6px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.m-ins-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1b252a; color: var(--dim); font-size: 10px; }
+.m-ins-row b { color: var(--text); font-family: var(--mono); font-size: 11px; }
+.m-ins-note { color: var(--faint); font-size: 10px; line-height: 1.8; margin-top: 8px; }
+.m-ins-station { width: 100%; text-align: left; border: 1px solid #26343a; background: #131b20; padding: 8px; margin-bottom: 5px; }
+.m-ins-station:hover { border-color: #5b6c70; }
+.m-ins-station.on { border-left: 3px solid var(--amber); }
+.m-ins-station b { display: block; font-size: 12px; }
+.m-ins-station span { color: var(--faint); font: 9px var(--mono); }
+
+.m-slider { display: flex; align-items: center; gap: 8px; }
+.m-slider input { flex: 1; accent-color: var(--amber); }
+.m-slider b { width: 34px; text-align: right; font: 10px var(--mono); color: var(--dim); }
+.m-seg-card { border: 1px solid var(--line); background: var(--panel2); padding: 10px; margin-bottom: 8px; }
+.m-seg-card .m-row { border-bottom: 0; padding: 2px 0; }
+.m-seg-card .m-bar { margin: 8px 0 0; }
+
+.m-modal { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; }
+.m-modal-shade { position: absolute; inset: 0; background: rgba(5, 8, 10, .68); }
+.m-modal-card { position: relative; width: min(520px, calc(100vw - 32px)); background: #11181c; border: 1px solid #45545a; padding: 18px; box-shadow: 0 18px 60px rgba(0,0,0,.4); }
+.m-modal-kicker { color: var(--amber); font-size: 9px; letter-spacing: 1.4px; }
+.m-modal-card h3 { font-size: 18px; margin: 8px 0 10px; letter-spacing: 1px; }
+.m-modal-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
+.m-toast { position: fixed; left: 50%; bottom: 54px; transform: translateX(-50%); z-index: 90; background: #1c262b; border: 1px solid #4a5b60; color: var(--text); padding: 8px 14px; font-size: 11px; }
+.m-modal-body { color: var(--dim); font-size: 11px; line-height: 1.9; }
+.m-modal-body p { margin: 6px 0; }
+.m-modal-body b { color: var(--text); }
+
+@media (max-width: 900px) {
+  .m-top { height: auto; min-height: 58px; flex-wrap: wrap; padding: 8px 12px; gap: 10px; }
+  .m-metrics { overflow-x: auto; }
+  .m-metrics div { min-width: 88px; padding: 4px 10px; }
+  .m-shell { height: calc(100% - 110px); }
+  .m-nav { width: 104px; }
+  .m-inspector { display: none; }
+  .m-map-wrap { height: 190px; }
+  .m-grid-4 { grid-template-columns: 1fr 1fr; }
+  .m-list { grid-template-columns: 1fr; }
+  .m-foot { height: 46px; }
+  .m-todo { display: none; }
+}
+
+.m-top { height: 52px; gap: 14px; }
+.m-brand { min-width: 210px; }
+.m-metrics div { min-width: 92px; padding: 7px 12px 0; }
+.m-metrics b { font-size: 15px; }
+.m-shell { height: calc(100% - 90px); }
+.m-nav { width: 124px; }
+.m-nav button { height: 31px; font-size: 10px; }
+.m-main { position: relative; display: block; overflow: hidden; background: #20211b; }
+.m-map-wrap { position: fixed; left: 124px; right: 0; top: 52px; height: calc(100vh - 90px); height: calc(100dvh - 90px); bottom: auto; background: #20211b; z-index: 4; }
+.m-map-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; display: block; border: 0; background: #20211b; }
+.m-map-cover { position: absolute; top: 12px; left: 12px; z-index: 8; pointer-events: none; display: flex; flex-direction: column; gap: 5px; transition: opacity .18s; }
+.m-map-name { background: rgba(20,22,18,.82); border: 1px solid #5a5847; padding: 7px 11px 6px; color: #f1ecdc; }
+.m-map-name b { font: 700 15px "Noto Serif SC", "Microsoft YaHei UI", serif; letter-spacing: .1em; }
+.m-map-name span { display: block; margin-top: 3px; font: 10px "Roboto Mono", Consolas, monospace; color: #aaa58f; }
+.m-map-stats { align-self: flex-start; background: rgba(20,22,18,.74); border-left: 2px solid #b08a43; padding: 5px 10px; color: #d6cbb0; }
+.m-map-stats b { font: 15px "Roboto Mono", Consolas, monospace; color: #f1ecdc; }
+.m-map-stats span { display: block; margin-top: 1px; font: 9px "Roboto Mono", Consolas, monospace; color: #aaa58f; }
+.m-drawer-toggle { position: fixed; left: 136px; bottom: 50px; z-index: 12; height: 27px; padding: 0 12px; border: 1px solid #7b7355; background: rgba(25,27,20,.9); color: #d9d0b6; font: 10px "Roboto Mono", Consolas, monospace; letter-spacing: .08em; }
+.m-drawer-toggle:hover { border-color: #b08a43; color: #f1ecdc; }
+.m-drawer-close { display: none; position: fixed; left: 568px; top: 64px; z-index: 22; width: 26px; height: 26px; border: 1px solid #5a5847; background: rgba(20,22,18,.94); color: #cfc5a8; font: 14px/1 sans-serif; }
+.m-page { position: fixed; left: 136px; top: 64px; bottom: 46px; width: min(420px, 34vw); z-index: 20; padding: 14px 16px; background: #0e1418; border: 1px solid #3a474d; box-shadow: 0 16px 48px rgba(0,0,0,.34); transform: translateX(-120vw); transition: transform .22s ease; overflow: auto; }
+.m-page.open { transform: none; }
+.m-main.drawer-open .m-drawer-close { display: block; }
+.m-main.drawer-open .m-drawer-toggle, .m-main.drawer-open .m-map-cover { opacity: 0; pointer-events: none; }
+.m-page-head { margin-bottom: 10px; padding-bottom: 6px; }
+.m-page-head h2 { font-size: 16px; letter-spacing: 1.5px; }
+.m-page-head span { font-size: 9px; }
+.m-inspector { display: none; }
+.m-foot { height: 38px; }
+@media (max-width: 900px) {
+  .m-shell { height: calc(100% - 102px); }
+  .m-nav { width: 92px; }
+  .m-map-wrap { left: 92px; top: 128px; height: calc(100vh - 174px) !important; bottom: auto; }
+  .m-page { position: fixed; left: 102px; top: 136px; bottom: 54px; width: min(300px, calc(100vw - 112px)); }
+  .m-drawer-close { left: auto; right: 8px; top: 136px; }
+  .m-drawer-toggle { left: 102px; bottom: 56px; }
+  .m-map-name b { font-size: 12px; }
+  .m-map-name span { font-size: 8px; }
+}
+
+</style>
+<style>
+@media (max-width: 900px) {
+  body { display: flex; flex-direction: column; }
+  .m-top { height: auto; min-height: 0; flex-wrap: wrap; padding: 8px 12px; gap: 8px 10px; }
+  .m-brand { min-width: 0; flex: 1; }
+  .m-brand b { font-size: 14px; }
+  .m-sub { display: none; }
+  .m-actions { order: 1; margin-left: auto; }
+  .m-actions button { height: 26px; padding: 0 8px; }
+  .m-metrics { order: 2; flex: 0 0 100%; flex-wrap: wrap; height: auto; overflow: visible; gap: 0; }
+  .m-metrics div { flex: 1 0 30%; min-width: 0; padding: 6px 8px; border-left: 0; border-top: 1px solid #1e292f; }
+  .m-metrics b { font-size: 15px; }
+  .m-shell { height: auto; flex: 1; flex-direction: column; }
+  .m-nav { width: 100%; height: 38px; flex: none; display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line2); }
+  .m-nav-label, .m-nav-foot { display: none; }
+  .m-nav button { width: auto; flex: 0 0 auto; height: 38px; padding: 0 12px; border-left: 0; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .m-nav button.on { border-left: 0; border-bottom-color: var(--amber); }
+  .m-map-wrap { height: 150px; overflow-x: auto; }
+  .m-map { min-width: 760px; }
+  .m-page { padding: 12px; }
+  .m-foot { height: 46px; flex: none; }
+  .m-todo { display: none; }
+  .m-toast { bottom: 64px; max-width: calc(100vw - 32px); text-align: center; }
+}
+
+</style>
+</head>
+<body data-theme="control">
+<header class="m-top">
+  <div class="m-brand"><span class="m-mark">调</span><b>调度台</b><span class="m-sub mono">站长台 / STATION DESK</span></div>
+  <div class="m-metrics">
+    <div><span>日</span><b class="mono" id="mDay">1</b></div>
+    <div><span>现金</span><b class="mono" id="mCash">¥300,000</b></div>
+    <div><span>声誉</span><b class="mono" id="mRep">50</b></div>
+    <div><span>上级</span><b class="mono" id="mSup">70</b></div>
+    <div><span>动作</span><b class="mono" id="mActs">2/2</b></div>
+  </div>
+  <div class="m-actions"><button id="mSave">保存</button><button id="mBack">返回入口</button></div>
+</header>
+
+<div class="m-shell">
+  <nav class="m-nav" id="mNav">
+    <div class="m-nav-label">经营</div>
+    <button data-tab="overview" class="on">总览</button>
+    <button data-tab="station">车站</button>
+    <button data-tab="assets">资产设施</button>
+    <button data-tab="staff">人员</button>
+    <button data-tab="contracts">合同</button>
+    <button data-tab="traffic">车流</button>
+    <button data-tab="finance">财务</button>
+    <button data-tab="policy">政策</button>
+    <button data-tab="save">存档与云</button>
+    <div class="m-nav-foot mono">v0.6.19 / 站场经营</div>
+  </nav>
+
+  <main class="m-main" id="mMain">
+    <section class="m-map-wrap">
+      <iframe id="mMapFrame" title="宝鸡站站场图" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no&quot;&gt;
+&lt;title&gt;宝鸡站 · 站场线条&lt;/title&gt;
+&lt;link href=&quot;https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700&amp;family=Noto+Serif+SC:wght@600;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+.topo { position: relative; width: 100%; height: 100%; overflow: hidden; background: #f5f1e4; border: 1px solid #1f201b; }
+.topo-view { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; }
+.topo-view.dragging { cursor: grabbing; }
+.topo-canvas { position: absolute; left: 0; top: 0; width: 3600px; height: 1500px; transform-origin: 0 0; }
+.topo-canvas svg { display: block; width: 3600px; height: 1500px; }
+.topo-canvas[data-lod=&quot;far&quot;] .lod-mid { display: none; }
+.topo-locators { position: absolute; top: 10px; right: 10px; z-index: 4; display: flex; flex-direction: column; gap: 3px; }
+.topo-locators button { min-width: 100px; padding: 5px 8px; border: 1px solid #4d4d42; background: #fbf7e9; color: #22231d; font-size: 10px; text-align: left; }
+.topo-locators button:hover { background: #fff; }
+.topo-locators button.on { background: #22231d; color: #f5f1e4; }
+.topo-zoom { position: absolute; right: 10px; bottom: 10px; z-index: 4; display: flex; gap: 3px; }
+.topo-zoom button { width: 28px; height: 26px; border: 1px solid #4d4d42; background: #fbf7e9; font: 12px &quot;Roboto Mono&quot;, monospace; }
+.topo-scale { position: absolute; left: 10px; bottom: 10px; z-index: 4; padding: 3px 6px; border: 1px solid #7d7968; background: rgba(251,247,233,.85); font: 9px &quot;Roboto Mono&quot;, monospace; color: #4e4c40; }
+.topo-hint { position: absolute; left: 10px; top: 10px; z-index: 4; padding: 3px 7px; border: 1px solid #7d7968; background: rgba(251,247,233,.85); font-size: 9px; color: #4e4c40; }
+.t-name { font-family: &quot;Noto Serif SC&quot;, serif; font-size: 22px; fill: #22231d; }
+.t-label { font-family: &quot;Noto Sans SC&quot;, sans-serif; font-size: 11px; fill: #33342c; }
+.t-small { font-family: &quot;Roboto Mono&quot;, monospace; font-size: 9px; fill: #5b594b; }
+.t-yard { font-family: &quot;Noto Serif SC&quot;, serif; font-size: 26px; fill: #3b3c33; }
+.t-fac { font-family: &quot;Noto Sans SC&quot;, sans-serif; font-size: 16px; fill: #3c3b31; font-weight: 700; }
+.t-fac-s { font-family: &quot;Noto Sans SC&quot;, sans-serif; font-size: 12px; fill: #4c4a3c; }
+.t-index { font-family: &quot;Roboto Mono&quot;, monospace; font-size: 12px; fill: #22231d; font-weight: 700; }
+.t-platform { font-family: &quot;Noto Sans SC&quot;, sans-serif; font-size: 10px; fill: #4c4b3f; }
+.t-signal { font-family: &quot;Roboto Mono&quot;, monospace; font-size: 8px; fill: #4c4b3f; }
+.t-route { font-family: &quot;Noto Sans SC&quot;, sans-serif; font-size: 9px; fill: #8a6417; }
+.t-emg { font-family: &quot;Noto Sans SC&quot;, sans-serif; font-size: 9px; fill: #8d2c22; font-weight: 700; }
+@media (max-width: 860px) {
+  .topo-locators { top: 6px; left: 6px; right: 6px; flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+  .topo-locators button { min-width: max-content; padding: 4px 6px; font-size: 9px; }
+  .topo-hint, .topo-scale { display: none; }
+}
+.topo-legend { position: absolute; left: 10px; bottom: 36px; z-index: 4; max-width: 330px; display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 6px 8px; border: 1px solid #7d7968; background: rgba(251,247,233,.92); font-size: 9px; color: #4e4c40; pointer-events: none; }
+.topo-legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.lg { display: inline-block; width: 18px; height: 2px; background: #22231d; }
+.lg-main { height: 4px; }
+.lg-arr { height: 2px; background: #22231d; }
+.lg-bc { height: 3px; background: #41443b; }
+.lg-yard { height: 2px; background: #7d7662; }
+.lg-x { width: 18px; height: 7px; background: none; border-top: 1px solid #22231d; border-right: 1px solid #22231d; transform: skewX(-24deg); }
+.lg-emg { height: 2px; background: repeating-linear-gradient(90deg, #8d2c22 0 4px, transparent 4px 7px); }
+.topo-locators button.alarm::after { content: &quot;&quot;; display: inline-block; width: 5px; height: 5px; margin-left: 5px; border-radius: 50%; background: #8d2c22; vertical-align: 1px; }
+.topo-canvas[data-lod=&quot;far&quot;] .lod-mid, .topo-canvas[data-lod=&quot;far&quot;] .lod-near { display: none; }
+.topo-canvas[data-lod=&quot;mid&quot;] .lod-near { display: none; }
+@media (max-width: 860px) { .topo-legend { display: none; } }
+
+&lt;/style&gt;
+&lt;style&gt;
+html,body{margin:0;height:100%;background:#20211b;color:#f4f0e4;font-family:&quot;Noto Sans SC&quot;,sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.bar{display:flex;align-items:center;gap:14px;padding:8px 14px;border-bottom:1px solid #4a4b40;background:#26271f;flex:none}
+.bar h1{margin:0;font:700 15px &quot;Noto Serif SC&quot;,serif;letter-spacing:.08em;color:#f4f0e4}
+.bar .sub{font:10px &quot;Roboto Mono&quot;,monospace;color:#aaa58f}
+.bar .tag{margin-left:auto;border:1px solid #6f6b56;padding:2px 7px;font:9px &quot;Roboto Mono&quot;,monospace;color:#c8c2a9}
+.stage{flex:1;min-height:0;padding:8px;display:flex;flex-direction:column;height:100%}
+#topo{flex:1;min-height:0;min-width:0;height:auto}
+body.embed .bar{display:none}
+body.embed .stage{position:fixed;inset:0;display:block;padding:0;height:auto}
+body.embed #topo{height:100%;width:100%}
+@media(max-width:760px){.bar{padding:6px 8px;gap:8px}.bar h1{font-size:12px}.bar .sub{display:none}.bar .tag{font-size:8px;padding:2px 5px}.stage{padding:4px}}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body class=&quot;embed&quot;&gt;
+&lt;div class=&quot;app&quot;&gt;
+  &lt;div class=&quot;bar&quot;&gt;
+    &lt;h1&gt;宝鸡站&lt;/h1&gt;
+    &lt;div class=&quot;sub&quot;&gt;6台10线 · 陇海 / 宝成 / 宝中&lt;/div&gt;
+    &lt;div class=&quot;tag&quot;&gt;站场线条 · v0.6.18&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;stage&quot; id=&quot;topo&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+(function () {
+  const W = 3600, H = 1500;
+  const C = {
+    paper: &#x27;#f7f3e7&#x27;, ink: &#x27;#22231d&#x27;, rail: &#x27;#3b3c33&#x27;, thin: &#x27;#5b594b&#x27;,
+    faint: &#x27;#a9a38f&#x27;, platform: &#x27;#e8e1cd&#x27;, building: &#x27;#efe9d7&#x27;,
+    red: &#x27;#8d2c22&#x27;, route: &#x27;#a77a1c&#x27;, cat: &#x27;#6d6a59&#x27;
+  };
+  const Y = [520, 560, 600, 640, 680, 720, 760, 800, 840, 880];
+  const KIND = [&#x27;正线&#x27;, &#x27;正线&#x27;, &#x27;到发&#x27;, &#x27;到发&#x27;, &#x27;到发&#x27;, &#x27;到发&#x27;, &#x27;到发&#x27;, &#x27;到发&#x27;, &#x27;宝成&#x27;, &#x27;宝成&#x27;];
+  const STORE = &#x27;dispatch:topo:baoji&#x27;;
+  const REDUCE = !!(window.matchMedia &amp;&amp; window.matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches);
+  const DATA = {
+    trains: [
+      { track: 0, x: 960, no: &#x27;K101&#x27;, model: &#x27;25G&#x27;, loco: &#x27;HXD3D&#x27;, cars: 6, alarm: false },
+      { track: 2, x: 1010, no: &#x27;货1&#x27;, model: &#x27;C70&#x27;, loco: &#x27;HXD3C&#x27;, cars: 5, alarm: false },
+      { track: 4, x: 900, no: &#x27;K105&#x27;, model: &#x27;25B&#x27;, loco: &#x27;HXD3D&#x27;, cars: 6, alarm: true },
+      { track: 8, x: 980, no: &#x27;K109&#x27;, model: &#x27;25G&#x27;, loco: &#x27;HXD3D&#x27;, cars: 5, alarm: false }
+    ],
+    occupancy: [
+      { track: 3, x1: 880, x2: 1020, kind: &#x27;占用&#x27; }
+    ]
+  };
+  const X1 = 650, X2 = 1880;
+  const SL = -0.022;
+  const ANG = (Math.atan(SL) * 180 / Math.PI).toFixed(2);
+  const esc = (s) =&gt; String(s == null ? &#x27;&#x27; : s).replace(/[&amp;&lt;&gt;&quot;]/g, (c) =&gt; ({ &#x27;&amp;&#x27;: &#x27;&amp;amp;&#x27;, &#x27;&lt;&#x27;: &#x27;&amp;lt;&#x27;, &#x27;&gt;&#x27;: &#x27;&amp;gt;&#x27;, &#x27;&quot;&#x27;: &#x27;&amp;quot;&#x27;, &quot;&#x27;&quot;: &#x27;&amp;#39;&#x27; }[c]));
+  const n = (v) =&gt; Number(v.toFixed(1));
+  const range = (k) =&gt; Array.from({ length: k }, (_, i) =&gt; i);
+  const cy = (i, x) =&gt; Y[i] + (x - X1) * SL;
+  const xover = (i, x) =&gt; `&lt;path d=&quot;M ${n(x - 44)} ${n(cy(i, x - 44))} C ${n(x - 14)} ${n(cy(i, x - 14))} ${n(x + 14)} ${n(cy(i - 1, x + 14))} ${n(x + 44)} ${n(cy(i - 1, x + 44))}&quot; fill=&quot;none&quot; stroke=&quot;${C.ink}&quot; stroke-width=&quot;1.9&quot;/&gt;${swMark(x, (cy(i, x) + cy(i - 1, x)) / 2)}`;
+  const xback = (i, x) =&gt; `&lt;path d=&quot;M ${n(x - 44)} ${n(cy(i - 1, x - 44))} C ${n(x - 14)} ${n(cy(i - 1, x - 14))} ${n(x + 14)} ${n(cy(i, x + 14))} ${n(x + 44)} ${n(cy(i, x + 44))}&quot; fill=&quot;none&quot; stroke=&quot;${C.ink}&quot; stroke-width=&quot;1.9&quot;/&gt;${swMark(x, (cy(i, x) + cy(i - 1, x)) / 2)}`;
+  const swMark = (x, y) =&gt; `&lt;path d=&quot;M ${n(x - 4)} ${n(y - 3)} L ${n(x + 4)} ${n(y + 3)} M ${n(x + 4)} ${n(y - 3)} L ${n(x - 4)} ${n(y + 3)}&quot; fill=&quot;none&quot; stroke=&quot;${C.thin}&quot; stroke-width=&quot;.7&quot;/&gt;`;
+  const withMark = (x, y, html) =&gt; html + swMark(x, y);
+  function signal(x, y, name) {
+    return `&lt;g class=&quot;lod-mid&quot;&gt;${pth([[x, y], [x, y - 12], [x, y - 17], [x, y - 20]], .7, C.ink)}&lt;circle cx=&quot;${n(x)}&quot; cy=&quot;${n(y - 23)}&quot; r=&quot;2.6&quot; fill=&quot;${C.red}&quot; stroke=&quot;${C.ink}&quot; stroke-width=&quot;.45&quot;/&gt;${label(x + 4, y - 19, name, &#x27;t-signal&#x27;)}&lt;/g&gt;`;
+  }
+  function spec(i) {
+    if (i &lt;= 1) return [3.6, C.ink, null];
+    if (i &gt;= 8) return [2.9, &#x27;#41443b&#x27;, null];
+    return [2.1, C.ink, null];
+  }
+  function ties() {
+    return `&lt;g class=&quot;lod-near&quot;&gt;${[0, 1].map((i) =&gt; range(18).map((k) =&gt; {
+      const x = 740 + k * 56, y = cy(i, x);
+      return pth([[x, y - 5], [x + 2, y - 2], [x + 2, y + 2], [x, y + 5]], .6, C.cat);
+    }).join(&#x27;&#x27;)).join(&#x27;&#x27;)}&lt;/g&gt;`;
+  }
+  function legend() {
+    return `&lt;div class=&quot;topo-legend&quot;&gt;
+      &lt;span&gt;&lt;i class=&quot;lg lg-main&quot;&gt;&lt;/i&gt;正线&lt;/span&gt;&lt;span&gt;&lt;i class=&quot;lg lg-arr&quot;&gt;&lt;/i&gt;到发线&lt;/span&gt;
+      &lt;span&gt;&lt;i class=&quot;lg lg-bc&quot;&gt;&lt;/i&gt;宝成&lt;/span&gt;&lt;span&gt;&lt;i class=&quot;lg lg-yard&quot;&gt;&lt;/i&gt;机走 / 货物 / 存车&lt;/span&gt;
+      &lt;span&gt;&lt;i class=&quot;lg lg-x&quot;&gt;&lt;/i&gt;渡线&lt;/span&gt;&lt;span&gt;&lt;i class=&quot;lg lg-emg&quot;&gt;&lt;/i&gt;安全 / 避难线&lt;/span&gt;
+    &lt;/div&gt;`;
+  }
+
+  function pth(points, w, color, dash) {
+    let d = `M ${n(points[0][0])} ${n(points[0][1])}`;
+    if (points.length === 2) d += ` L ${n(points[1][0])} ${n(points[1][1])}`;
+    for (let i = 1; i + 2 &lt; points.length; i += 3) d += ` C ${n(points[i][0])} ${n(points[i][1])} ${n(points[i + 1][0])} ${n(points[i + 1][1])} ${n(points[i + 2][0])} ${n(points[i + 2][1])}`;
+    return `&lt;path d=&quot;${d}&quot; fill=&quot;none&quot; stroke=&quot;${color || C.rail}&quot; stroke-width=&quot;${w || 2}&quot; ${dash ? `stroke-dasharray=&quot;${dash}&quot;` : &#x27;&#x27;}/&gt;`;
+  }
+  function box(x, y, w, h, fill, stroke, sw, dash) {
+    return `&lt;rect x=&quot;${n(x)}&quot; y=&quot;${n(y)}&quot; width=&quot;${n(w)}&quot; height=&quot;${n(h)}&quot; fill=&quot;${fill || &#x27;none&#x27;}&quot; stroke=&quot;${stroke || C.ink}&quot; stroke-width=&quot;${sw || 1}&quot; ${dash ? `stroke-dasharray=&quot;${dash}&quot;` : &#x27;&#x27;}/&gt;`;
+  }
+  function label(x, y, text, cls, anchor) {
+    return `&lt;text x=&quot;${n(x)}&quot; y=&quot;${n(y)}&quot; class=&quot;${cls || &#x27;t-label&#x27;}&quot; ${anchor ? `text-anchor=&quot;${anchor}&quot;` : &#x27;&#x27;}&gt;${esc(text)}&lt;/text&gt;`;
+  }
+  function catenary(x, y) {
+    return `&lt;g class=&quot;lod-mid&quot;&gt;${pth([[x + 11, y + 4], [x + 11, y + 12], [x + 11, y + 17], [x + 11, y + 18]], 1.1, C.cat)}${pth([[x + 4, y + 18], [x + 8, y + 18], [x + 14, y + 18], [x + 18, y + 18]], .9, C.cat)}&lt;/g&gt;`;
+  }
+
+  const COACH = {
+    &#x27;25G&#x27;: { body: &#x27;#315b46&#x27;, roof: &#x27;#d6d3c5&#x27;, stripe: &#x27;#c8c5b6&#x27;, win: &#x27;#1d3128&#x27;, ac: true },
+    &#x27;25B&#x27;: { body: &#x27;#3c6049&#x27;, roof: &#x27;#939888&#x27;, stripe: &#x27;#b6b3a2&#x27;, win: &#x27;#24372b&#x27;, ac: false, porthole: true },
+    &#x27;25K&#x27;: { body: &#x27;#2f5175&#x27;, roof: &#x27;#bfc3c2&#x27;, stripe: &#x27;#e1ded0&#x27;, win: &#x27;#182a3a&#x27;, ac: true },
+    &#x27;25T&#x27;: { body: &#x27;#e6e3d8&#x27;, roof: &#x27;#c8c6bb&#x27;, stripe: &#x27;#3e5f85&#x27;, win: &#x27;#263342&#x27;, ac: true },
+    &#x27;22B&#x27;: { body: &#x27;#3d5f49&#x27;, roof: &#x27;#9a9d90&#x27;, stripe: &#x27;#c5c1ad&#x27;, win: &#x27;#203128&#x27;, ac: false },
+    &#x27;SY25K&#x27;: { body: &#x27;#b08a2e&#x27;, roof: &#x27;#c9c6b6&#x27;, stripe: &#x27;#4b4635&#x27;, win: &#x27;#2c3028&#x27;, ac: false, inspect: true },
+    &#x27;CR400AF&#x27;: { body: &#x27;#e9e6dc&#x27;, roof: &#x27;#c5c6c2&#x27;, stripe: &#x27;#9c2f26&#x27;, win: &#x27;#1d2733&#x27;, ac: false, emu: true },
+    &#x27;CRH380A&#x27;: { body: &#x27;#e9e6dc&#x27;, roof: &#x27;#c5c6c2&#x27;, stripe: &#x27;#335d86&#x27;, win: &#x27;#1d2733&#x27;, ac: false, emu: true }
+  };
+  const LOCO = {
+    HXD3D: { body: &#x27;#2f4f7a&#x27;, roof: &#x27;#9da4aa&#x27;, stripe: &#x27;#b23a2b&#x27;, cab: &#x27;#1d2a3a&#x27; },
+    HXD3C: { body: &#x27;#3a5b7a&#x27;, roof: &#x27;#9da4aa&#x27;, stripe: &#x27;#b23a2b&#x27;, cab: &#x27;#1d2a3a&#x27; },
+    SS7E: { body: &#x27;#d7dde2&#x27;, roof: &#x27;#aeb4b8&#x27;, stripe: &#x27;#2f5175&#x27;, cab: &#x27;#26323d&#x27; },
+    SS9: { body: &#x27;#9c3a2c&#x27;, roof: &#x27;#c9c5b8&#x27;, stripe: &#x27;#e4d9c4&#x27;, cab: &#x27;#2b2520&#x27; },
+    DF11: { body: &#x27;#2f5b43&#x27;, roof: &#x27;#8f9587&#x27;, stripe: &#x27;#d5b34a&#x27;, cab: &#x27;#1f2d24&#x27; },
+    DF7G: { body: &#x27;#b08a2e&#x27;, roof: &#x27;#c9c3ae&#x27;, stripe: &#x27;#3d3b30&#x27;, cab: &#x27;#2b2922&#x27; },
+    &#x27;调车机&#x27;: { body: &#x27;#b08a2e&#x27;, roof: &#x27;#c9c3ae&#x27;, stripe: &#x27;#3d3b30&#x27;, cab: &#x27;#2b2922&#x27; }
+  };
+
+  function roofCoach(x, y, model) {
+    const s = COACH[model] || COACH[&#x27;25G&#x27;];
+    const w = 56, h = 12;
+    const win = range(8).map((i) =&gt; box(x + 4.5 + i * 6.1, y - 1.3, 3.6, 3.1, s.win, &#x27;#14201b&#x27;, .25)).join(&#x27;&#x27;);
+    const band = s.stripe ? box(x + 2, y + 2.4, w - 4, 1.3, s.stripe, &#x27;none&#x27;, 0) : &#x27;&#x27;;
+    const doors = `${box(x + 2.5, y - 4.2, 3, 8.2, s.body, &#x27;#1b1c17&#x27;, .55)}${box(x + w - 5.5, y - 4.2, 3, 8.2, s.body, &#x27;#1b1c17&#x27;, .55)}`;
+    const bogies = `${box(x + 6, y + 5.4, 11, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}${box(x + w - 17, y + 5.4, 11, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}`;
+    let detail = &#x27;&#x27;;
+    if (s.porthole) {
+      detail = range(8).map((i) =&gt; `&lt;circle cx=&quot;${x + 6.5 + i * 6.6}&quot; cy=&quot;${y - 3.2}&quot; r=&quot;1.5&quot; fill=&quot;#4e5142&quot; stroke=&quot;#262920&quot; stroke-width=&quot;.5&quot;/&gt;&lt;rect x=&quot;${x + 5.4 + i * 6.6}&quot; y=&quot;${y - 4.9}&quot; width=&quot;2.6&quot; height=&quot;.8&quot; fill=&quot;#a6a294&quot; stroke=&quot;#33362c&quot; stroke-width=&quot;.35&quot;/&gt;`).join(&#x27;&#x27;) + win;
+    } else if (s.ac) {
+      detail = range(3).map((i) =&gt; {
+        const ax = x + 9 + i * 15;
+        return `${box(ax, y - 5.2, 10.5, 6, &#x27;#c3bfb1&#x27;, &#x27;#5b594e&#x27;, .65)}${box(ax + 1.6, y - 4.2, 2.6, 4.2, &#x27;#7d7a6c&#x27;, &#x27;none&#x27;, 0)}${box(ax + 6.3, y - 4.2, 2.6, 4.2, &#x27;#7d7a6c&#x27;, &#x27;none&#x27;, 0)}`;
+      }).join(&#x27;&#x27;) + win;
+    } else {
+      detail = win;
+    }
+    if (s.inspect) detail += `${box(x + 16, y + 1.2, 24, 2.2, &#x27;#6d5b24&#x27;, &#x27;#3f371c&#x27;, .35)}${label(x + 22, y + 3, &#x27;检&#x27;, &#x27;t-small&#x27;)}`;
+    return `&lt;g&gt;${box(x, y - 6, w, h, s.body, &#x27;#22231d&#x27;, .75)}${box(x + 2, y - 4, w - 4, 3.4, s.roof, &#x27;#3d3e34&#x27;, .35)}${detail}${band}${doors}${bogies}&lt;/g&gt;`;
+  }
+
+  function freightCoach(x, y, model) {
+    const w = 56, h = 12;
+    if (model === &#x27;X6K&#x27;) {
+      const boxes = range(2).map((i) =&gt; {
+        const cx = x + 4 + i * 26, col = i ? &#x27;#7d876d&#x27; : &#x27;#aa865d&#x27;;
+        return `${box(cx, y - 13, 22, 10, col, &#x27;#484337&#x27;, .55)}${range(3).map((g) =&gt; pth([[cx + 3 + g * 7, y - 12], [cx + 3 + g * 7, y - 4]], .35, &#x27;#3f3b31&#x27;)).join(&#x27;&#x27;)}`;
+      }).join(&#x27;&#x27;);
+      return `&lt;g&gt;${box(x, y + 1, w, 5, &#x27;#5d5b50&#x27;, &#x27;#25261f&#x27;, .6)}${boxes}${box(x + 5, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}${box(x + w - 14, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}&lt;/g&gt;`;
+    }
+    if (model === &#x27;N17&#x27;) {
+      return `&lt;g&gt;${box(x, y + 2, w, 5, &#x27;#6b6758&#x27;, &#x27;#25261f&#x27;, .6)}${range(5).map((i) =&gt; pth([[x + 5 + i * 11, y + 2], [x + 5 + i * 11, y - 2]], .5, &#x27;#4d4a3d&#x27;)).join(&#x27;&#x27;)}${box(x + 5, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}${box(x + w - 14, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}&lt;/g&gt;`;
+    }
+    if (model === &#x27;G70&#x27;) {
+      return `&lt;g&gt;${box(x + 2, y - 5, w - 4, 10, &#x27;#77776c&#x27;, &#x27;#2f3028&#x27;, .6)}${box(x + 5, y - 3.5, w - 10, 3, &#x27;#9b9b8e&#x27;, &#x27;#44443a&#x27;, .35)}${range(4).map((i) =&gt; pth([[x + 9 + i * 12, y - 5], [x + 9 + i * 12, y + 5]], .5, &#x27;#4a4a3f&#x27;)).join(&#x27;&#x27;)}${box(x + 5, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}${box(x + w - 14, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}&lt;/g&gt;`;
+    }
+    const open = model === &#x27;C70&#x27;;
+    const body = open ? &#x27;#68685d&#x27; : &#x27;#5b4a36&#x27;;
+    const roof = open ? &#x27;#7f7f72&#x27; : &#x27;#7b6a50&#x27;;
+    const ribs = range(5).map((i) =&gt; pth([[x + 8 + i * 10, y - 4], [x + 8 + i * 10, y + 3]], .45, &#x27;#3f3f34&#x27;)).join(&#x27;&#x27;);
+    const door = open ? &#x27;&#x27; : box(x + 20, y - 2, 16, 6, &#x27;#4a3d2d&#x27;, &#x27;#2b241b&#x27;, .5);
+    return `&lt;g&gt;${box(x, y - 5, w, 11, body, &#x27;#22231d&#x27;, .7)}${box(x + 2, y - 4, w - 4, 3, roof, &#x27;#3d3e34&#x27;, .35)}${open ? &#x27;&#x27; : `${box(x + 2, y + 2, w - 4, 1, &#x27;#3a3025&#x27;, &#x27;none&#x27;, 0)}`}${ribs}${door}${box(x + 5, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}${box(x + w - 14, y + 5.4, 9, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}&lt;/g&gt;`;
+  }
+
+  function locoArt(x, y, model) {
+    const s = LOCO[model] || LOCO.HXD3D;
+    const w = 62, h = 13;
+    const cabWin = box(x + 4, y - 4.2, 8, 4.2, &#x27;#b9c2c3&#x27;, &#x27;#30362f&#x27;, .45);
+    const sideWin = box(x + 18, y - 3.8, 10, 3.4, &#x27;#8d9798&#x27;, &#x27;#363c35&#x27;, .4);
+    const stripe = box(x + 12, y + 1.8, w - 16, 1.4, s.stripe, &#x27;none&#x27;, 0);
+    const bogies = `${box(x + 7, y + 5.5, 12, 2.6, &#x27;#34352d&#x27;, &#x27;#1b1c16&#x27;, .45)}${box(x + w - 19, y + 5.5, 12, 2.6, &#x27;#34352d&#x27;, &#x27;#1b1c16&#x27;, .45)}`;
+    const panto = model === &#x27;DF11&#x27; || model === &#x27;DF7G&#x27; || model === &#x27;调车机&#x27;
+      ? `pth([[x + 28, y - 6], [x + 28, y - 9], [x + 28, y - 12], [x + 28, y - 14]], .6, &#x27;#3f4240&#x27;)`
+      : `${pth([[x + 18, y - 6], [x + 27, y - 9], [x + 36, y - 16], [x + 46, y - 7]], 1, &#x27;#3f4240&#x27;)}${pth([[x + 27, y - 9], [x + 31, y - 12], [x + 36, y - 12], [x + 40, y - 9]], .7, &#x27;#3f4240&#x27;)}`;
+    return `&lt;g&gt;${box(x, y - 6.5, w, h, s.body, &#x27;#1e1f19&#x27;, .85)}${box(x + 3, y - 4.5, w - 6, 3.6, s.roof, &#x27;#35362e&#x27;, .4)}${cabWin}${sideWin}${stripe}${panto}${bogies}&lt;/g&gt;`;
+  }
+
+  function emuLead(x, y, model) {
+    const s = COACH[model] || COACH.CR400AF;
+    const w = 64, h = 12;
+    return `&lt;g&gt;${box(x, y - 6, w, h, s.body, &#x27;#22231d&#x27;, .75)}${box(x + 2, y - 4, w - 4, 3.2, s.roof, &#x27;#3d3e34&#x27;, .35)}&lt;path d=&quot;M ${n(x)} ${n(y - 6)} L ${n(x + 4)} ${n(y - 8)} L ${n(x + 20)} ${n(y - 8)} L ${n(x + 26)} ${n(y - 6)} Z&quot; fill=&quot;${s.body}&quot; stroke=&quot;#22231d&quot; stroke-width=&quot;.7&quot;/&gt;${box(x + 6, y - 3.4, 12, 3.2, s.win, &#x27;#14201b&#x27;, .3)}${box(x + 20, y - 1.3, 34, 3.1, s.win, &#x27;#14201b&#x27;, .3)}${box(x + 2, y + 2.4, w - 4, 1.4, s.stripe, &#x27;none&#x27;, 0)}${box(x + 8, y + 5.4, 11, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}${box(x + w - 20, y + 5.4, 11, 2.4, &#x27;#3c3d34&#x27;, &#x27;#20211b&#x27;, .45)}&lt;/g&gt;`;
+  }
+
+  function train(x, y, no, model, loco, cars) {
+    let s = &#x27;&#x27;;
+    const emu = loco === &#x27;动车组自走&#x27; || model === &#x27;CR400AF&#x27; || model === &#x27;CRH380A&#x27;;
+    if (emu) {
+      s += emuLead(x, y, model);
+      for (let i = 1; i &lt; cars; i++) s += roofCoach(x + 4 + i * 60, y, model);
+    } else {
+      s += locoArt(x, y, loco);
+      const freight = [&#x27;C70&#x27;, &#x27;P70&#x27;, &#x27;X6K&#x27;, &#x27;N17&#x27;, &#x27;G70&#x27;].includes(model);
+      for (let i = 0; i &lt; cars; i++) s += freight ? freightCoach(x + 66 + i * 60, y, model) : roofCoach(x + 66 + i * 60, y, model);
+    }
+    return `&lt;g&gt;${s}${box(x - 1, y - 25, 68, 12, C.paper, &#x27;none&#x27;, 0)}${label(x + 1, y - 16, `${no} · ${model}`, &#x27;t-label&#x27;)}&lt;/g&gt;`;
+  }
+  function trainAt(i, x, no, model, loco, cars) {
+    const y = cy(i, x + 150);
+    return `&lt;g transform=&quot;rotate(${ANG} ${n(x + 150)} ${n(y)})&quot;&gt;${train(x, y, no, model, loco, cars)}&lt;/g&gt;`;
+  }
+
+  function coreLine(i, w, color) {
+    const a = cy(i, X1), b = cy(i, X2);
+    return pth([[X1, a], [X1 + 260, a - 2], [X2 - 260, b + 2], [X2, b]], w, color || C.ink);
+  }
+  function platformBand(yc, name) {
+    const x1 = 700, x2 = 1760, a = yc + (x1 - X1) * SL, b = yc + (x2 - X1) * SL;
+    return `&lt;g&gt;&lt;path d=&quot;M ${n(x1)} ${n(a - 8)} L ${n(x2)} ${n(b - 8)} L ${n(x2)} ${n(b + 8)} L ${n(x1)} ${n(a + 8)} Z&quot; fill=&quot;${C.platform}&quot; stroke=&quot;#958f7b&quot; stroke-width=&quot;.7&quot;/&gt;${pth([[x1 + 40, a], [x1 + 300, a + (300) * SL], [x1 + 620, a + (620) * SL], [x1 + 1000, a + (1000) * SL]], .5, &#x27;#b7af98&#x27;)}${label(x1 + 18, a + 4, name, &#x27;t-platform&#x27;)}&lt;/g&gt;`;
+  }
+  function trackIndex(i, x, anchor) {
+    const y = cy(i, x);
+    return `&lt;g&gt;&lt;circle cx=&quot;${n(x)}&quot; cy=&quot;${n(y)}&quot; r=&quot;8&quot; fill=&quot;${C.paper}&quot; stroke=&quot;${C.ink}&quot; stroke-width=&quot;.7&quot;/&gt;&lt;text x=&quot;${n(x)}&quot; y=&quot;${n(y + 4)}&quot; class=&quot;t-index&quot; text-anchor=&quot;${anchor || &#x27;middle&#x27;}&quot;&gt;${i + 1}&lt;/text&gt;&lt;/g&gt;`;
+  }
+  function yardLadder(x0, xEnd, leadY, ys, color) {
+    const lead = pth([[x0, leadY], [xEnd, leadY]], 1.8, color || &#x27;#615d4e&#x27;);
+    const branches = ys.filter((y) =&gt; y !== leadY).map((y, i) =&gt; {
+      const bx = x0 + 40 + i * 75, tx = bx + 300;
+      return `&lt;path d=&quot;M ${n(bx)} ${n(leadY)} C ${n(bx + 90)} ${n(leadY)}, ${n(bx + 210)} ${n(y)}, ${n(tx)} ${n(y)} L ${n(xEnd)} ${n(y)}&quot; fill=&quot;none&quot; stroke=&quot;${color || &#x27;#615d4e&#x27;}&quot; stroke-width=&quot;1.5&quot;/&gt;`;
+    }).join(&#x27;&#x27;);
+    return lead + branches;
+  }
+
+  function shed(x, y, w, h, name, cls) {
+    const rh = Math.max(12, h * .4);
+    const ribs = range(6).map((k) =&gt; pth([[x + 12 + k * (w - 24) / 5, y + 3], [x + 12 + k * (w - 24) / 5, y + rh]], .4, &#x27;#8e8772&#x27;)).join(&#x27;&#x27;);
+    const doors = range(3).map((k) =&gt; box(x + w * .18 + k * (w * .27), y + h - 10, 22, 9, &#x27;#7e7763&#x27;, &#x27;#565142&#x27;, .55)).join(&#x27;&#x27;);
+    return `&lt;g&gt;${box(x, y, w, h, &#x27;#d6cfb8&#x27;, &#x27;#5c5747&#x27;, 1.1)}${box(x + 3, y + 3, w - 6, rh, &#x27;#c7bfa7&#x27;, &#x27;#948b74&#x27;, .55)}${ribs}${doors}${label(x + 9, y + h * .5 + 5, name, cls || &#x27;t-fac&#x27;)}&lt;/g&gt;`;
+  }
+  function platformSlab(x, y, w, h, name) {
+    const ticks = range(11).map((k) =&gt; pth([[x + 8 + k * (w - 16) / 10, y + 3], [x + 8 + k * (w - 16) / 10, y + h - 3]], .45, &#x27;#a49a82&#x27;)).join(&#x27;&#x27;);
+    return `&lt;g&gt;${box(x, y, w, h, &#x27;#e2dac3&#x27;, &#x27;#867e68&#x27;, .9)}${ticks}${label(x + 9, y + h - 5, name, &#x27;t-fac-s&#x27;)}&lt;/g&gt;`;
+  }
+  function containers(x, y, w, h) {
+    const cols = 5, rows = 2, cw = (w - 12) / cols, ch = (h - 8) / rows;
+    const fills = [&#x27;#aa865d&#x27;, &#x27;#8f7c60&#x27;, &#x27;#7d876d&#x27;, &#x27;#9a7658&#x27;];
+    const stacks = range(rows).map((r) =&gt; range(cols).map((c) =&gt; {
+      const cx = x + 6 + c * cw, cyy = y + 4 + r * ch;
+      return `${box(cx, cyy, cw - 3, ch - 3, fills[(r + c) % 4], &#x27;#4f4a3c&#x27;, .55)}${range(3).map((g) =&gt; pth([[cx + 5 + g * (cw / 4), cyy + 1], [cx + 5 + g * (cw / 4), cyy + ch - 4]], .35, &#x27;#3f3b31&#x27;)).join(&#x27;&#x27;)}`;
+    }).join(&#x27;&#x27;)).join(&#x27;&#x27;);
+    return `&lt;g&gt;${box(x, y, w, h, &#x27;#efe9d6&#x27;, &#x27;#817a65&#x27;, .7)}${stacks}${label(x - 8, y + h / 2 + 4, &#x27;集装箱&#x27;, &#x27;t-fac-s&#x27;, &#x27;end&#x27;)}&lt;/g&gt;`;
+  }
+
+  function facilities() {
+    return [
+      `&lt;g class=&quot;lod-mid&quot;&gt;${box(3000, 72, 130, 32, &#x27;#d6cfb8&#x27;, &#x27;#5c5747&#x27;, 1)}${label(3008, 93, &#x27;存车值班&#x27;, &#x27;t-fac-s&#x27;)}&lt;/g&gt;`,
+      shed(3000, 226, 250, 40, &#x27;客车检修库&#x27;, &#x27;t-fac&#x27;),
+      platformSlab(3000, 288, 250, 20, &#x27;整备棚&#x27;),
+      shed(3000, 336, 250, 32, &#x27;洗车棚&#x27;, &#x27;t-fac&#x27;),
+      platformSlab(3000, 918, 250, 24, &#x27;货物站台&#x27;),
+      shed(3000, 968, 250, 38, &#x27;货场仓库&#x27;, &#x27;t-fac&#x27;),
+      containers(3000, 1032, 250, 38),
+      platformSlab(3000, 1158, 250, 20, &#x27;整备棚&#x27;),
+      `&lt;g&gt;&lt;circle cx=&quot;2930&quot; cy=&quot;1320&quot; r=&quot;19&quot; fill=&quot;#ddd6c1&quot; stroke=&quot;#5c5747&quot; stroke-width=&quot;1&quot;/&gt;${pth([[2911, 1320], [2949, 1320]], .6, &#x27;#5c5747&#x27;)}${pth([[2930, 1301], [2930, 1339]], .6, &#x27;#5c5747&#x27;)}${label(2900, 1350, &#x27;转车盘&#x27;, &#x27;t-fac-s&#x27;)}&lt;/g&gt;`,
+      shed(3000, 1290, 250, 58, &#x27;机车检修库&#x27;, &#x27;t-fac&#x27;)
+    ].join(&#x27;&#x27;);
+  }
+
+  function svg() {
+    const west = [
+      pth([[0, cy(0, 0)], [X1, cy(0, X1)]], spec(0)[0], spec(0)[1]),
+      pth([[0, cy(1, 0)], [X1, cy(1, X1)]], spec(1)[0], spec(1)[1]),
+      ...range(8).map((k) =&gt; {
+        const i = k + 2;
+        return pth([[0, cy(i, 0)], [X1, cy(i, X1)]], spec(i)[0], spec(i)[1]);
+      }),
+      ...range(8).map((k) =&gt; {
+        const i = k + 2, x = 620 - k * 40;
+        return xover(i, x) + xback(i, x + 26);
+      })
+    ].join(&#x27;&#x27;);
+
+    const east = [
+      pth([[X2, cy(0, X2)], [W, 500]], spec(0)[0], spec(0)[1]),
+      pth([[X2, cy(1, X2)], [W, 540]], spec(1)[0], spec(1)[1]),
+      ...range(8).map((k) =&gt; {
+        const i = k + 2;
+        return pth([[X2, cy(i, X2)], [W, cy(i, W)]], spec(i)[0], spec(i)[1]);
+      }),
+      ...range(8).map((k) =&gt; {
+        const i = k + 2, x = 1980 + k * 40;
+        return xover(i, x) + xback(i, x + 26);
+      }),
+    ].join(&#x27;&#x27;);
+
+    const yards = [
+      `&lt;path d=&quot;M ${n(X2)} ${n(cy(0, X2))} C ${n(1940)} ${n(cy(0, X2))}, ${n(1970)} 470, 2000 470 L ${n(W)} 470&quot; fill=&quot;none&quot; stroke=&quot;#7b3550&quot; stroke-width=&quot;2.2&quot;/&gt;`,
+      yardLadder(2000, W, 470, [270, 320, 370, 420, 470], &#x27;#7b3550&#x27;),
+      yardLadder(2800, W, 270, [120, 170, 220, 270], &#x27;#7b3550&#x27;),
+      `&lt;path d=&quot;M ${n(X2)} ${n(cy(9, X2))} C ${n(1970)} ${n(cy(9, X2))}, ${n(2080)} 900, 2200 900 L ${n(W)} 900&quot; fill=&quot;none&quot; stroke=&quot;#7b3550&quot; stroke-width=&quot;2.2&quot;/&gt;`,
+      yardLadder(2200, W, 900, [960, 1020, 1080], &#x27;#7b3550&#x27;),
+      `&lt;path d=&quot;M ${n(X2)} ${n(cy(9, X2))} C ${n(1950)} ${n(cy(9, X2))}, ${n(2080)} 1000, 2200 1140&quot; fill=&quot;none&quot; stroke=&quot;#7b3550&quot; stroke-width=&quot;2.2&quot;/&gt;`,
+      yardLadder(2200, W, 1140, [1200, 1260], &#x27;#7b3550&#x27;)
+    ].join(&#x27;&#x27;);
+
+    const mid = [
+      xover(4, 1160) + xback(4, 1186),
+      xover(7, 1430) + xback(7, 1456)
+    ].join(&#x27;&#x27;);
+
+    const emg = [
+      pth([[450, cy(0, 450)], [425, cy(0, 425) - 14], [405, cy(0, 405) - 32], [385, cy(0, 385) - 50]], 2.0, C.red, &#x27;7 4&#x27;),
+      label(380, cy(0, 385) - 62, &#x27;安全线&#x27;, &#x27;t-emg&#x27;, &#x27;end&#x27;),
+      pth([[X2, cy(9, X2)], [1900, cy(9, X2)], [1870, cy(9, X2) + 30], [1850, cy(9, X2) + 58]], 2.0, C.red, &#x27;7 4&#x27;),
+      label(1844, cy(9, X2) + 72, &#x27;避难线&#x27;, &#x27;t-emg&#x27;, &#x27;end&#x27;)
+    ].join(&#x27;&#x27;);
+
+    const route = pth([[650, cy(0, 650)], [740, cy(0, 650) - 54], [1680, cy(0, 1680) - 54], [1740, cy(0, 1740)]], 1.1, C.route, &#x27;5 4&#x27;)
+      + label(760, cy(0, 760) - 66, &#x27;正线外包通过&#x27;, &#x27;t-route&#x27;);
+
+    const occ = DATA.occupancy.map((o) =&gt; {
+      const y = cy(o.track, (o.x1 + o.x2) / 2);
+      return pth([[o.x1, y], [o.x1 + 30, y - 1], [o.x2 - 30, y + 1], [o.x2, y]], 4.2, C.red, &#x27;3 3&#x27;) + label(o.x1, y - 10, o.kind, &#x27;t-emg&#x27;);
+    }).join(&#x27;&#x27;);
+
+    const trains = DATA.trains.map((t) =&gt; trainAt(t.track, t.x, t.no, t.model, t.loco, t.cars)).join(&#x27;&#x27;);
+
+    const sigs = [
+      signal(560, cy(0, 560), &#x27;S1&#x27;), signal(560, cy(1, 560), &#x27;S2&#x27;),
+      signal(1930, cy(0, 1930), &#x27;S3&#x27;), signal(1930, cy(1, 1930), &#x27;S4&#x27;)
+    ].join(&#x27;&#x27;);
+
+    return `&lt;svg viewBox=&quot;0 0 3600 1500&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
+    &lt;rect width=&quot;3600&quot; height=&quot;1500&quot; fill=&quot;${C.paper}&quot;/&gt;
+    &lt;rect x=&quot;26&quot; y=&quot;26&quot; width=&quot;3548&quot; height=&quot;1448&quot; fill=&quot;none&quot; stroke=&quot;#8f8a76&quot; stroke-width=&quot;1&quot;/&gt;
+    ${box(940, 330, 610, 100, C.building, C.ink, 1.1)}
+    ${pth([[970, 356], [1200, 356], [1400, 356], [1520, 356]], 1.8, C.ink)}
+    ${label(970, 374, &#x27;宝鸡站&#x27;, &#x27;t-name&#x27;)}${label(970, 410, &#x27;客运场&#x27;, &#x27;t-label&#x27;)}
+    ${west}
+    ${east}
+    ${yards}
+    ${facilities()}
+    ${Y.map((_, i) =&gt; coreLine(i, spec(i)[0], spec(i)[1])).join(&#x27;&#x27;)}
+    ${mid}
+    ${route}
+    ${platformBand(540, &#x27;1台 · 1道&#x27;)}${platformBand(620, &#x27;2台 · 2/3道&#x27;)}${platformBand(660, &#x27;3台 · 4/5道&#x27;)}${platformBand(740, &#x27;4台 · 6/7道&#x27;)}${platformBand(820, &#x27;5台 · 8/9道&#x27;)}${platformBand(870, &#x27;6台 · 10道&#x27;)}
+    ${Y.map((_, i) =&gt; trackIndex(i, 632) + trackIndex(i, 1900)).join(&#x27;&#x27;)}
+    ${[820, 1140, 1460, 1700].map((x) =&gt; catenary(x, cy(0, x) - 4)).join(&#x27;&#x27;)}
+    ${ties()}
+    ${sigs}
+    ${emg}
+    ${occ}
+    ${trains}
+    ${label(2820, 100, &#x27;存车场&#x27;, &#x27;t-yard&#x27;)}
+    ${label(2820, 250, &#x27;客技站&#x27;, &#x27;t-yard&#x27;)}
+    ${label(2820, 890, &#x27;货场&#x27;, &#x27;t-yard&#x27;)}
+    ${label(2820, 1120, &#x27;机务折返段&#x27;, &#x27;t-yard&#x27;)}
+    &lt;/svg&gt;`;
+  }
+
+  function create(el, opts) {
+    opts = opts || {};
+    el.innerHTML = `&lt;div class=&quot;topo&quot;&gt;
+      &lt;div class=&quot;topo-view&quot;&gt;
+        &lt;div class=&quot;topo-canvas&quot; data-lod=&quot;far&quot;&gt;${svg()}&lt;/div&gt;
+        &lt;div class=&quot;topo-locators&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;topo-zoom&quot;&gt;&lt;button data-z=&quot;out&quot;&gt;−&lt;/button&gt;&lt;button data-z=&quot;in&quot;&gt;＋&lt;/button&gt;&lt;button data-z=&quot;fit&quot;&gt;全&lt;/button&gt;&lt;/div&gt;
+        &lt;div class=&quot;topo-scale&quot;&gt;拖动 · 缩放&lt;/div&gt;
+        &lt;div class=&quot;topo-hint&quot;&gt;拖动 · 滚轮/双指缩放 · 点书签定位&lt;/div&gt;
+      &lt;/div&gt;
+      ${legend()}
+    &lt;/div&gt;`;
+    const viewEl = el.querySelector(&#x27;.topo-view&#x27;);
+    const canvas = el.querySelector(&#x27;.topo-canvas&#x27;);
+    const loc = el.querySelector(&#x27;.topo-locators&#x27;);
+    const targets = [
+      { id: &#x27;all&#x27;, name: &#x27;全景&#x27;, r: [0, 0, 3600, 1500], z: 0 },
+      { id: &#x27;station&#x27;, name: &#x27;站房&#x27;, r: [900, 300, 700, 160], z: 1.1 },
+      { id: &#x27;pax&#x27;, name: &#x27;客运场&#x27;, r: [620, 460, 1260, 480], z: 0.8 },
+      { id: &#x27;west&#x27;, name: &#x27;西咽喉&#x27;, r: [20, 380, 700, 620], z: 0.85 },
+      { id: &#x27;east&#x27;, name: &#x27;东咽喉&#x27;, r: [1760, 380, 1100, 680], z: 0.85 },
+      { id: &#x27;storage&#x27;, name: &#x27;存车 / 客技&#x27;, r: [2000, 40, 1320, 480], z: 0.72 },
+      { id: &#x27;freight&#x27;, name: &#x27;货场&#x27;, r: [2200, 860, 1120, 260], z: 0.8 },
+      { id: &#x27;engine&#x27;, name: &#x27;机务段&#x27;, r: [2400, 1090, 920, 290], z: 0.8 },
+      { id: &#x27;k101&#x27;, name: &#x27;K101 · 1道&#x27;, pt: [1080, cy(0, 1080)], z: 1.05, alarm: true },
+      { id: &#x27;k105&#x27;, name: &#x27;K105 · 5道&#x27;, pt: [1040, cy(4, 1040)], z: 1.05, alarm: true },
+      { id: &#x27;w1&#x27;, name: &#x27;W1 道岔&#x27;, pt: [590, cy(3, 590)], z: 1.15 }
+    ];
+    loc.innerHTML = targets.map((t, i) =&gt; `&lt;button data-i=&quot;${i}&quot; class=&quot;${i === 0 ? &#x27;on&#x27; : &#x27;&#x27;}${t.alarm ? &#x27; alarm&#x27; : &#x27;&#x27;}&quot;&gt;${esc(t.name)}&lt;/button&gt;`).join(&#x27;&#x27;);
+    let cam = { x: 0, y: 0, z: 0.4, ready: false };
+    let activeId = &#x27;all&#x27;;
+    let pointers = new Map(), drag = null, pinch = null, moved = false, saveTimer = null;
+    const dims = () =&gt; ({ w: viewEl.clientWidth || 1000, h: viewEl.clientHeight || 700 });
+    function setActive(id) {
+      activeId = id || &#x27;&#x27;;
+      const idx = targets.findIndex((t) =&gt; t.id === activeId);
+      loc.querySelectorAll(&#x27;button&#x27;).forEach((b, j) =&gt; b.classList.toggle(&#x27;on&#x27;, j === idx));
+    }
+    function clamp() {
+      const { w, h } = dims();
+      const mw = W * cam.z, mh = H * cam.z;
+      cam.x = mw &lt;= w ? (w - mw) / 2 : Math.min(0, Math.max(w - mw, cam.x));
+      cam.y = mh &lt;= h ? (h - mh) / 2 : Math.min(0, Math.max(h - mh, cam.y));
+    }
+    function mode() {
+      const { w, h } = dims();
+      return w &lt; 700 &amp;&amp; h &gt; w ? &#x27;m&#x27; : &#x27;d&#x27;;
+    }
+    function saveCam() {
+      if (!cam.ready) return;
+      try { localStorage.setItem(`${STORE}:${mode()}`, JSON.stringify({ x: cam.x, y: cam.y, z: cam.z, id: activeId })); } catch (e) {}
+    }
+    function readCam() {
+      try {
+        const o = JSON.parse(localStorage.getItem(`${STORE}:${mode()}`));
+        return o &amp;&amp; Number.isFinite(o.x) &amp;&amp; Number.isFinite(o.y) &amp;&amp; Number.isFinite(o.z) &amp;&amp; o.z &gt;= 0.2 &amp;&amp; o.z &lt;= 2 ? o : null;
+      } catch (e) { return null; }
+    }
+    function apply() {
+      canvas.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`;
+      canvas.dataset.lod = cam.z &lt; 0.58 ? &#x27;far&#x27; : (cam.z &gt; 1.12 ? &#x27;near&#x27; : &#x27;mid&#x27;);
+      if (cam.ready) { clearTimeout(saveTimer); saveTimer = setTimeout(saveCam, 120); }
+    }
+    function fit() {
+      const { w, h } = dims();
+      cam.z = Math.min(w / W, h / H) * 0.99;
+      cam.x = (w - W * cam.z) / 2;
+      cam.y = (h - H * cam.z) / 2;
+      apply();
+    }
+    function focusPoint(x, y, z, animate) {
+      const { w, h } = dims();
+      cam.z = z || cam.z;
+      cam.x = w / 2 - x * cam.z;
+      cam.y = h / 2 - y * cam.z;
+      clamp();
+      const a = !!animate &amp;&amp; !REDUCE;
+      if (a) canvas.style.transition = &#x27;transform .22s ease&#x27;; else canvas.style.transition = &#x27;&#x27;;
+      apply();
+      if (a) setTimeout(() =&gt; { canvas.style.transition = &#x27;&#x27;; }, 240);
+    }
+    function focus(r, z, animate) {
+      focusPoint(r[0] + r[2] / 2, r[1] + r[3] / 2, z, animate);
+    }
+    function go(i) {
+      const t = targets[i];
+      if (!t) return;
+      if (t.pt) focusPoint(t.pt[0], t.pt[1], t.z || Math.max(cam.z, 0.72), true);
+      else if (t.id === &#x27;all&#x27;) fit();
+      else focus(t.r, Math.max(t.z || cam.z, 0.72), true);
+      setActive(t.id);
+    }
+    function zoomAt(px, py, f) {
+      const old = cam.z, z = Math.max(0.22, Math.min(2.0, old * f));
+      cam.x = px - (px - cam.x) * (z / old);
+      cam.y = py - (py - cam.y) * (z / old);
+      cam.z = z; clamp(); apply();
+    }
+    loc.addEventListener(&#x27;click&#x27;, (e) =&gt; {
+      const b = e.target.closest(&#x27;button[data-i]&#x27;);
+      if (b) go(Number(b.dataset.i));
+    });
+    el.querySelectorAll(&#x27;[data-z]&#x27;).forEach((b) =&gt; b.addEventListener(&#x27;click&#x27;, () =&gt; {
+      if (b.dataset.z === &#x27;fit&#x27;) { fit(); setActive(&#x27;all&#x27;); return; }
+      const { w, h } = dims();
+      zoomAt(w / 2, h / 2, b.dataset.z === &#x27;in&#x27; ? 1.25 : 0.8);
+    }));
+    viewEl.addEventListener(&#x27;wheel&#x27;, (e) =&gt; {
+      e.preventDefault();
+      const r = viewEl.getBoundingClientRect();
+      zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY &gt; 0 ? 0.84 : 1.18);
+    }, { passive: false });
+    viewEl.addEventListener(&#x27;pointerdown&#x27;, (e) =&gt; {
+      if (e.target.closest(&#x27;.topo-locators,.topo-zoom&#x27;)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      viewEl.setPointerCapture(e.pointerId);
+      if (pointers.size === 1) { drag = { x: e.clientX, y: e.clientY, vx: cam.x, vy: cam.y }; moved = false; viewEl.classList.add(&#x27;dragging&#x27;); }
+      if (pointers.size === 2) {
+        const p = [...pointers.values()];
+        pinch = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), z: cam.z, vx: cam.x, vy: cam.y };
+      }
+    });
+    viewEl.addEventListener(&#x27;pointermove&#x27;, (e) =&gt; {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pinch &amp;&amp; pointers.size &gt;= 2) {
+        const p = [...pointers.values()], d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        const r = viewEl.getBoundingClientRect(), mx = (p[0].x + p[1].x) / 2 - r.left, my = (p[0].y + p[1].y) / 2 - r.top;
+        const z = Math.max(0.22, Math.min(2.0, pinch.z * d / Math.max(1, pinch.d)));
+        cam.x = mx - (mx - pinch.vx) * (z / pinch.z);
+        cam.y = my - (my - pinch.vy) * (z / pinch.z);
+        cam.z = z; clamp(); apply(); moved = true; return;
+      }
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) &gt; 4) { moved = true; setActive(&#x27;&#x27;); }
+      cam.x = drag.vx + dx; cam.y = drag.vy + dy; clamp(); apply();
+    });
+    function end(e) {
+      pointers.delete(e.pointerId);
+      if (!pointers.size) { drag = null; pinch = null; viewEl.classList.remove(&#x27;dragging&#x27;); saveCam(); }
+      if (pointers.size &lt; 2) pinch = null;
+    }
+    viewEl.addEventListener(&#x27;pointerup&#x27;, end);
+    viewEl.addEventListener(&#x27;pointercancel&#x27;, end);
+    let lastMode = &#x27;&#x27;;
+    function initCam() {
+      const { w, h } = dims(), m = mode();
+      if (cam.ready) return;
+      const saved = readCam();
+      if (saved) {
+        cam = { x: saved.x, y: saved.y, z: saved.z, ready: true };
+        clamp(); apply(); setActive(saved.id || &#x27;&#x27;);
+        lastMode = m;
+        return;
+      }
+      if (w &gt;= 700 &amp;&amp; h &gt;= 500) {
+        fit(); setActive(&#x27;all&#x27;);
+      } else if (w &lt; 700 &amp;&amp; h &gt; w) {
+        focus([650, 340, 900, 700], 0.38, false); setActive(&#x27;pax&#x27;);
+      } else {
+        fit(); setActive(&#x27;all&#x27;);
+      }
+      cam.ready = true;
+      lastMode = m;
+    }
+    new ResizeObserver(() =&gt; {
+      const m = mode();
+      if (!cam.ready || (lastMode &amp;&amp; m !== lastMode)) {
+        if (lastMode &amp;&amp; m !== lastMode) cam.ready = false;
+        initCam();
+      } else { clamp(); apply(); }
+    }).observe(viewEl);
+    requestAnimationFrame(initCam);
+    window.baojiTopologyData = DATA;
+    return { fit, focus: go, view: () =&gt; ({ ...cam }) };
+  }
+  window.createTopology = create;
+  window.__TOPO_ART__ = { coach: roofCoach, loco: locoArt, freight: freightCoach, emu: emuLead };
+})();
+
+&lt;/script&gt;
+&lt;script&gt;
+const params = new URLSearchParams(location.search);
+const embed = params.has(&#x27;embed&#x27;);
+if (embed) document.body.classList.add(&#x27;embed&#x27;);
+const api = createTopology(document.getElementById(&#x27;topo&#x27;));
+const f = params.get(&#x27;focus&#x27;);
+if (f) { const i = [&#x27;all&#x27;,&#x27;station&#x27;,&#x27;pax&#x27;,&#x27;west&#x27;,&#x27;east&#x27;,&#x27;storage&#x27;,&#x27;freight&#x27;,&#x27;engine&#x27;,&#x27;k101&#x27;,&#x27;k105&#x27;,&#x27;w1&#x27;].indexOf(f); if (i &gt;= 0) setTimeout(() =&gt; api.focus(i), 120); }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+      <div class="m-map-cover">
+        <div class="m-map-name"><b>宝鸡站</b><span>一等站 · 6 台 10 线 · 客运 / 货场 / 机务折返段</span></div>
+        <div class="m-map-stats" id="mMapStats"></div>
+      </div>
+      <button class="m-drawer-toggle" id="mDrawerToggle">经营台账</button>
+      <button class="m-drawer-close" id="mDrawerClose">×</button>
+      <section class="m-page" id="mPage"></section>
+    </section>
+  </main>
+
+  <aside class="m-inspector" id="mInspector"></aside>
+</div>
+
+<footer class="m-foot">
+  <div class="m-todo" id="mTodo">今天没有必须处理的事。</div>
+  <div class="m-advance"><span id="mForecast" class="mono">预计净利 —</span><button id="mNext" class="m-primary">推进一天</button></div>
+</footer>
+
+<div id="mModal" class="m-modal hidden">
+  <div class="m-modal-shade"></div>
+  <div class="m-modal-card">
+    <div id="mModalKicker" class="m-modal-kicker mono">事件</div>
+    <h3 id="mModalTitle"></h3>
+    <div id="mModalBody"></div>
+    <div id="mModalActions" class="m-modal-actions"></div>
+  </div>
+</div>
+
+<div id="mToast" class="m-toast hidden"></div>
+<script type="module">
+const TOKEN_KEY = 'tst-dispatch-cloud-token';
+const LAST_KEY = 'tst-dispatch-cloud-last';
+
+function cloudToken() {
+  try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
+}
+
+function setCloudToken(t) {
+  try {
+    if (t) localStorage.setItem(TOKEN_KEY, String(t).trim());
+    else localStorage.removeItem(TOKEN_KEY);
+    return true;
+  } catch (e) { return false; }
+}
+
+function lastCloudId() {
+  try { return localStorage.getItem(LAST_KEY) || ''; } catch (e) { return ''; }
+}
+
+function remember(id) {
+  try { localStorage.setItem(LAST_KEY, id); } catch (e) { /* ignored */ }
+}
+
+async function api(path, opt) {
+  const token = cloudToken();
+  const headers = { Accept: 'application/vnd.github+json', ...(opt && opt.headers) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`https://api.github.com${path}`, { ...opt, headers });
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('GitHub 令牌无效或已过期');
+    if (res.status === 404) throw new Error('找不到这个云存档编号');
+    throw new Error(`云端返回 ${res.status}`);
+  }
+  return res.json();
+}
+
+async function uploadCloud(code, meta) {
+  if (!cloudToken()) throw new Error('先在设置里填 GitHub 令牌');
+  const body = {
+    description: `调度台云存档 ${meta && meta.name ? meta.name : ''} ${new Date().toISOString().slice(0, 16)}`,
+    public: false,
+    files: {
+      'dispatch-save.txt': { content: String(code) },
+      'dispatch-meta.json': { content: JSON.stringify(meta || {}, null, 2) },
+    },
+  };
+  const out = await api('/gists', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });
+  remember(out.id);
+  return { id: out.id, url: out.html_url, at: Date.now() };
+}
+
+async function downloadCloud(id) {
+  const clean = String(id || '').trim().split('/').pop();
+  if (!clean) throw new Error('云存档编号为空');
+  const gist = await api(`/gists/${clean}`, { method: 'GET' });
+  const f = gist.files && gist.files['dispatch-save.txt'];
+  if (!f) throw new Error('这个云端记录不是调度台存档');
+  let code = f.content || '';
+  if (f.truncated && f.raw_url) {
+    const res = await fetch(f.raw_url);
+    if (!res.ok) throw new Error('云存档内容读取失败');
+    code = await res.text();
+  }
+  remember(gist.id);
+  return { code, meta: gist.description || '', id: gist.id };
+}
+
+function parseCloudInput(text) {
+  const s = String(text || '').trim();
+  if (!s) return '';
+  const m = s.match(/gist\.github\.com\/[^/]+\/([a-f0-9]+)/i) || s.match(/^([a-f0-9]{12,})$/i);
+  return m ? m[1] : '';
+}
+
+
+const KEY = 'dispatch-manage-v1';
+const SLOT = (n) => `dispatch-manage-slot-${n}`;
+const TERM = 60;
+
+const STATIONS = [
+  { id: 'qinglan', name: '宝鸡', code: '44801', grade: '一等站', km: 0, tracks: 8, platforms: 3, sidings: 3, staff: 36, need: 31, facility: 91, baseTraffic: 140, revenueBase: 18600, costBase: 12100 },
+  { id: 'baishu', name: '秦岭', code: '44802', grade: '三等站', km: 45, tracks: 3, platforms: 1, sidings: 1, staff: 14, need: 10, facility: 83, baseTraffic: 42, revenueBase: 7800, costBase: 5200 },
+  { id: 'heyuan', name: '凤县', code: '44803', grade: '三等站', km: 108, tracks: 3, platforms: 1, sidings: 2, staff: 12, need: 11, facility: 78, baseTraffic: 50, revenueBase: 8200, costBase: 5600 },
+  { id: 'lingkou', name: '略阳', code: '44804', grade: '二等站', km: 200, tracks: 5, platforms: 2, sidings: 2, staff: 24, need: 20, facility: 87, baseTraffic: 88, revenueBase: 12400, costBase: 8800 },
+];
+
+const SEGMENTS = [
+  { id: 'qing-bai', from: 'qinglan', to: 'baishu', km: 45, capacity: 120, demand: 102, limit: 70 },
+  { id: 'bai-he', from: 'baishu', to: 'heyuan', km: 63, capacity: 90, demand: 63, limit: 65 },
+  { id: 'he-ling', from: 'heyuan', to: 'lingkou', km: 92, capacity: 75, demand: 55, limit: 60 },
+];
+
+const GROUPS = [
+  { id: 'signal', name: '信号联锁', cost: 9000, offset: 6 },
+  { id: 'track', name: '线路股道', cost: 12000, offset: 0 },
+  { id: 'platform', name: '站台雨棚', cost: 6000, offset: 2 },
+  { id: 'building', name: '站房候车', cost: 5000, offset: 3 },
+  { id: 'power', name: '供电照明', cost: 7000, offset: 1 },
+];
+
+const BUILDS = [
+  { id: 'track', name: '到发线扩建', desc: '股道 +2，能力 +36 列/日', cost: 120000, days: 12 },
+  { id: 'platform', name: '站台改造', desc: '站台 +1，能力 +12 列/日', cost: 90000, days: 9 },
+  { id: 'siding', name: '存车线增设', desc: '侧线 +1，能力 +8 列/日', cost: 60000, days: 7 },
+  { id: 'facility', name: '设施整修', desc: '五组设施各 +8 状态', cost: 70000, days: 5 },
+];
+
+const POLICIES = [
+  { id: 'safe', name: '安全整顿', desc: '安全 +6，成本 +2%，准点 -2', effect: { safety: 6, cost: 0.02, punc: -2 } },
+  { id: 'income', name: '增收会战', desc: '收入 +8%，安全 -5', effect: { revenue: 0.08, safety: -5 } },
+  { id: 'flow', name: '保畅通', desc: '准点 +6，成本 +3%', effect: { punc: 6, cost: 0.03 } },
+  { id: 'maint', name: '设备养护', desc: '设施老化减半，成本 +2%', effect: { maintain: 0.5, cost: 0.02 } },
+  { id: 'save', name: '节支降耗', desc: '成本 -8%，准点 -5', effect: { cost: -0.08, punc: -5 } },
+];
+
+const CONTRACT_POOL = [
+  { name: '陕煤电煤', kind: 'freight', station: 'qinglan', add: 16, reward: 4200, penalty: 1600, days: 5 },
+  { name: '宝鸡钢材', kind: 'freight', station: 'qinglan', add: 12, reward: 3400, penalty: 1400, days: 6 },
+  { name: '秦岭砂石', kind: 'freight', station: 'baishu', add: 8, reward: 2200, penalty: 900, days: 4 },
+  { name: '凤县矿石', kind: 'freight', station: 'heyuan', add: 10, reward: 2600, penalty: 1000, days: 5 },
+  { name: '略阳水泥', kind: 'freight', station: 'lingkou', add: 14, reward: 3600, penalty: 1500, days: 6 },
+  { name: '西安局通勤', kind: 'pax', station: 'baishu', add: 6, reward: 2100, penalty: 700, days: 5 },
+  { name: '汉中旅游专列', kind: 'pax', station: 'lingkou', add: 10, reward: 3200, penalty: 1100, days: 4 },
+  { name: '宝成线普速', kind: 'pax', station: 'heyuan', add: 8, reward: 2800, penalty: 900, days: 5 },
+  { name: '秦岭避暑客流', kind: 'pax', station: 'qinglan', add: 12, reward: 3800, penalty: 1300, days: 4 },
+  { name: '略阳集装箱', kind: 'freight', station: 'lingkou', add: 12, reward: 4000, penalty: 1700, days: 7 },
+];
+
+let state = null;
+let tab = 'overview';
+let selected = 'qinglan';
+
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fm = (n) => `¥${Math.round(n).toLocaleString('zh-CN')}`;
+const num = (n, d = 0) => Number(n).toLocaleString('zh-CN', { maximumFractionDigits: d, minimumFractionDigits: d });
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pct = (v) => `${Math.round(v * 100)}%`;
+const st = (id) => state.stations[id];
+const seg = (id) => SEGMENTS.find((s) => s.id === id);
+const stationDef = (id) => STATIONS.find((s) => s.id === id);
+
+function groupsOf(id) {
+  const s = st(id);
+  if (!s.groups || !GROUPS.every((g) => Number.isFinite(s.groups[g.id]))) {
+    s.groups = {};
+    GROUPS.forEach((g) => { s.groups[g.id] = clamp(stationDef(id).facility + (4 - g.offset), 35, 100); });
+  }
+  return s.groups;
+}
+
+function facAvg(id) {
+  const g = groupsOf(id);
+  return GROUPS.reduce((a, x) => a + g[x.id], 0) / GROUPS.length;
+}
+
+function capacity(id) {
+  const s = st(id);
+  return s.tracks * 14 + s.platforms * 10 + s.sidings * 6;
+}
+
+function fresh() {
+  const stations = {};
+  STATIONS.forEach((s) => {
+    stations[s.id] = {
+      tracks: s.tracks, platforms: s.platforms, sidings: s.sidings,
+      staff: s.staff, need: s.need, morale: 72, backlog: 0, build: null, groups: {},
+    };
+  });
+  const segments = {};
+  SEGMENTS.forEach((s) => { segments[s.id] = { pax: 62 }; });
+  const now = {
+    v: 1, day: 1, week: 1, cash: 300000, reputation: 52, superior: 70, ap: 2, demandIndex: 1,
+    stations, segments, contracts: [], offers: [], policy: null, policyDue: false,
+    ledger: [], effects: [], event: null, over: null, selected: 'qinglan', startedAt: Date.now(),
+  };
+  now.offers = makeOffers(now, 3);
+  return now;
+}
+
+function contractAdd(stationId) {
+  return state.contracts
+    .filter((c) => c.station === stationId)
+    .reduce((a, c) => a + (c.kind === 'freight' ? 0 : 0) + c.add, 0);
+}
+
+function effectSum(key) {
+  let v = 0;
+  state.effects.forEach((e) => { v += e[key] || 0; });
+  if (state.policy) {
+    const p = POLICIES.find((x) => x.id === state.policy.id);
+    if (p && p.effect[key]) v += p.effect[key];
+  }
+  return v;
+}
+
+function paxMix() {
+  const avg = SEGMENTS.reduce((a, s) => a + state.segments[s.id].pax, 0) / SEGMENTS.length;
+  return (avg - 62) / 100 * 0.26;
+}
+
+function project() {
+  const rows = [];
+  let revenue = 0;
+  let cost = 0;
+  let contractNet = 0;
+  let puncPressure = 0;
+  let safetyPressure = 0;
+  let trafficTotal = 0;
+  STATIONS.forEach((def) => {
+    const s = st(def.id);
+    const cAdd = contractAdd(def.id);
+    const traffic = def.baseTraffic * state.demandIndex + s.backlog + cAdd;
+    const cap = capacity(def.id);
+    const load = traffic / cap;
+    const over = Math.max(0, load - 0.92);
+    const rev = def.revenueBase * clamp(traffic / def.baseTraffic, 0.55, 1.35) * (1 - Math.max(0, load - 0.96) * 0.6) * (1 + effectSum('revenue') + paxMix());
+    const facility = facAvg(def.id);
+    const salary = s.staff * 70;
+    const maint = (900 + (100 - facility) * 8 + (s.build ? 1200 : 0)) * (1 - (state.policy && state.policy.id === 'maint' ? 0.5 : 0));
+    const rowCost = (def.costBase + salary + maint) * (1 + effectSum('cost'));
+    revenue += rev;
+    cost += rowCost;
+    trafficTotal += traffic;
+    puncPressure += over * (traffic / 100);
+    safetyPressure += (100 - facility) * 0.16;
+    rows.push({ id: def.id, name: def.name, traffic, cap, load, over, rev, cost: rowCost, facility, net: rev - rowCost });
+  });
+  const segRows = SEGMENTS.map((def) => {
+    const demand = def.demand * state.demandIndex + state.contracts.reduce((a, c) => a + c.add * 0.45, 0);
+    const load = demand / def.capacity;
+    puncPressure += Math.max(0, load - 0.9) * 2.2;
+    return { ...def, demand, load };
+  });
+  state.contracts.forEach((c) => {
+    const load = rows.find((r) => r.id === c.station).load;
+    const ok = load <= 1.22;
+    contractNet += ok ? c.reward : -c.penalty;
+  });
+  const facilityAvg = STATIONS.reduce((a, d) => a + facAvg(d.id), 0) / STATIONS.length;
+  const shortage = STATIONS.reduce((a, d) => a + Math.max(0, st(d.id).need - st(d.id).staff), 0);
+  const morale = STATIONS.reduce((a, d) => a + st(d.id).morale, 0) / STATIONS.length;
+  const punc = Math.round(clamp(94 - puncPressure * 0.7 - (100 - facilityAvg) * 0.22 - shortage * 0.7 - Math.max(0, 70 - morale) * 0.25 + effectSum('punc'), 20, 100));
+  const safety = Math.round(clamp(96 - safetyPressure - shortage * 0.5 + effectSum('safety'), 25, 100));
+  const net = revenue + contractNet - cost;
+  return { rows, segRows, revenue, cost, contractNet, net, punc, safety, facilityAvg, shortage, trafficTotal };
+}
+
+function makeOffers(target, n) {
+  const today = target.day || 1;
+  const out = [];
+  const used = new Set();
+  for (let i = 0; i < n; i++) {
+    let idx = (today * 3 + i * 5 + Math.floor(Math.random() * 7)) % CONTRACT_POOL.length;
+    while (used.has(idx)) idx = (idx + 1) % CONTRACT_POOL.length;
+    used.add(idx);
+    const base = CONTRACT_POOL[idx];
+    out.push({ ...base, id: `c-${today}-${i}-${idx}`, left: base.days, active: false });
+  }
+  return out;
+}
+
+function makeEvent() {
+  const pool = [
+    {
+      id: 'signal', station: 'qinglan', kicker: '设备故障', title: '宝鸡站 3 道信号机红灯',
+      body: '<p>电务值班员报：3 道出站信号机点不亮，可能是电缆盒进水。今晚还有 6 列客车要发。</p><p>抢修要停一条股道，不修就得靠引导信号放行。</p>',
+      choices: [
+        { label: '立即抢修', tone: 'warn', apply: { cash: -15000, facility: 8, safety: 4 } },
+        { label: '引导信号放行', apply: { safety: -7, punc: -4, effect: { label: '信号带病运行', days: 2, safety: -3 } } },
+      ],
+    },
+    {
+      id: 'inspection', kicker: '上级检查', title: '路局安全科突查',
+      body: '<p>安全科到站，重点看接发列车记录、施工作业和消防台账。值班员把两个月的记录都搬了出来。</p>',
+      choices: [
+        { label: '全员配合检查', tone: 'warn', apply: { cash: -10000, superior: 8, punc: 3 } },
+        { label: '按日常口径应付', apply: { safety: -8, superior: -5 } },
+      ],
+    },
+    {
+      id: 'coal', kicker: '货主加车', title: '陕煤要求临时加开两列',
+      body: '<p>货主说电厂库存见底，今晚必须再加两列电煤。站内空车够，但会让 1 道紧张两天。</p>',
+      choices: [
+        { label: '接这两列', tone: 'good', apply: { cash: 9000, punc: -4, effect: { label: '电煤加车', days: 2, punc: -3 } } },
+        { label: '推给邻站', apply: { reputation: -3, superior: -2 } },
+      ],
+    },
+    {
+      id: 'storm', kicker: '天气', title: '秦岭区段暴雨预警',
+      body: '<p>工务报：秦岭—凤县间连续降雨，边坡有落石风险。调度所要求客车限速 45 km/h。</p>',
+      choices: [
+        { label: '客车降速', tone: 'warn', apply: { punc: -5, safety: 6, effect: { label: '限速运行', days: 1, punc: -2 } } },
+        { label: '按图定速度跑', apply: { safety: -9, punc: 2 } },
+      ],
+    },
+    {
+      id: 'sick', kicker: '人员', title: '凤县站两名值班员请假',
+      body: '<p>凤县站夜班两名值班员同时请病假，站里只剩一个能盯信号的人。要么从宝鸡调人，要么让站长顶班。</p>',
+      choices: [
+        { label: '从宝鸡调两名', tone: 'warn', apply: { cash: -8000, punc: 3 } },
+        { label: '站长顶班', apply: { cash: -2000, morale: -5, punc: -3, effect: { label: '疲劳顶班', days: 2, punc: -2 } } },
+      ],
+    },
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function save(silent) {
+  try {
+    state.selected = selected;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    if (!silent) toast('已保存到本机');
+  } catch (e) { toast('本机存储不可用'); }
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || s.v !== 1 || !s.stations) return null;
+    return s;
+  } catch (e) { return null; }
+}
+
+function normalize(s) {
+  STATIONS.forEach((d) => {
+    if (!s.stations[d.id]) s.stations[d.id] = { tracks: d.tracks, platforms: d.platforms, sidings: d.sidings, staff: d.staff, need: d.need, morale: 70, backlog: 0, build: null, groups: {} };
+    const x = s.stations[d.id];
+    if (!x.groups || !GROUPS.every((g) => Number.isFinite(x.groups[g.id]))) {
+      x.groups = {};
+      GROUPS.forEach((g) => { x.groups[g.id] = clamp(d.facility + (4 - g.offset), 35, 100); });
+    }
+  });
+  if (!Number.isFinite(s.ap)) s.ap = 2;
+  s.effects = s.effects || [];
+  s.ledger = s.ledger || [];
+  s.contracts = s.contracts || [];
+  s.offers = s.offers || [];
+  return s;
+}
+
+function toast(text) {
+  const t = $('mToast');
+  t.textContent = text;
+  t.classList.remove('hidden');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => t.classList.add('hidden'), 2200);
+}
+
+function modal(kicker, title, body, actions) {
+  $('mModalKicker').textContent = kicker;
+  $('mModalTitle').textContent = title;
+  $('mModalBody').innerHTML = body;
+  const box = $('mModalActions');
+  box.innerHTML = '';
+  actions.forEach((a) => {
+    const b = document.createElement('button');
+    b.className = `m-btn ${a.tone || ''}`;
+    b.textContent = a.label;
+    b.addEventListener('click', a.fn);
+    box.appendChild(b);
+  });
+  $('mModal').classList.remove('hidden');
+}
+
+function closeModal() { $('mModal').classList.add('hidden'); }
+
+function rating() {
+  const avgNet = state.ledger.length ? state.ledger.slice(-7).reduce((a, x) => a + x.net, 0) / Math.min(7, state.ledger.length) : 0;
+  if (avgNet > 12000 && state.reputation >= 65) return 'A';
+  if (avgNet > 6000) return 'B';
+  if (avgNet > 0) return 'C';
+  return 'D';
+}
+
+function decideList(p) {
+  const out = [];
+  p.rows.forEach((r) => {
+    if (r.load > 1.02) out.push(`${r.name}能力负荷 ${pct(r.load)}，压车 ${Math.round(r.traffic - r.cap)} 列`);
+    else if (r.load > 0.9) out.push(`${r.name}接近满图，扩建或分流`);
+    if (r.facility < 60) out.push(`${r.name}设施状态 ${Math.round(r.facility)}，安排整修`);
+    if (st(r.id).need > st(r.id).staff) out.push(`${r.name}缺员 ${st(r.id).need - st(r.id).staff} 人`);
+  });
+  if (!state.policy || state.policy.left <= 0) out.push('本周政策未定，去政策页选一项');
+  if (state.ap <= 0) out.push('今日动作已用完，推进一天再办');
+  const ending = state.contracts.filter((c) => c.left <= 1);
+  if (ending.length) out.push(`${ending[0].name}今天到期，注意兑现`);
+  if (!out.length) out.push('设备与人手都在控，按当前节奏推进');
+  return out.slice(0, 6);
+}
+
+function renderTop() {
+  $('mDay').textContent = `第 ${state.day} 日`;
+  $('mCash').textContent = fm(state.cash);
+  $('mRep').textContent = Math.round(state.reputation);
+  $('mSup').textContent = Math.round(state.superior);
+  $('mActs').textContent = `${state.ap}/2`;
+  $('mCash').style.color = state.cash < 0 ? '#e0665c' : '';
+}
+
+function segColor(load) { return load > 0.98 ? 'bad' : load > 0.86 ? 'warn' : ''; }
+
+function renderMap(p) {
+  const box = document.getElementById('mMapStats');
+  if (!box || !p.rows || !p.rows[0]) return;
+  const r = p.rows[0];
+  box.innerHTML = `<b>${pct(r.load)}</b><span>今日 ${Math.round(r.traffic)} 列 · 能力 ${Math.round(r.cap)}</span>`;
+}
+
+function setNav() {
+  document.querySelectorAll('#mNav [data-tab]').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+}
+
+function renderInspector(p) {
+  const d = stationDef(selected);
+  const r = p.rows.find((x) => x.id === selected);
+  const s = st(selected);
+  const facility = facAvg(selected);
+  const c = s.build ? `施工中 · ${s.build.name} · 剩 ${s.build.left} 天` : '无施工';
+  $('mInspector').innerHTML = `
+    <h3>本站 / ${d.name}</h3>
+    <div class="m-ins-row"><span>站等</span><b>${d.grade}</b></div>
+    <div class="m-ins-row"><span>里程</span><b>K${d.km}</b></div>
+    <div class="m-ins-row"><span>股道 / 站台</span><b>${s.tracks} / ${s.platforms}</b></div>
+    <div class="m-ins-row"><span>人员</span><b>${s.staff} / 需 ${s.need}</b></div>
+    <div class="m-ins-row"><span>设施状态</span><b>${Math.round(facility)}</b></div>
+    <div class="m-ins-row"><span>今日通过</span><b>${Math.round(r.traffic)} 列</b></div>
+    <div class="m-ins-row"><span>能力负荷</span><b>${pct(r.load)}</b></div>
+    <div class="m-ins-row"><span>日净利</span><b style="color:${r.net >= 0 ? '#8dbb9c' : '#e0665c'}">${fm(r.net)}</b></div>
+    <div class="m-ins-row"><span>施工</span><b style="font-size:10px">${c}</b></div>
+    <div class="m-ins-note">${d.name}是${d.grade}，日通过 ${Math.round(r.traffic)} 列。当前${r.load > 0.98 ? '已经压车，先扩建或分流' : r.load > 0.9 ? '接近满图，留不出余量' : '还有余量'}。</div>
+    <h3 style="margin-top:16px">四站负荷</h3>
+    ${STATIONS.map((d2) => {
+      const rr = p.rows.find((x) => x.id === d2.id);
+      return `<button class="m-ins-station ${d2.id === selected ? 'on' : ''}" data-ins="${d2.id}"><b>${d2.name} <span style="float:right;color:${rr.load > 0.98 ? '#e0665c' : rr.load > 0.9 ? '#d6a14a' : '#8dbb9c'}">${pct(rr.load)}</span></b><span>${d2.grade} · ${st(d2.id).staff} 人 · 设施 ${Math.round(rr.facility)}</span></button>`;
+    }).join('')}`;
+  $('mInspector').querySelectorAll('[data-ins]').forEach((b) => b.addEventListener('click', () => { selected = b.dataset.ins; tab = 'station'; setNav(); renderAll(); }));
+}
+
+function stat(label, value, note) {
+  return `<div class="m-stat"><span>${label}</span><b>${value}</b><em>${note || ''}</em></div>`;
+}
+
+function renderOverview(p) {
+  const list = decideList(p);
+  const last = state.ledger.slice(-7);
+  const max = Math.max(1, ...last.map((x) => Math.abs(x.net)));
+  const bars = last.length ? last.map((x) => `<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:70px"><i style="display:block;height:${Math.max(2, Math.abs(x.net) / max * 52)}px;background:${x.net >= 0 ? '#5f9e76' : '#d4544a'}"></i><span style="font:8px var(--mono);color:#5f6d6a;text-align:center;margin-top:3px">${x.day}</span></div>`).join('') : '<span style="color:#5f6d6a">还没有日结数据</span>';
+  return `<div class="m-page-head"><h2>经营总览</h2><span>第 ${state.day} / ${TERM} 日 · 第 ${state.week} 周 · 评级 ${rating()}</span></div>
+  <div class="m-grid-4">
+    ${stat('现金', fm(state.cash), state.cash < 0 ? '已经透支' : '可周转')}
+    ${stat('预计日净利', fm(p.net), '按当前车流与合同')}
+    ${stat('准点率', `${p.punc}%`, '低于 75 会被点名')}
+    ${stat('安全值', `${p.safety}`, '低于 50 要停业整顿')}
+  </div>
+  <div class="m-block"><h3>今天要决定的事</h3>${list.map((x) => `<div class="m-row"><b>·</b><span>${esc(x)}</span></div>`).join('')}</div>
+  <div class="m-block"><h3>四站经营</h3><div class="m-list">
+    ${p.rows.map((r) => {
+      const d = stationDef(r.id);
+      const bad = r.load > 0.98 ? 'bad' : r.load > 0.9 ? 'warn' : '';
+      return `<div class="m-cell"><b>${d.name} <span style="float:right;color:${r.net >= 0 ? '#8dbb9c' : '#e0665c'};font:10px var(--mono)">${fm(r.net)}</span></b><span>通过 ${Math.round(r.traffic)} 列 · 能力 ${r.cap}</span><span>负荷 ${pct(r.load)} · 设施 ${Math.round(r.facility)}</span><div class="m-bar ${bad ? `m-bar-${bad}` : ''}"><i style="width:${Math.min(100, r.load * 100)}%"></i></div></div>`;
+    }).join('')}
+  </div></div>
+  <div class="m-block"><h3>最近 7 日净利</h3><div style="display:flex;gap:6px;align-items:flex-end">${bars}</div></div>
+  <div class="m-block"><h3>当前合同</h3>
+    ${state.contracts.length ? state.contracts.map((c) => `<div class="m-row"><b>${esc(c.name)}</b><span>${stationDef(c.station).name} · +${c.add} 列 · 日奖 ${fm(c.reward)}</span><span class="mono">剩 ${c.left} 天</span></div>`).join('') : '<div class="m-ins-note">还没有签合同。合同能补车流和现金，但会把车站压得更紧。</div>'}
+  </div>`;
+}
+
+function renderStation(p) {
+  const d = stationDef(selected);
+  const s = st(selected);
+  const r = p.rows.find((x) => x.id === selected);
+  const options = BUILDS.map((b) => {
+    const disabled = !!s.build || state.cash < b.cost;
+    return `<div class="m-row"><div style="flex:1"><b>${b.name}</b><span>${b.desc} · ${fm(b.cost)} · ${b.days} 天</span></div><button class="m-btn ${state.cash >= b.cost ? 'good' : ''}" data-build="${b.id}" ${disabled ? 'disabled' : ''}>${s.build ? '施工占用' : '开工'}</button></div>`;
+  }).join('');
+  return `<div class="m-page-head"><h2>${d.name}站</h2><span>${d.grade} · K${d.km} · ${d.code}</span></div>
+  <div class="m-grid-4">
+    ${stat('日通过', `${Math.round(r.traffic)} 列`, `能力 ${r.cap}`)}
+    ${stat('负荷', pct(r.load), r.load > 0.98 ? '压车' : r.load > 0.9 ? '接近满图' : '有余量')}
+    ${stat('设施', `${Math.round(r.facility)}`, '低于 60 进整修')}
+    ${stat('人员', `${s.staff} 人`, `需求 ${s.need} 人`)}
+  </div>
+  <div class="m-block"><h3>扩建与整修</h3>${options}</div>
+  <div class="m-block"><h3>车站底账</h3>
+    <div class="m-row"><span>到发线 / 站台 / 侧线</span><b class="mono">${s.tracks} / ${s.platforms} / ${s.sidings}</b></div>
+    <div class="m-row"><span>基础车流</span><b class="mono">${d.baseTraffic} 列/日</b></div>
+    <div class="m-row"><span>基础收入 / 成本</span><b class="mono">${fm(d.revenueBase)} / ${fm(d.costBase)}</b></div>
+    <div class="m-row"><span>待清积压</span><b class="mono">${Math.round(s.backlog)} 列</b></div>
+    <div class="m-row"><span>施工</span><b class="mono">${s.build ? `${s.build.name} 剩 ${s.build.left} 天` : '无'}</b></div>
+  </div>
+  <div class="m-block"><h3>本站设施</h3>${GROUPS.map((g) => `<div class="m-row"><span>${g.name}</span><b class="mono">${Math.round(groupsOf(selected)[g.id])}</b><div style="width:120px" class="m-bar ${groupsOf(selected)[g.id] < 60 ? 'm-bar-bad' : groupsOf(selected)[g.id] < 80 ? 'm-bar-warn' : ''}"><i style="width:${groupsOf(selected)[g.id]}%"></i></div></div>`).join('')}</div>`;
+}
+
+function renderAssets(p) {
+  return `<div class="m-page-head"><h2>资产设施</h2><span>五组设施分别老化，整修按站按组计费</span></div>
+  ${STATIONS.map((d) => {
+    const rows = GROUPS.map((g) => {
+      const v = groupsOf(d.id)[g.id];
+      const cls = v < 55 ? 'm-bar-bad' : v < 75 ? 'm-bar-warn' : '';
+      return `<div class="m-row"><span style="width:78px">${g.name}</span><div style="flex:1" class="m-bar ${cls}"><i style="width:${v}%"></i></div><b class="mono" style="width:30px;text-align:right">${Math.round(v)}</b><button class="m-btn ${v < 75 ? 'warn' : ''}" data-repair="${d.id}:${g.id}" ${state.cash < g.cost ? 'disabled' : ''}>整修 ${fm(g.cost)}</button></div>`;
+    }).join('');
+    return `<div class="m-block"><h3>${d.name} · 设施均分 ${Math.round(facAvg(d.id))}</h3>${rows}</div>`;
+  }).join('')}`;
+}
+
+function renderStaff() {
+  const rows = STATIONS.map((d) => {
+    const s = st(d.id);
+    const short = Math.max(0, s.need - s.staff);
+    return `<div class="m-block"><h3>${d.name} · ${s.staff} 人 / 需 ${s.need} 人 ${short ? `<span style="color:#d6a14a">缺 ${short}</span>` : '<span style="color:#8dbb9c">齐</span>'}</h3>
+      <div class="m-row"><span>士气</span><div style="flex:1" class="m-bar ${s.morale < 60 ? 'm-bar-bad' : s.morale < 75 ? 'm-bar-warn' : ''}"><i style="width:${s.morale}%"></i></div><b class="mono">${Math.round(s.morale)}</b></div>
+      <div class="m-row"><span>日工资</span><b class="mono">${fm(s.staff * 70)}</b><span>缺员会拉低准点率</span></div>
+      <div class="m-row"><div style="flex:1"><b>补员</b><span>签约 ${fm(12000)}，日工资 +70</span></div><button class="m-btn ${state.cash >= 12000 ? 'good' : ''}" data-hire="${d.id}" ${state.cash < 12000 ? 'disabled' : ''}>招 1 人</button><button class="m-btn" data-train="${d.id}" ${state.cash < 6000 || s.morale >= 92 ? 'disabled' : ''}>培训 ${fm(6000)}</button></div>
+    </div>`;
+  }).join('');
+  return `<div class="m-page-head"><h2>人员</h2><span>补员解决缺岗，培训拉士气；缺员会直接拉低准点率</span></div>${rows}`;
+}
+
+function renderContracts(p) {
+  const offers = state.offers.map((c) => `<div class="m-cell"><b>${esc(c.name)} <span style="float:right;color:#d6a14a;font:10px var(--mono)">${fm(c.reward)}/日</span></b><span>${stationDef(c.station).name} · +${c.add} 列/日 · ${c.days} 天</span><span>违约 ${fm(c.penalty)}/日 · 车站负荷需 ≤122%</span><div style="margin-top:8px"><button class="m-btn good" data-sign="${c.id}">签下 · ${fm(5000)}</button></div></div>`).join('');
+  const active = state.contracts.length ? state.contracts.map((c) => {
+    const load = p.rows.find((r) => r.id === c.station).load;
+    const ok = load <= 1.22;
+    return `<div class="m-row"><b>${esc(c.name)}</b><span>${stationDef(c.station).name} · +${c.add} 列 · 剩 ${c.left} 天</span><span class="mono" style="color:${ok ? '#8dbb9c' : '#e0665c'}">${ok ? '可兑现' : '要违约'}</span><button class="m-btn" data-drop="${c.id}">解约</button></div>`;
+  }).join('') : '<div class="m-ins-note">还没签合同。</div>';
+  return `<div class="m-page-head"><h2>合同</h2><span>合同加车流和现金，但会把对应车站压紧；每天结算一次</span></div>
+  <div class="m-block"><h3>货主与开行方案</h3><div class="m-list">${offers}</div></div>
+  <div class="m-block"><h3>执行中</h3>${active}</div>`;
+}
+
+function renderTraffic(p) {
+  const cards = SEGMENTS.map((s) => {
+    const load = p.segRows.find((x) => x.id === s.id).load;
+    const cls = load > 0.98 ? 'bad' : load > 0.86 ? 'warn' : '';
+    return `<div class="m-seg-card"><div class="m-row"><b>${stationDef(s.from).name}—${stationDef(s.to).name}</b><span class="mono">${s.km} km · 限 ${s.limit}</span></div>
+      <div class="m-slider"><span>客车</span><input type="range" min="20" max="85" value="${state.segments[s.id].pax}" data-share="${s.id}"><b>${state.segments[s.id].pax}%</b></div>
+      <div class="m-row"><span>需求 ${Math.round(p.segRows.find((x) => x.id === s.id).demand)} 列 · 能力 ${s.capacity}</span><b class="mono" style="color:${load > 0.98 ? '#e0665c' : load > 0.86 ? '#d6a14a' : '#8dbb9c'}">${pct(load)}</b></div>
+      <div class="m-bar ${cls ? `m-bar-${cls}` : ''}"><i style="width:${Math.min(100, load * 100)}%"></i></div>
+    </div>`;
+  }).join('');
+  return `<div class="m-page-head"><h2>车流组织</h2><span>客车比例影响收入结构；区段负荷超过 100% 会压车</span></div>${cards}
+  <div class="m-block"><h3>口径</h3><div class="m-ins-note">客车单列收入高，货车单列收入低但合同奖励稳定。区段需求按当前市场指数和合同叠加，滑杆只决定客车占比，不改变总需求。</div></div>`;
+}
+
+function renderFinance() {
+  const rows = state.ledger.slice(-15).reverse().map((x) => `<div class="m-row"><b class="mono">D${x.day}</b><span>收 ${fm(x.revenue)} · 支 ${fm(x.cost)} · 合同 ${fm(x.contract)}</span><b class="mono" style="margin-left:auto;color:${x.net >= 0 ? '#8dbb9c' : '#e0665c'}">${fm(x.net)}</b></div>`).join('');
+  const total = state.ledger.reduce((a, x) => a + x.net, 0);
+  return `<div class="m-page-head"><h2>财务</h2><span>现金 ${fm(state.cash)} · 累计净利 ${fm(total)}</span></div>
+  <div class="m-grid-4">
+    ${stat('累计收入', fm(state.ledger.reduce((a, x) => a + x.revenue, 0)), '含合同')}
+    ${stat('累计支出', fm(state.ledger.reduce((a, x) => a + x.cost, 0)), '工资、维护、施工')}
+    ${stat('累计净利', fm(total), '不含初始现金')}
+    ${stat('日均净利', fm(state.ledger.length ? total / state.ledger.length : 0), `${state.ledger.length} 天`)}
+  </div>
+  <div class="m-block"><h3>日结流水</h3>${rows || '<div class="m-ins-note">还没有流水，推进一天后生成。</div>'}</div>`;
+}
+
+function renderPolicy() {
+  const active = state.policy && state.policy.left > 0 ? `<div class="m-ins-note">当前：<b>${esc(state.policy.name)}</b>，剩 ${state.policy.left} 天。</div>` : '<div class="m-ins-note">本周还没有政策。</div>';
+  const cards = POLICIES.map((p) => `<div class="m-cell"><b>${p.name}</b><span>${p.desc}</span><div style="margin-top:8px"><button class="m-btn good" data-policy="${p.id}" ${state.cash < 5000 ? 'disabled' : ''}>${state.policy ? '调整（¥5,000）' : '定下本周'}</button></div></div>`).join('');
+  return `<div class="m-page-head"><h2>政策</h2><span>每 7 天可定一项，调整花 ¥5,000</span></div>${active}<div class="m-block"><h3>可选口径</h3><div class="m-list">${cards}</div></div>`;
+}
+
+function saveCode() {
+  const s = { ...state, selected };
+  return `MGV1:${btoa(unescape(encodeURIComponent(JSON.stringify(s))))}`;
+}
+
+function readCode(code) {
+  const t = String(code || '').trim();
+  if (!t.startsWith('MGV1:')) throw new Error('不是站长台存档');
+  const s = JSON.parse(decodeURIComponent(escape(atob(t.slice(5)))));
+  if (!s || s.v !== 1) throw new Error('存档版本不对');
+  return normalize(s);
+}
+
+function renderSave() {
+  const slots = [1, 2, 3].map((n) => {
+    let meta = '空';
+    try {
+      const raw = localStorage.getItem(SLOT(n));
+      if (raw) {
+        const s = JSON.parse(raw);
+        meta = `第 ${s.day} 日 · ${fm(s.cash)}`;
+      }
+    } catch (e) { meta = '损坏'; }
+    return `<div class="m-row"><b>槽位 ${n}</b><span>${meta}</span><button class="m-btn" data-save-slot="${n}">存</button><button class="m-btn" data-load-slot="${n}" ${meta === '空' ? 'disabled' : ''}>读</button></div>`;
+  }).join('');
+  return `<div class="m-page-head"><h2>存档与云</h2><span>本地、导出码、GitHub Gist</span></div>
+  <div class="m-block"><h3>本地槽位</h3>${slots}<div class="m-ins-note">每次推进一天会自动覆盖自动存档。</div></div>
+  <div class="m-block"><h3>导出码</h3><textarea id="mCode" style="width:100%;height:92px;background:#0d1316;border:1px solid #2f3e44;color:#c9d3cf;font:10px var(--mono);padding:8px" readonly>${saveCode()}</textarea><div style="margin-top:6px"><button class="m-btn" id="mCopy">复制导出码</button></div></div>
+  <div class="m-block"><h3>导入</h3><textarea id="mImport" placeholder="粘贴 MGV1:..." style="width:100%;height:70px;background:#0d1316;border:1px solid #2f3e44;color:#c9d3cf;font:10px var(--mono);padding:8px"></textarea><div style="margin-top:6px"><button class="m-btn" id="mImportGo">载入</button></div></div>
+  <div class="m-block"><h3>云端</h3><div class="m-row"><span>GitHub 令牌</span><input id="mToken" type="password" value="${esc(cloudToken())}" placeholder="gist 权限令牌" style="flex:1;height:25px;background:#0d1316;border:1px solid #2f3e44;color:#c9d3cf;padding:0 6px"></div><div class="m-row"><button class="m-btn good" id="mUp">上传云存档</button><span>把当前导出码写入私有 Gist</span></div><div class="m-row"><button class="m-btn" id="mDown">按编号载入</button><span>填 Gist 编号或链接</span></div></div>`;
+}
+
+function renderPage(p) {
+  const fn = { overview: renderOverview, station: renderStation, assets: renderAssets, staff: renderStaff, contracts: renderContracts, traffic: renderTraffic, finance: renderFinance, policy: renderPolicy, save: renderSave }[tab] || renderOverview;
+  $('mPage').innerHTML = fn(p);
+  if (tab === 'station') {
+    $('mPage').querySelectorAll('[data-build]').forEach((b) => b.addEventListener('click', () => startBuild(b.dataset.build)));
+  }
+  if (tab === 'assets') {
+    $('mPage').querySelectorAll('[data-repair]').forEach((b) => b.addEventListener('click', () => repair(b.dataset.repair)));
+  }
+  if (tab === 'staff') {
+    $('mPage').querySelectorAll('[data-hire]').forEach((b) => b.addEventListener('click', () => hire(b.dataset.hire)));
+    $('mPage').querySelectorAll('[data-train]').forEach((b) => b.addEventListener('click', () => trainStaff(b.dataset.train)));
+  }
+  if (tab === 'contracts') {
+    $('mPage').querySelectorAll('[data-sign]').forEach((b) => b.addEventListener('click', () => sign(b.dataset.sign)));
+    $('mPage').querySelectorAll('[data-drop]').forEach((b) => b.addEventListener('click', () => drop(b.dataset.drop)));
+  }
+  if (tab === 'traffic') {
+    $('mPage').querySelectorAll('[data-share]').forEach((input) => input.addEventListener('input', () => {
+      state.segments[input.dataset.share].pax = Number(input.value);
+      input.nextElementSibling.textContent = `${input.value}%`;
+      renderTop(); renderMap(project()); renderInspector(project());
+    }));
+  }
+  if (tab === 'policy') {
+    $('mPage').querySelectorAll('[data-policy]').forEach((b) => b.addEventListener('click', () => choosePolicy(b.dataset.policy)));
+  }
+  if (tab === 'save') {
+    $('mPage').querySelectorAll('[data-save-slot]').forEach((b) => b.addEventListener('click', () => saveSlot(Number(b.dataset.saveSlot))));
+    $('mPage').querySelectorAll('[data-load-slot]').forEach((b) => b.addEventListener('click', () => loadSlot(Number(b.dataset.loadSlot))));
+    $('mCopy').addEventListener('click', () => { $('mCode').select(); navigator.clipboard.writeText(saveCode()).then(() => toast('导出码已复制')).catch(() => toast('复制失败，手动选中')); });
+    $('mImportGo').addEventListener('click', () => {
+      try { applyLoaded(readCode($('mImport').value)); toast('导入成功'); } catch (e) { toast(e.message); }
+    });
+    $('mToken').addEventListener('change', () => setCloudToken($('mToken').value));
+    $('mUp').addEventListener('click', cloudSave);
+    $('mDown').addEventListener('click', cloudLoad);
+  }
+}
+
+function renderFoot(p) {
+  const todo = decideList(p)[0] || '按当前节奏推进';
+  $('mTodo').textContent = state.over ? `本局已结束：${state.over}` : todo;
+  $('mForecast').textContent = `预计日净利 ${fm(p.net)} / 准点 ${p.punc}%`;
+  $('mNext').disabled = false;
+  $('mNext').textContent = state.over ? '查看结算' : state.event ? '处理事件' : `推进到第 ${state.day + 1} 日`;
+}
+
+function renderAll() {
+  const p = project();
+  renderTop();
+  renderMap(p);
+  renderPage(p);
+  renderInspector(p);
+  renderFoot(p);
+}
+
+function setDrawer(open) {
+  document.getElementById('mPage')?.classList.toggle('open', open);
+  document.getElementById('mMain')?.classList.toggle('drawer-open', open);
+}
+
+function setTab(next) {
+  tab = next;
+  setDrawer(true);
+  setNav();
+  renderAll();
+}
+
+function useAction() {
+  if (state.ap <= 0) { toast('今天的管理动作已用完，推进一天再办'); return false; }
+  state.ap -= 1;
+  return true;
+}
+
+function startBuild(id) {
+  const o = BUILDS.find((b) => b.id === id);
+  const s = st(selected);
+  if (!o || s.build || state.cash < o.cost) return;
+  if (!useAction()) return;
+  state.cash -= o.cost;
+  s.build = { id: o.id, name: o.name, left: o.days };
+  save(true); renderAll(); toast(`${o.name}开工，${o.days} 天完成`);
+}
+
+function repair(key) {
+  const [id, gid] = key.split(':');
+  const g = GROUPS.find((x) => x.id === gid);
+  if (!g || state.cash < g.cost) return;
+  if (!useAction()) return;
+  state.cash -= g.cost;
+  groupsOf(id)[gid] = clamp(groupsOf(id)[gid] + 14, 0, 100);
+  save(true); renderAll(); toast(`${stationDef(id).name}${g.name}整修完成`);
+}
+
+function hire(id) {
+  if (state.cash < 12000) return;
+  if (!useAction()) return;
+  const s = st(id);
+  state.cash -= 12000;
+  s.staff += 1;
+  s.morale = clamp(s.morale + 2, 0, 100);
+  save(true); renderAll(); toast(`${stationDef(id).name}补员 1 人`);
+}
+
+function trainStaff(id) {
+  if (state.cash < 6000) return;
+  if (!useAction()) return;
+  state.cash -= 6000;
+  st(id).morale = clamp(st(id).morale + 6, 0, 100);
+  save(true); renderAll(); toast(`${stationDef(id).name}培训完成，士气 +6`);
+}
+
+function sign(id) {
+  const offer = state.offers.find((c) => c.id === id);
+  if (!offer) return;
+  if (!useAction()) return;
+  state.cash -= 5000;
+  state.contracts.push({ ...offer, left: offer.days, active: true });
+  state.offers = makeOffers(state, 3);
+  save(true); renderAll(); toast(`签下${offer.name}，签约费 ¥5,000`);
+}
+
+function drop(id) {
+  const c = state.contracts.find((x) => x.id === id);
+  if (!c) return;
+  if (!useAction()) return;
+  state.cash -= c.penalty;
+  state.contracts = state.contracts.filter((x) => x.id !== id);
+  save(true); renderAll(); toast(`解除${c.name}，赔付 ${fm(c.penalty)}`);
+}
+
+function choosePolicy(id) {
+  const p = POLICIES.find((x) => x.id === id);
+  if (!p) return;
+  if (!useAction()) return;
+  if (state.policy && state.policy.left > 0) state.cash -= 5000;
+  state.policy = { id: p.id, name: p.name, left: 7 };
+  state.policyDue = false;
+  save(true); renderAll(); toast(`本周政策：${p.name}`);
+}
+
+function advance() {
+  if (state.over) { openOver(); return; }
+  if (state.event) { openEvent(); return; }
+  const p = project();
+  const net = p.net;
+  state.cash += net;
+  state.ledger.push({ day: state.day, revenue: p.revenue, cost: p.cost, contract: p.contractNet, net, punc: p.punc, safety: p.safety });
+  if (state.ledger.length > 120) state.ledger.shift();
+  state.demandIndex *= 1.004;
+  state.effects.forEach((e) => { e.days -= 1; });
+  state.effects = state.effects.filter((e) => e.days > 0);
+  state.contracts.forEach((c) => { c.left -= 1; });
+  state.contracts = state.contracts.filter((c) => c.left > 0);
+  if (state.policy) {
+    state.policy.left -= 1;
+    if (state.policy.left <= 0) state.policy = null;
+  }
+  STATIONS.forEach((d) => {
+    const s = st(d.id);
+    const g = groupsOf(d.id);
+    GROUPS.forEach((x) => { s.groups[x.id] = clamp(s.groups[x.id] - (0.7 + Math.random() * 0.9) * (state.policy && state.policy.id === 'maint' ? 0.5 : 1), 20, 100); });
+    if (s.build) {
+      s.build.left -= 1;
+      if (s.build.left <= 0) {
+        const b = BUILDS.find((x) => x.id === s.build.id);
+        if (b.id === 'track') s.tracks += 2;
+        if (b.id === 'platform') s.platforms += 1;
+        if (b.id === 'siding') s.sidings += 1;
+        if (b.id === 'facility') GROUPS.forEach((x) => { s.groups[x.id] = clamp(s.groups[x.id] + 8, 0, 100); });
+        s.build = null;
+      }
+    }
+    const load = p.rows.find((x) => x.id === d.id).load;
+    if (load > 1) s.backlog = clamp(s.backlog + (load - 1) * 12, 0, 30);
+    else s.backlog = clamp(s.backlog - Math.min(2, s.backlog * 0.2), 0, 30);
+    s.morale = clamp(s.morale - 0.4 + (p.punc > 85 ? 0.5 : -0.4), 0, 100);
+    s.need = Math.round(d.baseTraffic * state.demandIndex / 4.5);
+  });
+  state.reputation = clamp(state.reputation + (p.punc - 80) / 9 + (p.safety - 85) / 20, 0, 100);
+  state.superior = clamp(state.superior + (net > 9000 ? 0.4 : net > 3000 ? -0.2 : -1.4) + (p.punc > 88 ? 0.2 : -0.5), 0, 100);
+  state.day += 1;
+  state.ap = 2;
+  state.week = Math.floor((state.day - 1) / 7) + 1;
+  if (state.day % 7 === 0) state.policyDue = true;
+  if (state.day % 4 === 0) state.event = makeEvent();
+  if (state.cash < -80000) state.over = '资金链断裂';
+  if (state.reputation <= 0) state.over = '声誉归零，被路局免职';
+  if (state.superior <= 0) state.over = '上级评价归零，被调离';
+  if (state.day > TERM && !state.over) state.over = '任期结束';
+  if (state.over) state.event = null;
+  save(true);
+  renderAll();
+  if (state.over) openOver();
+  else if (state.event) openEvent();
+  else toast(`第 ${state.day - 1} 日结：净利 ${fm(net)} · 准点 ${p.punc}%`);
+}
+
+function openEvent() {
+  const e = state.event;
+  if (!e) return;
+  modal(e.kicker, e.title, e.body, e.choices.map((c) => ({ label: c.label, tone: c.tone, fn: () => resolveEvent(c, e.station) })));
+}
+
+function resolveEvent(choice, stationId) {
+  const a = choice.apply || {};
+  const target = stationId || selected;
+  if (a.cash) state.cash += a.cash;
+  if (a.reputation) state.reputation = clamp(state.reputation + a.reputation, 0, 100);
+  if (a.superior) state.superior = clamp(state.superior + a.superior, 0, 100);
+  if (a.facility) {
+    GROUPS.forEach((g) => { groupsOf(target)[g.id] = clamp(groupsOf(target)[g.id] + a.facility, 0, 100); });
+  }
+  if (a.morale) STATIONS.forEach((d) => { st(d.id).morale = clamp(st(d.id).morale + a.morale, 0, 100); });
+  if (a.safety) state.effects.push({ label: choice.label, days: 2, safety: a.safety });
+  if (a.punc) state.effects.push({ label: choice.label, days: 2, punc: a.punc });
+  if (a.effect) state.effects.push(a.effect);
+  state.event = null;
+  save(true); closeModal(); renderAll();
+  toast('事件已处置，继续推进');
+}
+
+function openOver() {
+  const total = state.ledger.reduce((a, x) => a + x.net, 0);
+  const avgP = state.ledger.length ? Math.round(state.ledger.reduce((a, x) => a + x.punc, 0) / state.ledger.length) : 0;
+  modal('任期结束', state.over, `<p>现金 <b>${fm(state.cash)}</b>，累计净利 <b>${fm(total)}</b>，平均准点 <b>${avgP}%</b>，最终评级 <b>${rating()}</b>。</p><p>这局结束了。可以导出结算码留档，或者回入口重开。</p>`, [
+    { label: '导出结算码', tone: 'good', fn: () => { navigator.clipboard.writeText(saveCode()); toast('结算码已复制'); } },
+    { label: '重开一局', fn: () => { state = fresh(); selected = 'qinglan'; closeModal(); save(true); renderAll(); } },
+    { label: '留在本站', fn: closeModal },
+  ]);
+}
+
+function saveSlot(n) {
+  localStorage.setItem(SLOT(n), JSON.stringify({ ...state, selected }));
+  toast(`已写入槽位 ${n}`);
+  renderAll();
+}
+
+function loadSlot(n) {
+  try {
+    const raw = localStorage.getItem(SLOT(n));
+    if (!raw) return;
+    applyLoaded(normalize(JSON.parse(raw)));
+    toast(`已读取槽位 ${n}`);
+  } catch (e) { toast('槽位读取失败'); }
+}
+
+function applyLoaded(s) {
+  state = normalize(s);
+  selected = state.selected || 'qinglan';
+  tab = 'overview';
+  setNav(); save(true); renderAll();
+}
+
+async function cloudSave() {
+  try {
+    setCloudToken($('mToken').value);
+    const r = await uploadCloud(saveCode(), { name: `站长台 D${state.day}` });
+    toast(`已上传：${r.id}`);
+  } catch (e) { toast(e.message); }
+}
+
+function cloudLoad() {
+  const id = prompt('填 Gist 编号或链接');
+  const clean = parseCloudInput(id || '');
+  if (!clean) return;
+  downloadCloud(clean).then((r) => { applyLoaded(readCode(r.code)); toast(`已读取云端 ${clean}`); }).catch((e) => toast(e.message));
+}
+
+function exportCsv() {
+  const rows = ['day,revenue,cost,contract,net,punc,safety'];
+  state.ledger.forEach((x) => rows.push([x.day, Math.round(x.revenue), Math.round(x.cost), Math.round(x.contract), Math.round(x.net), x.punc, x.safety].join(',')));
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `dispatch-manage-D${state.day}.csv`;
+  a.click();
+}
+
+document.querySelectorAll('#mNav [data-tab]').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+$('mDrawerClose')?.addEventListener('click', () => setDrawer(false));
+$('mDrawerToggle')?.addEventListener('click', () => setDrawer(true));
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setDrawer(false); });
+$('mNext').addEventListener('click', advance);
+$('mSave').addEventListener('click', () => save(false));
+$('mBack').addEventListener('click', () => { save(true); location.href = '../index.html'; });
+$('mModal').querySelector('.m-modal-shade').addEventListener('click', () => { if (!state.event) closeModal(); });
+
+state = normalize(load() || fresh());
+selected = state.selected || 'qinglan';
+tab = 'overview';
+setNav();
+setDrawer(false);
+renderAll();
+if (!load()) toast('新局开始：接手宝成线四站，撑过 60 天');
+
+</script>
+</body>
+</html>

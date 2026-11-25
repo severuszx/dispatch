@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>宝鸡站 · 站场线条</title>
+<link href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+.topo { position: relative; width: 100%; height: 100%; overflow: hidden; background: #f5f1e4; border: 1px solid #1f201b; }
+.topo-view { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; }
+.topo-view.dragging { cursor: grabbing; }
+.topo-canvas { position: absolute; left: 0; top: 0; width: 3600px; height: 1500px; transform-origin: 0 0; }
+.topo-canvas svg { display: block; width: 3600px; height: 1500px; }
+.topo-canvas[data-lod="far"] .lod-mid { display: none; }
+.topo-locators { position: absolute; top: 10px; right: 10px; z-index: 4; display: flex; flex-direction: column; gap: 3px; }
+.topo-locators button { min-width: 100px; padding: 5px 8px; border: 1px solid #4d4d42; background: #fbf7e9; color: #22231d; font-size: 10px; text-align: left; }
+.topo-locators button:hover { background: #fff; }
+.topo-locators button.on { background: #22231d; color: #f5f1e4; }
+.topo-zoom { position: absolute; right: 10px; bottom: 10px; z-index: 4; display: flex; gap: 3px; }
+.topo-zoom button { width: 28px; height: 26px; border: 1px solid #4d4d42; background: #fbf7e9; font: 12px "Roboto Mono", monospace; }
+.topo-scale { position: absolute; left: 10px; bottom: 10px; z-index: 4; padding: 3px 6px; border: 1px solid #7d7968; background: rgba(251,247,233,.85); font: 9px "Roboto Mono", monospace; color: #4e4c40; }
+.topo-hint { position: absolute; left: 10px; top: 10px; z-index: 4; padding: 3px 7px; border: 1px solid #7d7968; background: rgba(251,247,233,.85); font-size: 9px; color: #4e4c40; }
+.t-name { font-family: "Noto Serif SC", serif; font-size: 22px; fill: #22231d; }
+.t-label { font-family: "Noto Sans SC", sans-serif; font-size: 11px; fill: #33342c; }
+.t-small { font-family: "Roboto Mono", monospace; font-size: 9px; fill: #5b594b; }
+.t-yard { font-family: "Noto Serif SC", serif; font-size: 26px; fill: #3b3c33; }
+.t-fac { font-family: "Noto Sans SC", sans-serif; font-size: 16px; fill: #3c3b31; font-weight: 700; }
+.t-fac-s { font-family: "Noto Sans SC", sans-serif; font-size: 12px; fill: #4c4a3c; }
+.t-index { font-family: "Roboto Mono", monospace; font-size: 12px; fill: #22231d; font-weight: 700; }
+.t-platform { font-family: "Noto Sans SC", sans-serif; font-size: 10px; fill: #4c4b3f; }
+.t-signal { font-family: "Roboto Mono", monospace; font-size: 8px; fill: #4c4b3f; }
+.t-route { font-family: "Noto Sans SC", sans-serif; font-size: 9px; fill: #8a6417; }
+.t-emg { font-family: "Noto Sans SC", sans-serif; font-size: 9px; fill: #8d2c22; font-weight: 700; }
+@media (max-width: 860px) {
+  .topo-locators { top: 6px; left: 6px; right: 6px; flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+  .topo-locators button { min-width: max-content; padding: 4px 6px; font-size: 9px; }
+  .topo-hint, .topo-scale { display: none; }
+}
+.topo-legend { position: absolute; left: 10px; bottom: 36px; z-index: 4; max-width: 330px; display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 6px 8px; border: 1px solid #7d7968; background: rgba(251,247,233,.92); font-size: 9px; color: #4e4c40; pointer-events: none; }
+.topo-legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.lg { display: inline-block; width: 18px; height: 2px; background: #22231d; }
+.lg-main { height: 4px; }
+.lg-arr { height: 2px; background: #22231d; }
+.lg-bc { height: 3px; background: #41443b; }
+.lg-yard { height: 2px; background: #7d7662; }
+.lg-x { width: 18px; height: 7px; background: none; border-top: 1px solid #22231d; border-right: 1px solid #22231d; transform: skewX(-24deg); }
+.lg-emg { height: 2px; background: repeating-linear-gradient(90deg, #8d2c22 0 4px, transparent 4px 7px); }
+.topo-locators button.alarm::after { content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 5px; border-radius: 50%; background: #8d2c22; vertical-align: 1px; }
+.topo-canvas[data-lod="far"] .lod-mid, .topo-canvas[data-lod="far"] .lod-near { display: none; }
+.topo-canvas[data-lod="mid"] .lod-near { display: none; }
+@media (max-width: 860px) { .topo-legend { display: none; } }
+
+</style>
+<style>
+html,body{margin:0;height:100%;background:#20211b;color:#f4f0e4;font-family:"Noto Sans SC",sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.bar{display:flex;align-items:center;gap:14px;padding:8px 14px;border-bottom:1px solid #4a4b40;background:#26271f;flex:none}
+.bar h1{margin:0;font:700 15px "Noto Serif SC",serif;letter-spacing:.08em;color:#f4f0e4}
+.bar .sub{font:10px "Roboto Mono",monospace;color:#aaa58f}
+.bar .tag{margin-left:auto;border:1px solid #6f6b56;padding:2px 7px;font:9px "Roboto Mono",monospace;color:#c8c2a9}
+.stage{flex:1;min-height:0;padding:8px;display:flex;flex-direction:column;height:100%}
+#topo{flex:1;min-height:0;min-width:0;height:auto}
+body.embed .bar{display:none}
+body.embed .stage{position:fixed;inset:0;display:block;padding:0;height:auto}
+body.embed #topo{height:100%;width:100%}
+@media(max-width:760px){.bar{padding:6px 8px;gap:8px}.bar h1{font-size:12px}.bar .sub{display:none}.bar .tag{font-size:8px;padding:2px 5px}.stage{padding:4px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <h1>宝鸡站</h1>
+    <div class="sub">6台10线 · 陇海 / 宝成 / 宝中</div>
+    <div class="tag">站场线条 · v0.6.18</div>
+  </div>
+  <div class="stage" id="topo"></div>
+</div>
+<script>
+(function () {
+  const W = 3600, H = 1500;
+  const C = {
+    paper: '#f7f3e7', ink: '#22231d', rail: '#3b3c33', thin: '#5b594b',
+    faint: '#a9a38f', platform: '#e8e1cd', building: '#efe9d7',
+    red: '#8d2c22', route: '#a77a1c', cat: '#6d6a59'
+  };
+  const Y = [520, 560, 600, 640, 680, 720, 760, 800, 840, 880];
+  const KIND = ['正线', '正线', '到发', '到发', '到发', '到发', '到发', '到发', '宝成', '宝成'];
+  const STORE = 'dispatch:topo:baoji';
+  const REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const DATA = {
+    trains: [
+      { track: 0, x: 960, no: 'K101', model: '25G', loco: 'HXD3D', cars: 6, alarm: false },
+      { track: 2, x: 1010, no: '货1', model: 'C70', loco: 'HXD3C', cars: 5, alarm: false },
+      { track: 4, x: 900, no: 'K105', model: '25B', loco: 'HXD3D', cars: 6, alarm: true },
+      { track: 8, x: 980, no: 'K109', model: '25G', loco: 'HXD3D', cars: 5, alarm: false }
+    ],
+    occupancy: [
+      { track: 3, x1: 880, x2: 1020, kind: '占用' }
+    ]
+  };
+  const X1 = 650, X2 = 1880;
+  const SL = -0.022;
+  const ANG = (Math.atan(SL) * 180 / Math.PI).toFixed(2);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const n = (v) => Number(v.toFixed(1));
+  const range = (k) => Array.from({ length: k }, (_, i) => i);
+  const cy = (i, x) => Y[i] + (x - X1) * SL;
+  const xover = (i, x) => `<path d="M ${n(x - 44)} ${n(cy(i, x - 44))} C ${n(x - 14)} ${n(cy(i, x - 14))} ${n(x + 14)} ${n(cy(i - 1, x + 14))} ${n(x + 44)} ${n(cy(i - 1, x + 44))}" fill="none" stroke="${C.ink}" stroke-width="1.9"/>${swMark(x, (cy(i, x) + cy(i - 1, x)) / 2)}`;
+  const xback = (i, x) => `<path d="M ${n(x - 44)} ${n(cy(i - 1, x - 44))} C ${n(x - 14)} ${n(cy(i - 1, x - 14))} ${n(x + 14)} ${n(cy(i, x + 14))} ${n(x + 44)} ${n(cy(i, x + 44))}" fill="none" stroke="${C.ink}" stroke-width="1.9"/>${swMark(x, (cy(i, x) + cy(i - 1, x)) / 2)}`;
+  const swMark = (x, y) => `<path d="M ${n(x - 4)} ${n(y - 3)} L ${n(x + 4)} ${n(y + 3)} M ${n(x + 4)} ${n(y - 3)} L ${n(x - 4)} ${n(y + 3)}" fill="none" stroke="${C.thin}" stroke-width=".7"/>`;
+  const withMark = (x, y, html) => html + swMark(x, y);
+  function signal(x, y, name) {
+    return `<g class="lod-mid">${pth([[x, y], [x, y - 12], [x, y - 17], [x, y - 20]], .7, C.ink)}<circle cx="${n(x)}" cy="${n(y - 23)}" r="2.6" fill="${C.red}" stroke="${C.ink}" stroke-width=".45"/>${label(x + 4, y - 19, name, 't-signal')}</g>`;
+  }
+  function spec(i) {
+    if (i <= 1) return [3.6, C.ink, null];
+    if (i >= 8) return [2.9, '#41443b', null];
+    return [2.1, C.ink, null];
+  }
+  function ties() {
+    return `<g class="lod-near">${[0, 1].map((i) => range(18).map((k) => {
+      const x = 740 + k * 56, y = cy(i, x);
+      return pth([[x, y - 5], [x + 2, y - 2], [x + 2, y + 2], [x, y + 5]], .6, C.cat);
+    }).join('')).join('')}</g>`;
+  }
+  function legend() {
+    return `<div class="topo-legend">
+      <span><i class="lg lg-main"></i>正线</span><span><i class="lg lg-arr"></i>到发线</span>
+      <span><i class="lg lg-bc"></i>宝成</span><span><i class="lg lg-yard"></i>机走 / 货物 / 存车</span>
+      <span><i class="lg lg-x"></i>渡线</span><span><i class="lg lg-emg"></i>安全 / 避难线</span>
+    </div>`;
+  }
+
+  function pth(points, w, color, dash) {
+    let d = `M ${n(points[0][0])} ${n(points[0][1])}`;
+    if (points.length === 2) d += ` L ${n(points[1][0])} ${n(points[1][1])}`;
+    for (let i = 1; i + 2 < points.length; i += 3) d += ` C ${n(points[i][0])} ${n(points[i][1])} ${n(points[i + 1][0])} ${n(points[i + 1][1])} ${n(points[i + 2][0])} ${n(points[i + 2][1])}`;
+    return `<path d="${d}" fill="none" stroke="${color || C.rail}" stroke-width="${w || 2}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
+  }
+  function box(x, y, w, h, fill, stroke, sw, dash) {
+    return `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" fill="${fill || 'none'}" stroke="${stroke || C.ink}" stroke-width="${sw || 1}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
+  }
+  function label(x, y, text, cls, anchor) {
+    return `<text x="${n(x)}" y="${n(y)}" class="${cls || 't-label'}" ${anchor ? `text-anchor="${anchor}"` : ''}>${esc(text)}</text>`;
+  }
+  function catenary(x, y) {
+    return `<g class="lod-mid">${pth([[x + 11, y + 4], [x + 11, y + 12], [x + 11, y + 17], [x + 11, y + 18]], 1.1, C.cat)}${pth([[x + 4, y + 18], [x + 8, y + 18], [x + 14, y + 18], [x + 18, y + 18]], .9, C.cat)}</g>`;
+  }
+
+  const COACH = {
+    '25G': { body: '#315b46', roof: '#d6d3c5', stripe: '#c8c5b6', win: '#1d3128', ac: true },
+    '25B': { body: '#3c6049', roof: '#939888', stripe: '#b6b3a2', win: '#24372b', ac: false, porthole: true },
+    '25K': { body: '#2f5175', roof: '#bfc3c2', stripe: '#e1ded0', win: '#182a3a', ac: true },
+    '25T': { body: '#e6e3d8', roof: '#c8c6bb', stripe: '#3e5f85', win: '#263342', ac: true },
+    '22B': { body: '#3d5f49', roof: '#9a9d90', stripe: '#c5c1ad', win: '#203128', ac: false },
+    'SY25K': { body: '#b08a2e', roof: '#c9c6b6', stripe: '#4b4635', win: '#2c3028', ac: false, inspect: true },
+    'CR400AF': { body: '#e9e6dc', roof: '#c5c6c2', stripe: '#9c2f26', win: '#1d2733', ac: false, emu: true },
+    'CRH380A': { body: '#e9e6dc', roof: '#c5c6c2', stripe: '#335d86', win: '#1d2733', ac: false, emu: true }
+  };
+  const LOCO = {
+    HXD3D: { body: '#2f4f7a', roof: '#9da4aa', stripe: '#b23a2b', cab: '#1d2a3a' },
+    HXD3C: { body: '#3a5b7a', roof: '#9da4aa', stripe: '#b23a2b', cab: '#1d2a3a' },
+    SS7E: { body: '#d7dde2', roof: '#aeb4b8', stripe: '#2f5175', cab: '#26323d' },
+    SS9: { body: '#9c3a2c', roof: '#c9c5b8', stripe: '#e4d9c4', cab: '#2b2520' },
+    DF11: { body: '#2f5b43', roof: '#8f9587', stripe: '#d5b34a', cab: '#1f2d24' },
+    DF7G: { body: '#b08a2e', roof: '#c9c3ae', stripe: '#3d3b30', cab: '#2b2922' },
+    '调车机': { body: '#b08a2e', roof: '#c9c3ae', stripe: '#3d3b30', cab: '#2b2922' }
+  };
+
+  function roofCoach(x, y, model) {
+    const s = COACH[model] || COACH['25G'];
+    const w = 56, h = 12;
+    const win = range(8).map((i) => box(x + 4.5 + i * 6.1, y - 1.3, 3.6, 3.1, s.win, '#14201b', .25)).join('');
+    const band = s.stripe ? box(x + 2, y + 2.4, w - 4, 1.3, s.stripe, 'none', 0) : '';
+    const doors = `${box(x + 2.5, y - 4.2, 3, 8.2, s.body, '#1b1c17', .55)}${box(x + w - 5.5, y - 4.2, 3, 8.2, s.body, '#1b1c17', .55)}`;
+    const bogies = `${box(x + 6, y + 5.4, 11, 2.4, '#3c3d34', '#20211b', .45)}${box(x + w - 17, y + 5.4, 11, 2.4, '#3c3d34', '#20211b', .45)}`;
+    let detail = '';
+    if (s.porthole) {
+      detail = range(8).map((i) => `<circle cx="${x + 6.5 + i * 6.6}" cy="${y - 3.2}" r="1.5" fill="#4e5142" stroke="#262920" stroke-width=".5"/><rect x="${x + 5.4 + i * 6.6}" y="${y - 4.9}" width="2.6" height=".8" fill="#a6a294" stroke="#33362c" stroke-width=".35"/>`).join('') + win;
+    } else if (s.ac) {
+      detail = range(3).map((i) => {
+        const ax = x + 9 + i * 15;
+        return `${box(ax, y - 5.2, 10.5, 6, '#c3bfb1', '#5b594e', .65)}${box(ax + 1.6, y - 4.2, 2.6, 4.2, '#7d7a6c', 'none', 0)}${box(ax + 6.3, y - 4.2, 2.6, 4.2, '#7d7a6c', 'none', 0)}`;
+      }).join('') + win;
+    } else {
+      detail = win;
+    }
+    if (s.inspect) detail += `${box(x + 16, y + 1.2, 24, 2.2, '#6d5b24', '#3f371c', .35)}${label(x + 22, y + 3, '检', 't-small')}`;
+    return `<g>${box(x, y - 6, w, h, s.body, '#22231d', .75)}${box(x + 2, y - 4, w - 4, 3.4, s.roof, '#3d3e34', .35)}${detail}${band}${doors}${bogies}</g>`;
+  }
+
+  function freightCoach(x, y, model) {
+    const w = 56, h = 12;
+    if (model === 'X6K') {
+      const boxes = range(2).map((i) => {
+        const cx = x + 4 + i * 26, col = i ? '#7d876d' : '#aa865d';
+        return `${box(cx, y - 13, 22, 10, col, '#484337', .55)}${range(3).map((g) => pth([[cx + 3 + g * 7, y - 12], [cx + 3 + g * 7, y - 4]], .35, '#3f3b31')).join('')}`;
+      }).join('');
+      return `<g>${box(x, y + 1, w, 5, '#5d5b50', '#25261f', .6)}${boxes}${box(x + 5, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}${box(x + w - 14, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}</g>`;
+    }
+    if (model === 'N17') {
+      return `<g>${box(x, y + 2, w, 5, '#6b6758', '#25261f', .6)}${range(5).map((i) => pth([[x + 5 + i * 11, y + 2], [x + 5 + i * 11, y - 2]], .5, '#4d4a3d')).join('')}${box(x + 5, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}${box(x + w - 14, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}</g>`;
+    }
+    if (model === 'G70') {
+      return `<g>${box(x + 2, y - 5, w - 4, 10, '#77776c', '#2f3028', .6)}${box(x + 5, y - 3.5, w - 10, 3, '#9b9b8e', '#44443a', .35)}${range(4).map((i) => pth([[x + 9 + i * 12, y - 5], [x + 9 + i * 12, y + 5]], .5, '#4a4a3f')).join('')}${box(x + 5, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}${box(x + w - 14, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}</g>`;
+    }
+    const open = model === 'C70';
+    const body = open ? '#68685d' : '#5b4a36';
+    const roof = open ? '#7f7f72' : '#7b6a50';
+    const ribs = range(5).map((i) => pth([[x + 8 + i * 10, y - 4], [x + 8 + i * 10, y + 3]], .45, '#3f3f34')).join('');
+    const door = open ? '' : box(x + 20, y - 2, 16, 6, '#4a3d2d', '#2b241b', .5);
+    return `<g>${box(x, y - 5, w, 11, body, '#22231d', .7)}${box(x + 2, y - 4, w - 4, 3, roof, '#3d3e34', .35)}${open ? '' : `${box(x + 2, y + 2, w - 4, 1, '#3a3025', 'none', 0)}`}${ribs}${door}${box(x + 5, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}${box(x + w - 14, y + 5.4, 9, 2.4, '#3c3d34', '#20211b', .45)}</g>`;
+  }
+
+  function locoArt(x, y, model) {
+    const s = LOCO[model] || LOCO.HXD3D;
+    const w = 62, h = 13;
+    const cabWin = box(x + 4, y - 4.2, 8, 4.2, '#b9c2c3', '#30362f', .45);
+    const sideWin = box(x + 18, y - 3.8, 10, 3.4, '#8d9798', '#363c35', .4);
+    const stripe = box(x + 12, y + 1.8, w - 16, 1.4, s.stripe, 'none', 0);
+    const bogies = `${box(x + 7, y + 5.5, 12, 2.6, '#34352d', '#1b1c16', .45)}${box(x + w - 19, y + 5.5, 12, 2.6, '#34352d', '#1b1c16', .45)}`;
+    const panto = model === 'DF11' || model === 'DF7G' || model === '调车机'
+      ? `pth([[x + 28, y - 6], [x + 28, y - 9], [x + 28, y - 12], [x + 28, y - 14]], .6, '#3f4240')`
+      : `${pth([[x + 18, y - 6], [x + 27, y - 9], [x + 36, y - 16], [x + 46, y - 7]], 1, '#3f4240')}${pth([[x + 27, y - 9], [x + 31, y - 12], [x + 36, y - 12], [x + 40, y - 9]], .7, '#3f4240')}`;
+    return `<g>${box(x, y - 6.5, w, h, s.body, '#1e1f19', .85)}${box(x + 3, y - 4.5, w - 6, 3.6, s.roof, '#35362e', .4)}${cabWin}${sideWin}${stripe}${panto}${bogies}</g>`;
+  }
+
+  function emuLead(x, y, model) {
+    const s = COACH[model] || COACH.CR400AF;
+    const w = 64, h = 12;
+    return `<g>${box(x, y - 6, w, h, s.body, '#22231d', .75)}${box(x + 2, y - 4, w - 4, 3.2, s.roof, '#3d3e34', .35)}<path d="M ${n(x)} ${n(y - 6)} L ${n(x + 4)} ${n(y - 8)} L ${n(x + 20)} ${n(y - 8)} L ${n(x + 26)} ${n(y - 6)} Z" fill="${s.body}" stroke="#22231d" stroke-width=".7"/>${box(x + 6, y - 3.4, 12, 3.2, s.win, '#14201b', .3)}${box(x + 20, y - 1.3, 34, 3.1, s.win, '#14201b', .3)}${box(x + 2, y + 2.4, w - 4, 1.4, s.stripe, 'none', 0)}${box(x + 8, y + 5.4, 11, 2.4, '#3c3d34', '#20211b', .45)}${box(x + w - 20, y + 5.4, 11, 2.4, '#3c3d34', '#20211b', .45)}</g>`;
+  }
+
+  function train(x, y, no, model, loco, cars) {
+    let s = '';
+    const emu = loco === '动车组自走' || model === 'CR400AF' || model === 'CRH380A';
+    if (emu) {
+      s += emuLead(x, y, model);
+      for (let i = 1; i < cars; i++) s += roofCoach(x + 4 + i * 60, y, model);
+    } else {
+      s += locoArt(x, y, loco);
+      const freight = ['C70', 'P70', 'X6K', 'N17', 'G70'].includes(model);
+      for (let i = 0; i < cars; i++) s += freight ? freightCoach(x + 66 + i * 60, y, model) : roofCoach(x + 66 + i * 60, y, model);
+    }
+    return `<g>${s}${box(x - 1, y - 25, 68, 12, C.paper, 'none', 0)}${label(x + 1, y - 16, `${no} · ${model}`, 't-label')}</g>`;
+  }
+  function trainAt(i, x, no, model, loco, cars) {
+    const y = cy(i, x + 150);
+    return `<g transform="rotate(${ANG} ${n(x + 150)} ${n(y)})">${train(x, y, no, model, loco, cars)}</g>`;
+  }
+
+  function coreLine(i, w, color) {
+    const a = cy(i, X1), b = cy(i, X2);
+    return pth([[X1, a], [X1 + 260, a - 2], [X2 - 260, b + 2], [X2, b]], w, color || C.ink);
+  }
+  function platformBand(yc, name) {
+    const x1 = 700, x2 = 1760, a = yc + (x1 - X1) * SL, b = yc + (x2 - X1) * SL;
+    return `<g><path d="M ${n(x1)} ${n(a - 8)} L ${n(x2)} ${n(b - 8)} L ${n(x2)} ${n(b + 8)} L ${n(x1)} ${n(a + 8)} Z" fill="${C.platform}" stroke="#958f7b" stroke-width=".7"/>${pth([[x1 + 40, a], [x1 + 300, a + (300) * SL], [x1 + 620, a + (620) * SL], [x1 + 1000, a + (1000) * SL]], .5, '#b7af98')}${label(x1 + 18, a + 4, name, 't-platform')}</g>`;
+  }
+  function trackIndex(i, x, anchor) {
+    const y = cy(i, x);
+    return `<g><circle cx="${n(x)}" cy="${n(y)}" r="8" fill="${C.paper}" stroke="${C.ink}" stroke-width=".7"/><text x="${n(x)}" y="${n(y + 4)}" class="t-index" text-anchor="${anchor || 'middle'}">${i + 1}</text></g>`;
+  }
+  function yardLadder(x0, xEnd, leadY, ys, color) {
+    const lead = pth([[x0, leadY], [xEnd, leadY]], 1.8, color || '#615d4e');
+    const branches = ys.filter((y) => y !== leadY).map((y, i) => {
+      const bx = x0 + 40 + i * 75, tx = bx + 300;
+      return `<path d="M ${n(bx)} ${n(leadY)} C ${n(bx + 90)} ${n(leadY)}, ${n(bx + 210)} ${n(y)}, ${n(tx)} ${n(y)} L ${n(xEnd)} ${n(y)}" fill="none" stroke="${color || '#615d4e'}" stroke-width="1.5"/>`;
+    }).join('');
+    return lead + branches;
+  }
+
+  function shed(x, y, w, h, name, cls) {
+    const rh = Math.max(12, h * .4);
+    const ribs = range(6).map((k) => pth([[x + 12 + k * (w - 24) / 5, y + 3], [x + 12 + k * (w - 24) / 5, y + rh]], .4, '#8e8772')).join('');
+    const doors = range(3).map((k) => box(x + w * .18 + k * (w * .27), y + h - 10, 22, 9, '#7e7763', '#565142', .55)).join('');
+    return `<g>${box(x, y, w, h, '#d6cfb8', '#5c5747', 1.1)}${box(x + 3, y + 3, w - 6, rh, '#c7bfa7', '#948b74', .55)}${ribs}${doors}${label(x + 9, y + h * .5 + 5, name, cls || 't-fac')}</g>`;
+  }
+  function platformSlab(x, y, w, h, name) {
+    const ticks = range(11).map((k) => pth([[x + 8 + k * (w - 16) / 10, y + 3], [x + 8 + k * (w - 16) / 10, y + h - 3]], .45, '#a49a82')).join('');
+    return `<g>${box(x, y, w, h, '#e2dac3', '#867e68', .9)}${ticks}${label(x + 9, y + h - 5, name, 't-fac-s')}</g>`;
+  }
+  function containers(x, y, w, h) {
+    const cols = 5, rows = 2, cw = (w - 12) / cols, ch = (h - 8) / rows;
+    const fills = ['#aa865d', '#8f7c60', '#7d876d', '#9a7658'];
+    const stacks = range(rows).map((r) => range(cols).map((c) => {
+      const cx = x + 6 + c * cw, cyy = y + 4 + r * ch;
+      return `${box(cx, cyy, cw - 3, ch - 3, fills[(r + c) % 4], '#4f4a3c', .55)}${range(3).map((g) => pth([[cx + 5 + g * (cw / 4), cyy + 1], [cx + 5 + g * (cw / 4), cyy + ch - 4]], .35, '#3f3b31')).join('')}`;
+    }).join('')).join('');
+    return `<g>${box(x, y, w, h, '#efe9d6', '#817a65', .7)}${stacks}${label(x - 8, y + h / 2 + 4, '集装箱', 't-fac-s', 'end')}</g>`;
+  }
+
+  function facilities() {
+    return [
+      `<g class="lod-mid">${box(3000, 72, 130, 32, '#d6cfb8', '#5c5747', 1)}${label(3008, 93, '存车值班', 't-fac-s')}</g>`,
+      shed(3000, 226, 250, 40, '客车检修库', 't-fac'),
+      platformSlab(3000, 288, 250, 20, '整备棚'),
+      shed(3000, 336, 250, 32, '洗车棚', 't-fac'),
+      platformSlab(3000, 918, 250, 24, '货物站台'),
+      shed(3000, 968, 250, 38, '货场仓库', 't-fac'),
+      containers(3000, 1032, 250, 38),
+      platformSlab(3000, 1158, 250, 20, '整备棚'),
+      `<g><circle cx="2930" cy="1320" r="19" fill="#ddd6c1" stroke="#5c5747" stroke-width="1"/>${pth([[2911, 1320], [2949, 1320]], .6, '#5c5747')}${pth([[2930, 1301], [2930, 1339]], .6, '#5c5747')}${label(2900, 1350, '转车盘', 't-fac-s')}</g>`,
+      shed(3000, 1290, 250, 58, '机车检修库', 't-fac')
+    ].join('');
+  }
+
+  function svg() {
+    const west = [
+      pth([[0, cy(0, 0)], [X1, cy(0, X1)]], spec(0)[0], spec(0)[1]),
+      pth([[0, cy(1, 0)], [X1, cy(1, X1)]], spec(1)[0], spec(1)[1]),
+      ...range(8).map((k) => {
+        const i = k + 2;
+        return pth([[0, cy(i, 0)], [X1, cy(i, X1)]], spec(i)[0], spec(i)[1]);
+      }),
+      ...range(8).map((k) => {
+        const i = k + 2, x = 620 - k * 40;
+        return xover(i, x) + xback(i, x + 26);
+      })
+    ].join('');
+
+    const east = [
+      pth([[X2, cy(0, X2)], [W, 500]], spec(0)[0], spec(0)[1]),
+      pth([[X2, cy(1, X2)], [W, 540]], spec(1)[0], spec(1)[1]),
+      ...range(8).map((k) => {
+        const i = k + 2;
+        return pth([[X2, cy(i, X2)], [W, cy(i, W)]], spec(i)[0], spec(i)[1]);
+      }),
+      ...range(8).map((k) => {
+        const i = k + 2, x = 1980 + k * 40;
+        return xover(i, x) + xback(i, x + 26);
+      }),
+    ].join('');
+
+    const yards = [
+      `<path d="M ${n(X2)} ${n(cy(0, X2))} C ${n(1940)} ${n(cy(0, X2))}, ${n(1970)} 470, 2000 470 L ${n(W)} 470" fill="none" stroke="#7b3550" stroke-width="2.2"/>`,
+      yardLadder(2000, W, 470, [270, 320, 370, 420, 470], '#7b3550'),
+      yardLadder(2800, W, 270, [120, 170, 220, 270], '#7b3550'),
+      `<path d="M ${n(X2)} ${n(cy(9, X2))} C ${n(1970)} ${n(cy(9, X2))}, ${n(2080)} 900, 2200 900 L ${n(W)} 900" fill="none" stroke="#7b3550" stroke-width="2.2"/>`,
+      yardLadder(2200, W, 900, [960, 1020, 1080], '#7b3550'),
+      `<path d="M ${n(X2)} ${n(cy(9, X2))} C ${n(1950)} ${n(cy(9, X2))}, ${n(2080)} 1000, 2200 1140" fill="none" stroke="#7b3550" stroke-width="2.2"/>`,
+      yardLadder(2200, W, 1140, [1200, 1260], '#7b3550')
+    ].join('');
+
+    const mid = [
+      xover(4, 1160) + xback(4, 1186),
+      xover(7, 1430) + xback(7, 1456)
+    ].join('');
+
+    const emg = [
+      pth([[450, cy(0, 450)], [425, cy(0, 425) - 14], [405, cy(0, 405) - 32], [385, cy(0, 385) - 50]], 2.0, C.red, '7 4'),
+      label(380, cy(0, 385) - 62, '安全线', 't-emg', 'end'),
+      pth([[X2, cy(9, X2)], [1900, cy(9, X2)], [1870, cy(9, X2) + 30], [1850, cy(9, X2) + 58]], 2.0, C.red, '7 4'),
+      label(1844, cy(9, X2) + 72, '避难线', 't-emg', 'end')
+    ].join('');
+
+    const route = pth([[650, cy(0, 650)], [740, cy(0, 650) - 54], [1680, cy(0, 1680) - 54], [1740, cy(0, 1740)]], 1.1, C.route, '5 4')
+      + label(760, cy(0, 760) - 66, '正线外包通过', 't-route');
+
+    const occ = DATA.occupancy.map((o) => {
+      const y = cy(o.track, (o.x1 + o.x2) / 2);
+      return pth([[o.x1, y], [o.x1 + 30, y - 1], [o.x2 - 30, y + 1], [o.x2, y]], 4.2, C.red, '3 3') + label(o.x1, y - 10, o.kind, 't-emg');
+    }).join('');
+
+    const trains = DATA.trains.map((t) => trainAt(t.track, t.x, t.no, t.model, t.loco, t.cars)).join('');
+
+    const sigs = [
+      signal(560, cy(0, 560), 'S1'), signal(560, cy(1, 560), 'S2'),
+      signal(1930, cy(0, 1930), 'S3'), signal(1930, cy(1, 1930), 'S4')
+    ].join('');
+
+    return `<svg viewBox="0 0 3600 1500" xmlns="http://www.w3.org/2000/svg">
+    <rect width="3600" height="1500" fill="${C.paper}"/>
+    <rect x="26" y="26" width="3548" height="1448" fill="none" stroke="#8f8a76" stroke-width="1"/>
+    ${box(940, 330, 610, 100, C.building, C.ink, 1.1)}
+    ${pth([[970, 356], [1200, 356], [1400, 356], [1520, 356]], 1.8, C.ink)}
+    ${label(970, 374, '宝鸡站', 't-name')}${label(970, 410, '客运场', 't-label')}
+    ${west}
+    ${east}
+    ${yards}
+    ${facilities()}
+    ${Y.map((_, i) => coreLine(i, spec(i)[0], spec(i)[1])).join('')}
+    ${mid}
+    ${route}
+    ${platformBand(540, '1台 · 1道')}${platformBand(620, '2台 · 2/3道')}${platformBand(660, '3台 · 4/5道')}${platformBand(740, '4台 · 6/7道')}${platformBand(820, '5台 · 8/9道')}${platformBand(870, '6台 · 10道')}
+    ${Y.map((_, i) => trackIndex(i, 632) + trackIndex(i, 1900)).join('')}
+    ${[820, 1140, 1460, 1700].map((x) => catenary(x, cy(0, x) - 4)).join('')}
+    ${ties()}
+    ${sigs}
+    ${emg}
+    ${occ}
+    ${trains}
+    ${label(2820, 100, '存车场', 't-yard')}
+    ${label(2820, 250, '客技站', 't-yard')}
+    ${label(2820, 890, '货场', 't-yard')}
+    ${label(2820, 1120, '机务折返段', 't-yard')}
+    </svg>`;
+  }
+
+  function create(el, opts) {
+    opts = opts || {};
+    el.innerHTML = `<div class="topo">
+      <div class="topo-view">
+        <div class="topo-canvas" data-lod="far">${svg()}</div>
+        <div class="topo-locators"></div>
+        <div class="topo-zoom"><button data-z="out">−</button><button data-z="in">＋</button><button data-z="fit">全</button></div>
+        <div class="topo-scale">拖动 · 缩放</div>
+        <div class="topo-hint">拖动 · 滚轮/双指缩放 · 点书签定位</div>
+      </div>
+      ${legend()}
+    </div>`;
+    const viewEl = el.querySelector('.topo-view');
+    const canvas = el.querySelector('.topo-canvas');
+    const loc = el.querySelector('.topo-locators');
+    const targets = [
+      { id: 'all', name: '全景', r: [0, 0, 3600, 1500], z: 0 },
+      { id: 'station', name: '站房', r: [900, 300, 700, 160], z: 1.1 },
+      { id: 'pax', name: '客运场', r: [620, 460, 1260, 480], z: 0.8 },
+      { id: 'west', name: '西咽喉', r: [20, 380, 700, 620], z: 0.85 },
+      { id: 'east', name: '东咽喉', r: [1760, 380, 1100, 680], z: 0.85 },
+      { id: 'storage', name: '存车 / 客技', r: [2000, 40, 1320, 480], z: 0.72 },
+      { id: 'freight', name: '货场', r: [2200, 860, 1120, 260], z: 0.8 },
+      { id: 'engine', name: '机务段', r: [2400, 1090, 920, 290], z: 0.8 },
+      { id: 'k101', name: 'K101 · 1道', pt: [1080, cy(0, 1080)], z: 1.05, alarm: true },
+      { id: 'k105', name: 'K105 · 5道', pt: [1040, cy(4, 1040)], z: 1.05, alarm: true },
+      { id: 'w1', name: 'W1 道岔', pt: [590, cy(3, 590)], z: 1.15 }
+    ];
+    loc.innerHTML = targets.map((t, i) => `<button data-i="${i}" class="${i === 0 ? 'on' : ''}${t.alarm ? ' alarm' : ''}">${esc(t.name)}</button>`).join('');
+    let cam = { x: 0, y: 0, z: 0.4, ready: false };
+    let activeId = 'all';
+    let pointers = new Map(), drag = null, pinch = null, moved = false, saveTimer = null;
+    const dims = () => ({ w: viewEl.clientWidth || 1000, h: viewEl.clientHeight || 700 });
+    function setActive(id) {
+      activeId = id || '';
+      const idx = targets.findIndex((t) => t.id === activeId);
+      loc.querySelectorAll('button').forEach((b, j) => b.classList.toggle('on', j === idx));
+    }
+    function clamp() {
+      const { w, h } = dims();
+      const mw = W * cam.z, mh = H * cam.z;
+      cam.x = mw <= w ? (w - mw) / 2 : Math.min(0, Math.max(w - mw, cam.x));
+      cam.y = mh <= h ? (h - mh) / 2 : Math.min(0, Math.max(h - mh, cam.y));
+    }
+    function mode() {
+      const { w, h } = dims();
+      return w < 700 && h > w ? 'm' : 'd';
+    }
+    function saveCam() {
+      if (!cam.ready) return;
+      try { localStorage.setItem(`${STORE}:${mode()}`, JSON.stringify({ x: cam.x, y: cam.y, z: cam.z, id: activeId })); } catch (e) {}
+    }
+    function readCam() {
+      try {
+        const o = JSON.parse(localStorage.getItem(`${STORE}:${mode()}`));
+        return o && Number.isFinite(o.x) && Number.isFinite(o.y) && Number.isFinite(o.z) && o.z >= 0.2 && o.z <= 2 ? o : null;
+      } catch (e) { return null; }
+    }
+    function apply() {
+      canvas.style.transform = `translate(${cam.x}px,${cam.y}px) scale(${cam.z})`;
+      canvas.dataset.lod = cam.z < 0.58 ? 'far' : (cam.z > 1.12 ? 'near' : 'mid');
+      if (cam.ready) { clearTimeout(saveTimer); saveTimer = setTimeout(saveCam, 120); }
+    }
+    function fit() {
+      const { w, h } = dims();
+      cam.z = Math.min(w / W, h / H) * 0.99;
+      cam.x = (w - W * cam.z) / 2;
+      cam.y = (h - H * cam.z) / 2;
+      apply();
+    }
+    function focusPoint(x, y, z, animate) {
+      const { w, h } = dims();
+      cam.z = z || cam.z;
+      cam.x = w / 2 - x * cam.z;
+      cam.y = h / 2 - y * cam.z;
+      clamp();
+      const a = !!animate && !REDUCE;
+      if (a) canvas.style.transition = 'transform .22s ease'; else canvas.style.transition = '';
+      apply();
+      if (a) setTimeout(() => { canvas.style.transition = ''; }, 240);
+    }
+    function focus(r, z, animate) {
+      focusPoint(r[0] + r[2] / 2, r[1] + r[3] / 2, z, animate);
+    }
+    function go(i) {
+      const t = targets[i];
+      if (!t) return;
+      if (t.pt) focusPoint(t.pt[0], t.pt[1], t.z || Math.max(cam.z, 0.72), true);
+      else if (t.id === 'all') fit();
+      else focus(t.r, Math.max(t.z || cam.z, 0.72), true);
+      setActive(t.id);
+    }
+    function zoomAt(px, py, f) {
+      const old = cam.z, z = Math.max(0.22, Math.min(2.0, old * f));
+      cam.x = px - (px - cam.x) * (z / old);
+      cam.y = py - (py - cam.y) * (z / old);
+      cam.z = z; clamp(); apply();
+    }
+    loc.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-i]');
+      if (b) go(Number(b.dataset.i));
+    });
+    el.querySelectorAll('[data-z]').forEach((b) => b.addEventListener('click', () => {
+      if (b.dataset.z === 'fit') { fit(); setActive('all'); return; }
+      const { w, h } = dims();
+      zoomAt(w / 2, h / 2, b.dataset.z === 'in' ? 1.25 : 0.8);
+    }));
+    viewEl.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const r = viewEl.getBoundingClientRect();
+      zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY > 0 ? 0.84 : 1.18);
+    }, { passive: false });
+    viewEl.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.topo-locators,.topo-zoom')) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      viewEl.setPointerCapture(e.pointerId);
+      if (pointers.size === 1) { drag = { x: e.clientX, y: e.clientY, vx: cam.x, vy: cam.y }; moved = false; viewEl.classList.add('dragging'); }
+      if (pointers.size === 2) {
+        const p = [...pointers.values()];
+        pinch = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), z: cam.z, vx: cam.x, vy: cam.y };
+      }
+    });
+    viewEl.addEventListener('pointermove', (e) => {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pinch && pointers.size >= 2) {
+        const p = [...pointers.values()], d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        const r = viewEl.getBoundingClientRect(), mx = (p[0].x + p[1].x) / 2 - r.left, my = (p[0].y + p[1].y) / 2 - r.top;
+        const z = Math.max(0.22, Math.min(2.0, pinch.z * d / Math.max(1, pinch.d)));
+        cam.x = mx - (mx - pinch.vx) * (z / pinch.z);
+        cam.y = my - (my - pinch.vy) * (z / pinch.z);
+        cam.z = z; clamp(); apply(); moved = true; return;
+      }
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) { moved = true; setActive(''); }
+      cam.x = drag.vx + dx; cam.y = drag.vy + dy; clamp(); apply();
+    });
+    function end(e) {
+      pointers.delete(e.pointerId);
+      if (!pointers.size) { drag = null; pinch = null; viewEl.classList.remove('dragging'); saveCam(); }
+      if (pointers.size < 2) pinch = null;
+    }
+    viewEl.addEventListener('pointerup', end);
+    viewEl.addEventListener('pointercancel', end);
+    let lastMode = '';
+    function initCam() {
+      const { w, h } = dims(), m = mode();
+      if (cam.ready) return;
+      const saved = readCam();
+      if (saved) {
+        cam = { x: saved.x, y: saved.y, z: saved.z, ready: true };
+        clamp(); apply(); setActive(saved.id || '');
+        lastMode = m;
+        return;
+      }
+      if (w >= 700 && h >= 500) {
+        fit(); setActive('all');
+      } else if (w < 700 && h > w) {
+        focus([650, 340, 900, 700], 0.38, false); setActive('pax');
+      } else {
+        fit(); setActive('all');
+      }
+      cam.ready = true;
+      lastMode = m;
+    }
+    new ResizeObserver(() => {
+      const m = mode();
+      if (!cam.ready || (lastMode && m !== lastMode)) {
+        if (lastMode && m !== lastMode) cam.ready = false;
+        initCam();
+      } else { clamp(); apply(); }
+    }).observe(viewEl);
+    requestAnimationFrame(initCam);
+    window.baojiTopologyData = DATA;
+    return { fit, focus: go, view: () => ({ ...cam }) };
+  }
+  window.createTopology = create;
+  window.__TOPO_ART__ = { coach: roofCoach, loco: locoArt, freight: freightCoach, emu: emuLead };
+})();
+
+</script>
+<script>
+const params = new URLSearchParams(location.search);
+const embed = params.has('embed');
+if (embed) document.body.classList.add('embed');
+const api = createTopology(document.getElementById('topo'));
+const f = params.get('focus');
+if (f) { const i = ['all','station','pax','west','east','storage','freight','engine','k101','k105','w1'].indexOf(f); if (i >= 0) setTimeout(() => api.focus(i), 120); }
+</script>
+</body>
+</html>

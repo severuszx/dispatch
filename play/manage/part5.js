@@ -74,3 +74,4 @@ function renderTraffic(p) {
   return `<div class="m-page-head"><h2>车流组织</h2><span>客车比例影响收入结构；区段负荷超过 100% 会压车</span></div>${cards}
   <div class="m-block"><h3>口径</h3><div class="m-ins-note">客车单列收入高，货车单列收入低但合同奖励稳定。区段需求按当前市场指数和合同叠加，滑杆只决定客车占比，不改变总需求。</div></div>`;
 }
+

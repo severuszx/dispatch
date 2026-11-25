@@ -64,3 +64,4 @@ const pct = (v) => `${Math.round(v * 100)}%`;
 const st = (id) => state.stations[id];
 const seg = (id) => SEGMENTS.find((s) => s.id === id);
 const stationDef = (id) => STATIONS.find((s) => s.id === id);
+

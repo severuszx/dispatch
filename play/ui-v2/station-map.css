@@ -1,0 +1,49 @@
+.smap { position: relative; width: 100%; height: 100%; min-height: 0; overflow: hidden; background: #e9e1cc; border: 1px solid #8b846f; }
+.smap-viewport { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; background: #efe8d6; }
+.smap-viewport.dragging { cursor: grabbing; }
+.smap-canvas { position: absolute; top: 0; left: 0; width: 2200px; height: 1500px; transform-origin: 0 0; will-change: transform; }
+.smap-canvas svg { display: block; width: 2200px; height: 1500px; }
+.smap-canvas[data-lod="far"] .lod-mid, .smap-canvas[data-lod="far"] .lod-near { display: none; }
+.smap-canvas[data-lod="mid"] .lod-near { display: none; }
+.smap-locators { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 5; }
+.smap-locators button { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 96px; padding: 5px 8px; border: 1px solid #7d7662; background: rgba(246,239,221,.92); color: #3b3b32; font-size: 10px; letter-spacing: 1px; text-align: left; box-shadow: 1px 2px 0 rgba(43,45,39,.12); }
+.smap-locators button:hover { background: #fff9e8; border-color: #2b2d27; }
+.smap-locators button.on { background: #2b2d27; color: #efe7d2; border-color: #2b2d27; }
+.smap-locators button i { width: 5px; height: 5px; border-radius: 50%; background: #b88a2f; }
+.smap-locators button.alert i { background: #a63a2e; box-shadow: 0 0 0 2px rgba(166,58,46,.16); }
+.smap-zoom { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 4px; z-index: 5; }
+.smap-zoom button { width: 28px; height: 26px; border: 1px solid #7d7662; background: rgba(246,239,221,.92); color: #2b2d27; font-family: "Roboto Mono", monospace; font-size: 13px; }
+.smap-zoom button:hover { background: #fff9e8; }
+.smap-minimap { position: absolute; left: 10px; bottom: 10px; width: 176px; height: 112px; border: 1px solid #7d7662; background: rgba(246,239,221,.9); z-index: 5; overflow: hidden; cursor: crosshair; }
+.smap-minimap svg { display: block; width: 100%; height: 100%; }
+.smap-hint { position: absolute; left: 10px; top: 10px; z-index: 5; padding: 4px 7px; border: 1px solid #aaa28b; background: rgba(246,239,221,.8); color: #615d4e; font-size: 9px; letter-spacing: 1px; pointer-events: none; }
+.smap-scale { position: absolute; right: 10px; bottom: 42px; z-index: 5; color: #5d594b; font-family: "Roboto Mono", monospace; font-size: 9px; background: rgba(246,239,221,.75); padding: 2px 5px; }
+.smap-name { font-family: "Noto Serif SC", serif; font-size: 22px; fill: #2b2d27; }
+.smap-sub { font-family: "Roboto Mono", monospace; font-size: 10px; fill: #6c6756; letter-spacing: 1px; }
+.smap-yard-label { font-family: "Noto Serif SC", serif; font-size: 15px; fill: #4a473b; }
+.smap-track-label { font-family: "Roboto Mono", monospace; font-size: 10px; fill: #4f4c40; }
+.smap-dim { font-family: "Roboto Mono", monospace; font-size: 9px; fill: #7b7562; }
+.smap-alert { fill: #a63a2e; }
+@media (max-width: 860px) {
+  .smap-locators { top: 6px; right: 6px; max-height: 70%; overflow: auto; }
+  .smap-locators button { min-width: 82px; padding: 4px 6px; font-size: 9px; }
+  .smap-minimap { width: 132px; height: 84px; }
+  .smap-hint { display: none; }
+}
+
+.smap-canvas[data-lod="far"] .smap-track-label,
+.smap-canvas[data-lod="far"] .smap-dim { display: none; }
+.smap-minimap { display: none; }
+
+.smap-yard-label { font-size: 24px; }
+.smap-index { font-family: "Roboto Mono", monospace; font-size: 13px; fill: #37382f; font-weight: 700; }
+
+.smap-port { font-family: "Noto Sans SC", sans-serif; font-size: 11px; fill: #37382f; letter-spacing: 1px; font-weight: 600; }
+.smap-emg { font-family: "Noto Sans SC", sans-serif; font-size: 9px; fill: #a63a2e; letter-spacing: .5px; font-weight: 700; }
+@media (max-width: 860px) {
+  .smap-locators { top: 6px; left: 6px; right: 6px; flex-direction: row; overflow-x: auto; overflow-y: hidden; max-height: none; padding-bottom: 3px; }
+  .smap-locators button { min-width: max-content; flex: none; padding: 4px 7px; font-size: 9px; }
+  .smap-locators button i { display: none; }
+}
+
+.smap-track-label, .smap-index, .smap-port, .smap-emg { paint-order: stroke; stroke: #efe8d6; stroke-width: 2px; stroke-linejoin: round; }

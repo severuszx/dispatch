@@ -128,3 +128,4 @@ function decideList(p) {
   if (!out.length) out.push('设备与人手都在控，按当前节奏推进');
   return out.slice(0, 6);
 }
+

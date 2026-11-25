@@ -107,3 +107,4 @@ function renderOverview(p) {
     ${state.contracts.length ? state.contracts.map((c) => `<div class="m-row"><b>${esc(c.name)}</b><span>${stationDef(c.station).name} · +${c.add} 列 · 日奖 ${fm(c.reward)}</span><span class="mono">剩 ${c.left} 天</span></div>`).join('') : '<div class="m-ins-note">还没有签合同。合同能补车流和现金，但会把车站压得更紧。</div>'}
   </div>`;
 }
+

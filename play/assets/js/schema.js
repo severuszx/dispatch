@@ -25,8 +25,8 @@ export function migrateScene(raw) {
   s.duration = Math.max(30, Math.min(1440, Math.round(num(s.duration, 240))));
   s.trains = Math.max(0, Math.min(80, Math.round(num(s.trains, 8))));
   s.start = Math.round(num(s.start, 360));
-  s.lateLimit = Math.max(1, Math.round(num(s.lateLimit, 15)));
-  s.waitLimit = Math.max(1, Math.round(num(s.waitLimit, 12)));
+  s.lateLimit = Math.max(60, Math.round(num(s.lateLimit, 90)));
+  s.waitLimit = Math.max(20, Math.round(num(s.waitLimit, 45)));
   s.meta = {
     author: String((s.meta && s.meta.author) || s.author || '本机'),
     desc: String((s.meta && s.meta.desc) || s.brief || ''),

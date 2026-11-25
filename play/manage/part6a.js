@@ -17,6 +17,7 @@ function renderPolicy() {
   return `<div class="m-page-head"><h2>政策</h2><span>每 7 天可定一项，调整花 ¥5,000</span></div>${active}<div class="m-block"><h3>可选口径</h3><div class="m-list">${cards}</div></div>`;
 }
 
+
 function renderSave() {
   const slots = [1, 2, 3].map((n) => {
     let meta = '空';
@@ -92,3 +93,4 @@ function renderAll() {
   renderInspector(p);
   renderFoot(p);
 }
+
