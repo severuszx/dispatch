@@ -1,5 +1,15 @@
 # 调度台 · 交接
 
+## 0.6.19 安装包与值班站场（2026-11-25）
+
+- 值班调度默认场景改为宝鸡站客运场：6 台 10 线，1 道基本站台，2—9 道岛式站台，10 道尽头式；`hub-baoji.json` 10 股道、10 列车。
+- `ctc.js` 增加岛式站台带、站台编号（1台 1道、2台 2/3道……5台 10道）、股道类型（正线/到发/混线）和错位咽喉曲线；原先 `trackRole` 只认 `platform`/`freight`，不认 `platforms`，导致宝鸡全按混线画。
+- 修正 `app.js`/`sim.js` 的 `hubbaoji` 未进入 `hubDatas`：浏览器缓存旧 `app.js` 时宝鸡回退到四站底账，已给入口脚本加 `?v=0.6.19c`，给 `ctc.js` 加同版本查询。
+- Android：新建 `game/android`，原生 WebView + 内置 `AssetServer` 从 APK assets 提供 `game/`，不依赖外网；`调度台-0.6.19.apk` 已用 debug key 签名，`aapt2 dump badging` 通过（package com.tst.dispatch、minSdk 23、targetSdk 33）。
+- Windows：`desktop` 用 electron-packager 打 win32 x64，`调度台-0.6.19-win64.zip` 内含 `调度台.exe`；仅打包，未在 Windows 实机启动验证。
+- 全量网页：`app_17jrnmgq939`，release `7712087175769623806`，125 个文件；`调度台-0.6.19-网页版.zip` 同步更新。
+- 未验证：APK 未在真机/模拟器安装启动；EXE 未在 Windows 运行；值班台点股道指派列车的完整流程未逐步回归。
+
 ## 0.6.19 站长台全屏站场（2026-11-25）
 
 - 站长台从“上方一条四站示意图 + 下方报表”改成全屏宝鸡站站场图，屏幕只做取景框。
