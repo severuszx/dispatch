@@ -208,6 +208,10 @@ class Sim {
       .slice(0, scene.trains || 99)
       .map((t) => this.makeHubTrain(t));
     for (const t of this.trains) {
+      if (scene.autoDemo) {
+        t.autoRelease = true;
+        t.release = true;
+      }
       if (t.status !== 'station') continue;
       const ft = this.freeTrack(t.station, t.dir, t);
       if (ft) { ft.train = t.id; t.trackNo = ft.no; }
@@ -229,7 +233,7 @@ class Sim {
     const start = this.startClock;
     const arr = raw.arr == null ? start : raw.arr;
     const dep = raw.dep == null ? arr + 10 : raw.dep;
-    const inYard = raw.arr == null || raw.arr <= start;
+    const inYard = !raw.through && (raw.arr == null || raw.arr <= start);
     const spec = trainSpec(raw, sceneBureau(this.scene));
     const digits = Number(String(raw.no || '').replace(/\D/g, ''));
     const dir = raw.dir === 0 ? -1 : raw.dir === 1 ? 1 : (Number.isFinite(digits) && digits > 0 && digits % 2 === 0 ? 1 : -1);
@@ -299,6 +303,10 @@ class Sim {
       }
       if (t.status === 'approach' || t.status === 'pending') {
         if (this.clock < t.planArr) continue;
+        if (this.scene && this.scene.autoTrack && !t.trackNo) {
+          const ft = this.freeTrack(t.station, t.dir, t);
+          if (ft) { ft.train = t.id; t.trackNo = ft.no; }
+        }
         if (t.through && !t.trackNo) {
           const ft = this.freeTrack(t.station, 0, t);
           if (ft) { ft.train = t.id; t.trackNo = ft.no; }
@@ -323,6 +331,10 @@ class Sim {
         continue;
       }
       if (t.status !== 'station') continue;
+      if (this.scene && this.scene.autoDemo && !(t.tasks || []).some((x) => x.state === 'active')) {
+        const next = (t.tasks || []).find((x) => x.state === 'wait');
+        if (next) { next.state = 'active'; next.left = next.min; }
+      }
       for (const task of t.tasks || []) {
         if (task.state !== 'active') continue;
         task.left = Math.max(0, task.left - 1);
@@ -425,7 +437,7 @@ class Sim {
     }
     t.originTrack = t.trackNo;
     t.departAt = this.clock;
-    t.arriveAt = this.clock + 3;
+    t.arriveAt = this.clock + (t.through ? 5 : 3);
     t.departWall = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     t.status = 'running';
     t.section = { a: t.station, b: 'next', progress: 0 };
