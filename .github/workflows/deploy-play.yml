@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: curl -fsSL https://aka.doubaocdn.com/s/DQJ4oUCPUE -o /tmp/game.zip
-      - run: rm -rf play/assets play/data play/manage play/packs play/ui-v2 play/index.html
-      - run: unzip -q /tmp/game.zip -d play
       - run: |
           if grep -q "scene.autoDemo" play/assets/js/sim.js; then
             echo "already patched"
