@@ -1,7 +1,7 @@
 import { el, toast } from './util.js';
 
 const KEY = 'tst-dispatch-packs';
-const LINES = ['qinglan', 'jiangwan', 'linhe'];
+const LINES = ['qinglan', 'jiangwan', 'linhe', 'ningxi'];
 
 function state() {
   const raw = localStorage.getItem(KEY);
@@ -24,6 +24,7 @@ function validate(pack) {
   if (!pack.name || !pack.version) throw new Error('缺少 name 或 version');
   const scene = pack.scene;
   if (!scene || !scene.title || !LINES.includes(scene.line)) throw new Error('scene.line 不在支持线路内');
+  if (scene.drive && !/^[a-z0-9./_-]+$/.test(scene.drive)) throw new Error('scene.drive 路径不合法');
   return {
     id: pack.id,
     name: String(pack.name),
@@ -32,7 +33,7 @@ function validate(pack) {
     note: String(pack.note || scene.brief || ''),
     scene: {
       id: String(scene.id || `pk-${pack.id}`),
-      kind: 'pack',
+      kind: scene.drive ? 'drive' : 'pack',
       title: String(scene.title),
       line: String(scene.line),
       brief: String(scene.brief || pack.note || ''),
@@ -140,6 +141,7 @@ export function mountPacks(body, ctx) {
         const ops = el('div', 'pk-ops');
         const load = el('button', 'btn btn-primary', '载入');
         load.addEventListener('click', () => {
+          if (p.scene.drive) { location.href = p.scene.drive; return; }
           ctx.loadPack(p.scene);
           toast(`已载入扩展包：${p.name}`, 'ok');
         });

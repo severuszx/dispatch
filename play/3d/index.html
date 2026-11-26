@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>调度台 3D · 宝鸡站</title>
+<style>
+:root{--bg:#0b0d0f;--panel:#12161a;--line:#2a3036;--text:#d8d6ce;--dim:#858b8f;--amber:#c9a45c;--red:#b23a2b;--green:#5f8f72}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:"Noto Sans SC","Microsoft YaHei",sans-serif}
+#stage{position:fixed;inset:0}
+#stage canvas{display:block}
+header{position:fixed;left:0;right:0;top:0;height:54px;background:#0d1013;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 16px;z-index:20}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:210px}
+.brand b{font-size:19px;letter-spacing:2px}
+.brand span{font:11px/1 ui-monospace,monospace;color:var(--dim);letter-spacing:1px}
+.clock{font:600 24px/1 ui-monospace,monospace;color:#e8e4d8}
+.meta{font:11px/1.4 ui-monospace,monospace;color:var(--dim)}
+.meta b{display:block;color:#c9c6bb;font-size:12px}
+.spacer{flex:1}
+button{background:#171c21;border:1px solid #333a41;color:#d9d6cc;height:30px;padding:0 11px;font:12px/1 "Noto Sans SC",sans-serif;cursor:pointer}
+button:hover{border-color:#6c747b;background:#1d242a}
+button.on{border-color:var(--amber);color:#f0d9a7;background:#211d16}
+#side{position:fixed;right:14px;top:66px;width:258px;background:rgba(14,18,21,.94);border:1px solid var(--line);z-index:15;padding:12px}
+#side h3{margin:0 0 8px;font-size:13px;letter-spacing:1px;color:#bfbcb2}
+#side .no{font:600 22px/1 ui-monospace,monospace;color:#f0eadb;margin-bottom:5px}
+#side .rows{font:11px/1.9 ui-monospace,monospace;color:#a9ada8}
+#side .rows i{display:inline-block;width:54px;color:#6f777a;font-style:normal}
+#side .task{margin-top:8px;padding-top:8px;border-top:1px solid #252b30;font-size:11px;color:#9ca29f}
+#log{position:fixed;left:14px;bottom:12px;width:330px;max-height:145px;overflow:hidden;background:rgba(13,17,20,.9);border:1px solid var(--line);padding:7px 9px;font:11px/1.55 ui-monospace,monospace;color:#989e9a;z-index:15}
+#log b{color:#c9a45c;font-weight:400}
+#legend{position:fixed;right:14px;bottom:12px;background:rgba(13,17,20,.9);border:1px solid var(--line);padding:7px 9px;font:11px/1.6 ui-monospace,monospace;color:#868d8d;z-index:15}
+#legend span{display:inline-block;width:8px;height:8px;margin-right:5px;vertical-align:middle}
+#tip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);font:11px/1 ui-monospace,monospace;color:#626a6c;z-index:12;pointer-events:none}
+#loading{position:fixed;inset:0;background:#0b0d0f;display:flex;align-items:center;justify-content:center;z-index:40;font:12px/1.6 ui-monospace,monospace;color:#8a8f8b;letter-spacing:1px}
+#loading.hidden{display:none}
+@media(max-width:760px){
+ header{height:48px;gap:8px;padding:0 9px}.brand{min-width:0}.brand b{font-size:15px}.brand span{display:none}
+ .clock{font-size:19px}.meta{display:none}
+ #side{right:7px;top:56px;width:190px;padding:9px}#side .rows{font-size:10px}
+ #log{left:7px;bottom:7px;width:calc(100% - 14px);max-height:90px;font-size:10px}
+ #legend,#tip{display:none}
+ .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<header>
+  <div class="brand"><b>调度台</b><span>3D / BAOJI</span></div>
+  <div class="clock" id="clock">06:00</div>
+  <div class="meta"><b id="mode">宝鸡站 · 客运场</b><span id="count">在站 0 / 待接 0</span></div>
+  <div class="spacer"></div>
+  <button id="pause">暂停</button>
+  <button class="sp" data-s="1">×1</button>
+  <button class="sp on" data-s="5">×5</button>
+  <button class="sp" data-s="10">×10</button>
+  <button class="sp hide-m" data-s="20">×20</button>
+  <button id="follow" class="hide-m">跟车</button>
+  <button id="reset" class="hide-m">全景</button>
+  <button id="to2d">2D</button>
+  <button id="todrive" onclick="location.href='drive.html'">HXD3D 驾驶</button>
+</header>
+<div id="side">
+  <h3>列车</h3>
+  <div class="no" id="selNo">未选择</div>
+  <div class="rows" id="selRows"><i>状态</i>点一列车查看</div>
+  <div class="task" id="selTask">拖动旋转 · 滚轮缩放 · 点车选中</div>
+</div>
+<div id="log"></div>
+<div id="legend"><span style="background:#5f8f72"></span>空闲 <span style="background:#b23a2b;margin-left:10px"></span>占用 <br>黄线为站台安全线</div>
+<div id="tip">拖动旋转 · 滚轮缩放 · 右键平移 · 点击列车跟车</div>
+<div id="loading">正在建立宝鸡站三维站场…</div>
+<script type="application/json" id="hubData">{"station":{"id":"baoji","name":"宝鸡站","code":"BJY","line":"宝成线 · 陇海线"},"yards":[{"id":"main","name":"客运场","type":"一等客运站","tracks":10,"platform":6,"freight":0,"note":"6 台 10 线，1 道基本站台，2—9 道岛式站台，10 道尽头式；西咽喉接宝成正线，东咽喉引存车、货场与机务折返段","platforms":[{"type":"基本","faces":1,"lenM":550},{"type":"岛式","faces":2,"lenM":520},{"type":"岛式","faces":2,"lenM":520},{"type":"岛式","faces":2,"lenM":520},{"type":"岛式","faces":2,"lenM":520},{"type":"尽头式","faces":1,"lenM":480}]}],"trains":[{"id":"bj-x1","no":"Z901","type":"Z","yard":"main","arr":360,"dep":365,"through":true,"coaches":18,"priority":2,"crew":1,"dir":1,"model":"25T","loco":"SS9"},{"id":"bj-x2","no":"K902","type":"K","yard":"main","arr":364,"dep":369,"through":true,"coaches":18,"priority":3,"crew":1,"dir":0,"model":"25G","loco":"HXD3D"},{"id":"bj-x3","no":"货3","type":"货","yard":"main","arr":369,"dep":374,"through":true,"coaches":24,"priority":6,"crew":1,"dir":1,"model":"C70","loco":"HXD3C"},{"id":"bj-x4","no":"T904","type":"T","yard":"main","arr":374,"dep":379,"through":true,"coaches":12,"priority":3,"crew":1,"dir":0,"model":"25T","loco":"SS7E"},{"id":"bj-01","no":"K101","type":"K","yard":"main","arr":null,"dep":372,"coaches":16,"priority":4,"crew":1,"dir":1,"model":"25G","loco":"HXD3D"},{"id":"bj-02","no":"K102","type":"K","yard":"main","arr":366,"dep":384,"coaches":16,"priority":4,"crew":1,"dir":0,"model":"25G","loco":"HXD3D"},{"id":"bj-03","no":"K105","type":"K","yard":"main","arr":390,"dep":405,"coaches":14,"priority":4,"crew":1,"dir":1,"model":"25B","loco":"HXD3D"},{"id":"bj-04","no":"K109","type":"K","yard":"main","arr":420,"dep":436,"coaches":15,"priority":4,"crew":1,"dir":0,"model":"25G","loco":"HXD3D"},{"id":"bj-05","no":"货1","type":"货","yard":"main","arr":378,"dep":400,"coaches":24,"priority":6,"crew":1,"dir":0,"model":"C70","loco":"HXD3C"},{"id":"bj-06","no":"货2","type":"货","yard":"main","arr":402,"dep":425,"coaches":22,"priority":6,"crew":1,"dir":1,"model":"X6K","loco":"HXD3C"},{"id":"bj-07","no":"T21","type":"T","yard":"main","arr":408,"dep":414,"coaches":12,"priority":3,"crew":1,"dir":1,"model":"25T","loco":"SS7E"},{"id":"bj-08","no":"T22","type":"T","yard":"main","arr":438,"dep":446,"coaches":12,"priority":3,"crew":1,"dir":0,"model":"25T","loco":"SS7E"},{"id":"bj-09","no":"检1","type":"检","yard":"main","arr":450,"dep":470,"coaches":6,"priority":5,"crew":1,"dir":0,"model":"25G","loco":"DF7G"},{"id":"bj-10","no":"调1","type":"调","yard":"main","arr":432,"dep":452,"coaches":8,"priority":5,"crew":1,"dir":1,"model":"25B","loco":"DF7G"}]}</script>
+<script type="module" src="./scene.js"></script>
+</body>
+</html>

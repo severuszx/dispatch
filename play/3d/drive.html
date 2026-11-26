@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>HXD3D · Z595 宁西线自由驾驶</title>
+<style>
+:root{--bg:#080a0c;--panel:#10151a;--line:#2a3239;--text:#d7d4ca;--dim:#7f898f;--amber:#c8a15b;--red:#b33b2d;--green:#4f8a65}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:"Noto Sans SC","Microsoft YaHei",sans-serif}
+#stage{position:fixed;inset:0}#stage canvas{display:block}
+header{position:fixed;left:0;right:0;top:0;height:52px;background:#0c1014;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 14px;z-index:20}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:240px}.brand b{font-size:18px;letter-spacing:2px}.brand span{font:10px/1 ui-monospace,monospace;color:var(--dim);letter-spacing:1px}
+.train-id{font:600 18px/1 ui-monospace,monospace;color:#eee6d2}.train-sub{font:10px/1.5 ui-monospace,monospace;color:#8b9398}
+.spacer{flex:1}button{background:#171d22;border:1px solid #364049;color:#d8d4ca;height:30px;padding:0 10px;font:12px/1 "Noto Sans SC",sans-serif;cursor:pointer}button:hover{background:#20272d}button.on{border-color:var(--amber);color:#f0d39a;background:#211d16}
+#info{position:fixed;left:14px;bottom:12px;width:226px;background:rgba(11,16,20,.92);border:1px solid var(--line);padding:11px;z-index:15}
+#info .label{font:10px/1.4 ui-monospace,monospace;color:#6f7a80;letter-spacing:1px}.spd{display:flex;align-items:baseline;gap:7px;margin:5px 0 8px}.spd b{font:600 46px/1 ui-monospace,monospace;color:#f0eadb}.spd i{font:11px/1 ui-monospace,monospace;color:#9aa29e;font-style:normal}
+.bars{font:10px/1.8 ui-monospace,monospace;color:#9aa19c}.bar{display:flex;gap:2px;margin:3px 0 7px}.bar span{height:6px;flex:1;background:#252c31}.bar span.on{background:var(--amber)}.bar.brake span.on{background:var(--red)}
+.next{margin-top:7px;padding-top:7px;border-top:1px solid #252c31;font:11px/1.8 ui-monospace,monospace;color:#b3b5ac}.next b{display:block;color:#e6dcc4;font-size:15px}
+#controls{position:fixed;right:14px;bottom:12px;width:160px;background:rgba(11,16,20,.9);border:1px solid var(--line);padding:9px;z-index:15}
+#controls button{width:100%;margin:3px 0;height:28px}#tip{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);font:11px/1.3 ui-monospace,monospace;color:#626b6e;text-align:center;pointer-events:none}
+#tooltip{position:fixed;padding:5px 8px;background:#0c1115;border:1px solid #6b5b36;color:#e7d7b0;font:11px/1.2 "Noto Sans SC",sans-serif;z-index:30;display:none;pointer-events:none}
+#loading{position:fixed;inset:0;background:#080a0c;z-index:50;display:flex;align-items:center;justify-content:center;font:12px/1.6 ui-monospace,monospace;color:#89918f;letter-spacing:1px}#loading.hidden{display:none}
+#note{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:rgba(13,18,22,.92);border:1px solid #4c4634;color:#d8c39a;padding:7px 12px;font:11px/1.4 "Noto Sans SC",sans-serif;z-index:16;display:none}
+@media(max-width:760px){header{height:46px;gap:7px;padding:0 8px}.brand{min-width:0}.brand b{font-size:14px}.brand span{display:none}.train-id{font-size:14px}.train-sub{display:none}#info{left:7px;bottom:74px;width:160px;padding:8px}.spd b{font-size:34px}#controls{right:7px;width:112px;padding:6px}#controls button{height:26px;font-size:11px}#tip{display:none}}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<header>
+  <div class="brand"><b>调度台</b><span>DRIVE / HXD3D</span></div>
+  <div><div class="train-id">Z595</div><div class="train-sub">宁西线 · 信阳 → 西安</div></div>
+  <div class="spacer"></div>
+  <button id="cabBtn" class="on">驾驶室</button>
+  <button id="deskBtn">操纵台</button>
+  <button id="extBtn">外部视角</button>
+  <button id="hornBtn">喇叭</button>
+  <button id="exitBtn">返回</button>
+</header>
+<div id="info">
+  <div class="label">HXD3D · 25T 18 辆</div>
+  <div class="spd"><b id="spd">0</b><i>km/h</i></div>
+  <div class="bars">牵引 <span id="notchTxt">0</span> 级</div>
+  <div class="bar" id="pwrBar"></div>
+  <div class="bars">制动 <span id="brakeTxt">0</span> 级</div>
+  <div class="bar brake" id="brkBar"></div>
+  <div class="bars">管压 <b id="bp">500</b> kPa · 总风 <b id="mr">900</b> kPa</div>
+  <div class="next">下一站 <b id="nextSt">信阳</b><span id="eta">20:52 发车</span></div>
+</div>
+<div id="controls">
+  <button id="pwrUp">牵引 +</button>
+  <button id="pwrDown">牵引 −</button>
+  <button id="brkUp">制动 +</button>
+  <button id="brkDown">制动 −</button>
+  <button id="relBtn">缓解</button>
+</div>
+<div id="tip">W/S 牵引 · A/D 制动 · 空格喇叭 · C 切换视角</div>
+<div id="tooltip"></div>
+<div id="note"></div>
+<div id="loading">正在装载 HXD3D 司机室与宁西线…</div>
+<script type="module" src="./drive.js"></script>
+</body>
+</html>

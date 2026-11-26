@@ -1,0 +1,20 @@
+{
+  "id": "ningxi-z595",
+  "name": "宁西线 · Z595 自由驾驶",
+  "version": "1.0.0",
+  "author": "调度台内置",
+  "note": "HXD3D 单机牵引 18 辆 25T，信阳至西安。司机室 36 个可操作开关，牵引、制动、受电弓、主断、监控均可操作。",
+  "scene": {
+    "id": "pk-ningxi-z595",
+    "kind": "drive",
+    "title": "宁西线 · Z595 自由驾驶",
+    "line": "ningxi",
+    "brief": "HXD3D 牵引 25T，信阳至西安，自由驾驶。",
+    "terms": ["drive", "hxd3d", "ningxi"],
+    "duration": 0,
+    "difficulty": 3,
+    "weather": "晴",
+    "trains": 1,
+    "drive": "3d/drive.html"
+  }
+}
