@@ -20,4 +20,8 @@ if 'window.__startGame' not in a:
         a = a.replace(old, new, 1)
     a += "\nwindow.__startGame = startGame;\n"
     open(p, 'w').write(a)
+p = 'play/index.html'
+h = open(p).read()
+h = h.replace('assets/js/app.js?v=0.6.19c', 'assets/js/app.js?v=0.6.20')
+open(p, 'w').write(h)
 print('app patched')
