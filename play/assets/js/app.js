@@ -206,9 +206,14 @@ async function loadCloudPack(id) {
 }
 
 async function fetchJson(path) {
-  const res = await fetch(path, { cache: 'no-cache' });
-  if (!res.ok) throw new Error(`${path} ${res.status}`);
-  return res.json();
+  for (let i = 0; i < 4; i += 1) {
+    try {
+      const res = await fetch(path, { cache: 'no-cache' });
+      if (res.ok) return res.json();
+    } catch (e) { }
+    await new Promise((r) => setTimeout(r, 500 + i * 400));
+  }
+  throw new Error(`${path} 读取失败`);
 }
 
 function hubStationName(scene) {
@@ -1487,3 +1492,5 @@ function loadWorkshopScene(pack) {
 
 boot();
 
+
+window.__startGame = startGame;
