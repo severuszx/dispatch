@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          if grep -q "scene.autoDemo" play/assets/js/sim.js; then
+          if grep -q "__startGame" play/assets/js/app.js; then
             echo "already patched"
             exit 0
           fi
