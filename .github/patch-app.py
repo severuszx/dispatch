@@ -26,5 +26,6 @@ p = 'play/index.html'
 h = open(p).read()
 h = h.replace('assets/js/app.js?v=0.6.20', 'assets/js/app-0.6.20.js')
 h = h.replace('assets/js/app.js?v=0.6.19c', 'assets/js/app-0.6.20.js')
+h = h.replace('v0.6.19', 'v0.6.20').replace('0.6.19</b>', '0.6.20</b>')
 open(p, 'w').write(h)
 print('app patched')
