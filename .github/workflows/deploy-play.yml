@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          if ! grep -q "__startGame" play/assets/js/app.js; then
+          if ! grep -q "v=0.6.20" play/index.html; then
             python3 .github/patch-app.py
           fi
           if ! grep -q "scene.autoDemo" play/assets/js/sim.js; then
