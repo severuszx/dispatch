@@ -17,9 +17,18 @@ jobs:
           if ! grep -q "scene.autoDemo" play/assets/js/sim.js; then
             python3 .github/patch-demo.py
           fi
+          python3 .github/patch-drive.py
+      - run: |
+          curl -fsSL -o /tmp/3d.zip https://aka.doubaocdn.com/s/LAGqndK55i
+          rm -rf /tmp/3d && mkdir -p /tmp/3d
+          unzip -oq /tmp/3d.zip -d /tmp/3d
+          mkdir -p play/3d play/packs
+          cp -r /tmp/3d/3d/. play/3d/
+          cp -r /tmp/3d/packs/. play/packs/
+          cp /tmp/3d/packs.js play/assets/js/packs.js
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add play
-          git diff --cached --quiet || git commit -m "play: 0.6.20 auto dispatch [skip ci]"
+          git diff --cached --quiet || git commit -m "play: HXD3D drive + 0.6.20 auto dispatch [skip ci]"
           git push
