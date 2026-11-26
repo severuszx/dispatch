@@ -11,11 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          if grep -q "__startGame" play/assets/js/app.js; then
-            echo "already patched"
-            exit 0
+          if ! grep -q "__startGame" play/assets/js/app.js; then
+            python3 .github/patch-app.py
           fi
-          python3 .github/patch-demo.py
+          if ! grep -q "scene.autoDemo" play/assets/js/sim.js; then
+            python3 .github/patch-demo.py
+          fi
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
